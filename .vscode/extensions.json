@@ -1,0 +1,16 @@
+{
+    "recommendations": [
+        "ms-vscode.vscode-typescript-next",
+        "esbenp.prettier-vscode",
+        "ms-vscode.live-server",
+        "github.copilot",
+        "github.copilot-chat",
+        "bradlc.vscode-tailwindcss",
+        "formulahendry.auto-rename-tag",
+        "christian-kohler.path-intellisense",
+        "wayou.vscode-todo-highlight",
+        "gruntfuggly.todo-tree",
+        "ms-vscode.theme-tomorrowkit",
+        "pkief.material-icon-theme"
+    ]
+}

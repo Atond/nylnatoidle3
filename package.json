@@ -1,0 +1,64 @@
+{
+  "name": "idle-game-v1",
+  "version": "0.1.0",
+  "description": "Un jeu incrémental inspiré de Cookie Clicker et Dodecadragons",
+  "type": "module",
+  "main": "src/js/main.js",
+  "scripts": {
+    "dev": "http-server -p 3000 -o -c-1",
+    "start": "npm run dev",
+    "format": "prettier --write \"src/**/*.{js,css,html}\" \"*.{md,json}\"",
+    "format:check": "prettier --check \"src/**/*.{js,css,html}\"",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "preview": "http-server dist -p 3000 -o",
+    "clean": "rm -rf dist node_modules",
+    "test": "echo 'Tests à implémenter' && exit 0"
+  },
+  "keywords": [
+    "idle-game",
+    "incremental-game",
+    "browser-game",
+    "cookie-clicker",
+    "javascript",
+    "html5"
+  ],
+  "author": "Votre nom",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/votre-username/idle-game-v1"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "prettier": "^3.1.0",
+    "eslint": "^8.54.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": false,
+    "tabWidth": 2,
+    "trailingComma": "es5",
+    "printWidth": 100,
+    "arrowParens": "always"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "es2021": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+      "ecmaVersion": "latest",
+      "sourceType": "module"
+    },
+    "rules": {
+      "no-unused-vars": "warn",
+      "no-console": "off"
+    }
+  }
+}

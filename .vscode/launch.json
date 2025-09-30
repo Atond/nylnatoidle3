@@ -1,0 +1,35 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "🎮 Debug Idle Game",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:8080",
+            "webRoot": "${workspaceFolder}",
+            "sourceMaps": true,
+            "runtimeExecutable": "chrome",
+            "runtimeArgs": [
+                "--auto-open-devtools-for-tabs",
+                "--disable-web-security",
+                "--user-data-dir=${workspaceFolder}/.chrome-profile"
+            ],
+            "preLaunchTask": "🎮 Start Development Server"
+        },
+        {
+            "name": "🧪 Debug Tests",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/test/run-tests.js",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "name": "🔍 Debug Current File",
+            "type": "node",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        }
+    ]
+}

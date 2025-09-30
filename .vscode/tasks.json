@@ -1,0 +1,114 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "🎮 Start Development Server",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "-m",
+                "http.server",
+                "8080",
+                "--directory",
+                "."
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "isBackground": true,
+            "problemMatcher": [],
+            "detail": "Lance un serveur de développement local sur http://localhost:8080"
+        },
+        {
+            "label": "🧪 Run Tests",
+            "type": "shell",
+            "command": "node",
+            "args": [
+                "test/run-tests.js"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated"
+            },
+            "problemMatcher": [],
+            "detail": "Exécute tous les tests du projet"
+        },
+        {
+            "label": "🎨 Format Code",
+            "type": "shell",
+            "command": "prettier",
+            "args": [
+                "--write",
+                "src/**/*.{js,css,html}"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent"
+            },
+            "detail": "Formate automatiquement tout le code avec Prettier"
+        },
+        {
+            "label": "🔍 Lint Code",
+            "type": "shell",
+            "command": "eslint",
+            "args": [
+                "src/**/*.js",
+                "--fix"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always"
+            },
+            "problemMatcher": "$eslint-stylish",
+            "detail": "Vérifie et corrige automatiquement les problèmes de linting"
+        },
+        {
+            "label": "📦 Build Production",
+            "type": "shell",
+            "command": "npm",
+            "args": [
+                "run",
+                "build"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true
+            },
+            "problemMatcher": [],
+            "detail": "Construit la version de production du jeu"
+        },
+        {
+            "label": "🚀 Deploy to GitHub Pages",
+            "type": "shell",
+            "command": "npm",
+            "args": [
+                "run",
+                "deploy"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true
+            },
+            "dependsOn": "📦 Build Production",
+            "detail": "Déploie le jeu sur GitHub Pages"
+        }
+    ]
+}
