@@ -1,72 +1,130 @@
 /**
- * Configuration centrale du jeu
- * Modifier ces valeurs pour ajuster l'équilibrage sans toucher au code
+ * Configuration globale du jeu - Nyln'ato Idle RPG
+ * Toutes les constantes et paramètres modifiables sans toucher au code
  */
 
-export const GAME_CONFIG = {
-  // Informations du jeu
-  name: "Idle Game",
-  version: "0.1.0",
+const GameConfig = {
+  // ========== GÉNÉRAL ==========
+  GAME_VERSION: '0.1.0-alpha',
+  GAME_NAME: "Nyln'ato Idle",
   
-  // Ressource principale
-  resource: {
-    name: "cookies",
-    nameSingular: "cookie",
-    emoji: "🍪",
-    startingAmount: 0,
-    clickPower: 1, // Cookies par clic manuel
+  // ========== JOUEUR DÉPART ==========
+  PLAYER: {
+    STARTING_LEVEL: 1,
+    STARTING_HP: 100,
+    STARTING_STATS: {
+      force: 5,
+      agility: 5,
+      intelligence: 5,
+      wisdom: 5,
+      endurance: 5
+    }
   },
   
-  // Système de sauvegarde
-  save: {
-    autoSaveInterval: 30000, // 30 secondes en millisecondes
-    saveKey: "idleGameSave_v1", // Clé LocalStorage
-    enableCompression: false, // Activer plus tard si nécessaire
-  },
-  
-  // Performance et rendu
-  performance: {
-    gameUpdateInterval: 100, // ms entre chaque calcul de production
-    uiUpdateInterval: 200, // ms entre chaque mise à jour de l'UI
-    maxFPS: 60,
-    enablePerformanceMonitoring: true, // Logs de performance en dev
-  },
-  
-  // Interface utilisateur
-  ui: {
-    numberFormat: {
-      useShortNotation: true, // true: 1.5M, false: 1,500,000
-      decimalPlaces: 2,
-      useSpaceSeparator: false, // true: 1 500 000, false: 1,500,000
+  // ========== COMBAT ==========
+  COMBAT: {
+    // Dégâts de base par clic
+    BASE_CLICK_DAMAGE: 1,
+    
+    // Vitesse d'attaque (millisecondes entre chaque attaque)
+    BASE_ATTACK_SPEED: 2000, // 2 secondes
+    
+    // Formule de calcul des dégâts
+    DAMAGE_FORMULA: {
+      // Dégâts physiques = Force × multiplicateur
+      FORCE_MULTIPLIER: 1.0,
+      // Dégâts magiques = Intelligence × multiplicateur
+      INTELLIGENCE_MULTIPLIER: 1.0
     },
-    animations: {
+    
+    // Formule vitesse d'attaque basée sur Agilité
+    AGILITY_SPEED_FACTOR: 0.02, // +2% de vitesse par point d'agilité
+  },
+  
+  // ========== PROGRESSION ==========
+  PROGRESSION: {
+    // Formule XP requise : BASE_XP × (niveau ^ EXPONENT)
+    BASE_XP: 100,
+    XP_EXPONENT: 1.5,
+    
+    // Stats gagnées par niveau
+    STATS_PER_LEVEL: {
+      hp: 10,        // +10 PV max par niveau
+      force: 2,      // +2 Force par niveau
+      agility: 1,    // +1 Agilité par niveau
+      intelligence: 1, // +1 Intelligence par niveau
+      wisdom: 1,     // +1 Sagesse par niveau
+      endurance: 2   // +2 Endurance par niveau
+    }
+  },
+  
+  // ========== ZONES ==========
+  ZONES: {
+    // Nombre de monstres à tuer pour débloquer la zone suivante
+    MONSTERS_TO_UNLOCK: 10
+  },
+  
+  // ========== SAUVEGARDE ==========
+  SAVE: {
+    AUTO_SAVE_INTERVAL: 30000, // 30 secondes
+    SAVE_KEY: "nylnatoIdleSave_v1",
+    ENABLE_COMPRESSION: false
+  },
+  
+  // ========== PERFORMANCE ==========
+  PERFORMANCE: {
+    UPDATE_INTERVAL: 100, // 100ms (10 fois par seconde)
+    MAX_FPS: 60,
+    ENABLE_MONITORING: true
+  },
+  
+  // ========== UI ==========
+  UI: {
+    // Nombre maximum de lignes dans le journal de combat
+    MAX_COMBAT_LOG_ENTRIES: 10,
+    
+    // Animation des barres de vie (ms)
+    HP_BAR_ANIMATION_DURATION: 300,
+    
+    // Notation des grands nombres
+    NUMBER_FORMAT: 'abbreviated', // 'full', 'abbreviated', 'scientific'
+    
+    // Animations
+    ANIMATIONS: {
       enableParticles: true,
       enableTransitions: true,
-      particleLifetime: 1000, // ms
+      particleLifetime: 1000
     },
-    notifications: {
-      duration: 3000, // ms
+    
+    // Notifications
+    NOTIFICATIONS: {
+      duration: 3000,
       maxVisible: 3,
-      position: "top-right", // top-right, top-left, bottom-right, bottom-left
-    },
+      position: "top-right"
+    }
   },
   
-  // Features activées/désactivées
-  features: {
-    enableAchievements: true,
-    enableUpgrades: true,
-    enableStatistics: true,
-    enablePrestige: false, // À activer plus tard
-    enableEvents: false, // À activer plus tard
-    enableSounds: false, // À activer plus tard
+  // ========== FEATURES ==========
+  FEATURES: {
+    enableProfessions: true,
+    enableTown: true,
+    enableQuests: false, // Phase 2
+    enableDragons: false, // Phase 4
+    enableGuild: false, // Phase 4
+    enableSounds: false // À activer plus tard
   },
   
-  // Débogage
-  debug: {
+  // ========== DEBUG ==========
+  DEBUG: {
     enabled: true, // Mettre à false en production
     showFPS: true,
-    logProduction: false,
+    logCombat: true, // Activé pour déboguer
     logSaves: true,
-    cheatMode: true, // Raccourcis pour tester rapidement
-  },
+    cheatMode: true // Raccourcis pour tester rapidement
+  }
 };
+
+// Rendre disponible globalement
+if (typeof window !== 'undefined') {
+  window.GameConfig = GameConfig;
+}

@@ -1,0 +1,115 @@
+/**
+ * Configuration des Quêtes
+ */
+
+const QuestsData = [
+    // ========== QUÊTE 1 : Premiers Pas ==========
+    {
+        id: 'quest_first_steps',
+        title: 'Premiers Pas',
+        description: 'Tuez 10 monstres pour prouver votre valeur',
+        type: 'kill',
+        target: 10,
+        requirements: {
+            // Pas de prérequis, c'est la première quête
+        },
+        rewards: {
+            xp: 50,
+            gold: 25,
+            unlocks: ['gathering'] // Débloque l'onglet Récolte
+        }
+    },
+    
+    // ========== QUÊTE 2 : Maître des Ressources (débloque Ville) ==========
+    {
+        id: 'quest_resource_master',
+        title: 'Maître des Ressources',
+        description: 'Tuez 50 monstres pour obtenir des ressources',
+        type: 'kill',
+        target: 50,
+        requirements: {
+            quest: 'quest_first_steps' // Nécessite d'avoir complété "Premiers Pas"
+        },
+        rewards: {
+            xp: 200,
+            gold: 100,
+            unlocks: ['town'] // Débloque l'onglet Ville
+        }
+    },
+    
+    // ========== QUÊTE 3 : Bâtisseur (débloque Dragons) ==========
+    {
+        id: 'quest_builder',
+        title: 'Bâtisseur Accompli',
+        description: 'Tuez 100 monstres pour développer votre ville',
+        type: 'kill',
+        target: 100,
+        requirements: {
+            quest: 'quest_resource_master' // Nécessite "Maître des Ressources"
+        },
+        rewards: {
+            xp: 500,
+            gold: 250,
+            unlocks: ['dragons'] // Débloque l'onglet Dragons
+        }
+    },
+    
+    // ========== QUÊTE 4 : Héros Légendaire (débloque Guilde) ==========
+    {
+        id: 'quest_legendary_hero',
+        title: 'Héros Légendaire',
+        description: 'Tuez 200 monstres et prouvez votre valeur',
+        type: 'kill',
+        target: 200,
+        requirements: {
+            quest: 'quest_builder' // Nécessite "Bâtisseur Accompli"
+        },
+        rewards: {
+            xp: 1000,
+            gold: 500,
+            unlocks: ['guild'] // Débloque l'onglet Guilde
+        }
+    },
+    
+    // ========== QUÊTES MÉTIERS (pour plus tard) ==========
+    {
+        id: 'quest_woodcutter_apprentice',
+        title: 'Apprenti Bûcheron',
+        description: 'Récoltez 50 Bois de Chêne',
+        type: 'collect',
+        target: 50,
+        requirements: {
+            quest: 'quest_first_steps', // Nécessite d'avoir complété "Premiers Pas"
+            resourceType: 'wood',
+            resourceName: 'Bois de Chêne'
+        },
+        rewards: {
+            xp: 100,
+            gold: 50,
+            unlocks: ['wood_frene'] // Débloque Bois de Frêne
+        }
+    },
+    
+    {
+        id: 'quest_miner_apprentice',
+        title: 'Apprenti Mineur',
+        description: 'Récoltez 50 Fer',
+        type: 'collect',
+        target: 50,
+        requirements: {
+            quest: 'quest_first_steps', // Nécessite d'avoir complété "Premiers Pas"
+            resourceType: 'ore',
+            resourceName: 'Fer'
+        },
+        rewards: {
+            xp: 100,
+            gold: 50,
+            unlocks: ['ore_cuivre'] // Débloque Cuivre
+        }
+    }
+];
+
+// Rendre disponible globalement
+if (typeof window !== 'undefined') {
+    window.QuestsData = QuestsData;
+}

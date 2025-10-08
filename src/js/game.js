@@ -1,0 +1,778 @@
+/**
+ * Classe Game - Point d'entrée principal du jeu
+ * Orchestre tous les systèmes (combat, métiers, ville, etc.)
+ */
+
+class Game {
+    constructor() {
+        // Systèmes principaux
+        this.player = null;
+        this.combat = null;
+        this.ui = null;
+        this.questManager = null;
+        this.professionManager = null;
+        this.equipmentManager = null;
+        this.storageManager = null;
+        this.characterCreation = null;
+        
+        // Boucle de jeu
+        this.lastUpdateTime = 0;
+        this.gameLoopId = null;
+        this.isRunning = false;
+        
+        // Sauvegarde automatique
+        this.lastSaveTime = 0;
+        this.autoSaveIntervalId = null;
+        
+        // Flag pour empêcher la sauvegarde pendant le reset
+        this.isResetting = false;
+        
+        if (GameConfig.DEBUG.enabled) {
+            console.log(`🎮 ${GameConfig.GAME_NAME} v${GameConfig.GAME_VERSION} initialisé`);
+        }
+    }
+
+    /**
+     * Initialise le jeu
+     */
+    init() {
+        // Création des instances
+        this.player = new Player();
+        this.combat = new Combat(this.player);
+        this.questManager = new QuestManager(this.player);
+        this.professionManager = new ProfessionManager();
+        this.equipmentManager = new EquipmentManager(this);
+        this.craftingManager = new CraftingManager(this);
+        this.buildingManager = new BuildingManager(this);
+        this.storageManager = new StorageManager(this);
+        this.ui = new UI(this);
+        this.characterCreation = new CharacterCreationManager(this);
+        
+        // Tente de charger une sauvegarde existante
+        const loaded = this.load();
+        
+        if (!loaded) {
+            console.log('🆕 Nouvelle partie démarrée');
+            // Plus besoin d'équipement de test, on peut les fabriquer !
+        } else {
+            console.log('💾 Sauvegarde chargée');
+        }
+        
+        // Mise à jour initiale de l'interface
+        this.ui.update();
+        this.ui.updateProfessions();
+        this.ui.updateInventory();
+        this.ui.updateAutoGatherButtons();
+        this.ui.checkEquipmentUnlock(); // Vérifier si l'équipement doit être débloqué
+        
+        // Afficher la création de personnage si nécessaire
+        if (this.characterCreation.shouldShow()) {
+            setTimeout(() => {
+                this.characterCreation.show();
+            }, 500);
+        }
+        
+        // Démarre la boucle de jeu
+        this.start();
+        
+        // Active l'auto-save
+        this.startAutoSave();
+        
+        if (GameConfig.DEBUG.enabled) {
+            console.log('✅ Jeu prêt !');
+            console.log('💡 Tapez game dans la console pour accéder au jeu');
+        }
+    }
+
+    /**
+     * Démarre la boucle de jeu
+     */
+    start() {
+        if (this.isRunning) return;
+        
+        this.isRunning = true;
+        this.lastUpdateTime = Date.now();
+        this.gameLoop();
+    }
+
+    /**
+     * Arrête la boucle de jeu
+     */
+    stop() {
+        this.isRunning = false;
+        
+        if (this.gameLoopId) {
+            cancelAnimationFrame(this.gameLoopId);
+            this.gameLoopId = null;
+        }
+    }
+
+    /**
+     * Boucle principale du jeu
+     */
+    gameLoop() {
+        if (!this.isRunning) return;
+        
+        const currentTime = Date.now();
+        const deltaTime = currentTime - this.lastUpdateTime;
+        
+        // Mise à jour uniquement tous les X ms (défini dans config)
+        if (deltaTime >= GameConfig.PERFORMANCE.UPDATE_INTERVAL) {
+            this.update(deltaTime);
+            this.lastUpdateTime = currentTime;
+        }
+        
+        // Continue la boucle
+        this.gameLoopId = requestAnimationFrame(() => this.gameLoop());
+    }
+
+    /**
+     * Met à jour le jeu
+     */
+    update(deltaTime) {
+        // Met à jour le combat (auto-combat pour plus tard)
+        if (this.combat) {
+            this.combat.update(deltaTime);
+        }
+        
+        // Met à jour les bâtiments (production automatique)
+        if (this.buildingManager) {
+            this.buildingManager.update(deltaTime);
+        }
+        
+        // Met à jour l'interface
+        if (this.ui) {
+            this.ui.update();
+        }
+    }
+
+    /**
+     * Gère le clic sur le bouton d'attaque
+     */
+    onAttackClick() {
+        if (!this.player.isAlive) {
+            console.log('Vous êtes mort, attendez la réanimation...');
+            return;
+        }
+        
+        const success = this.combat.manualAttack();
+        
+        if (success) {
+            // Mise à jour immédiate de l'UI
+            this.ui.update();
+        }
+    }
+
+    /**
+     * Toggle l'auto-combat
+     */
+    onAutoCombatToggle() {
+        const isActive = this.combat.toggleAutoCombat();
+        this.ui.updateAutoCombatButton(isActive);
+        
+        if (GameConfig.DEBUG.enabled) {
+            console.log('🔄 Auto-combat:', isActive ? 'ACTIVÉ' : 'DÉSACTIVÉ');
+            console.log('Combat state:', {
+                isActive: this.combat.isActive,
+                isFighting: this.combat.isFighting,
+                autoCombatEnabled: this.combat.autoCombatEnabled
+            });
+        }
+    }
+
+    /**
+     * Change de zone (avec flèches)
+     */
+    onZoneChange(direction) {
+        const success = this.combat.changeZone(direction);
+        if (success) {
+            this.ui.update();
+        }
+    }
+
+    /**
+     * Sauvegarde le jeu
+     */
+    save() {
+        // Empêcher la sauvegarde pendant le reset
+        if (this.isResetting) {
+            console.log('⏸️ Sauvegarde bloquée (reset en cours)');
+            return;
+        }
+        
+        try {
+            const saveData = {
+                version: GameConfig.GAME_VERSION,
+                timestamp: Date.now(),
+                player: this.player.toJSON(),
+                combat: this.combat.toJSON(),
+                quests: this.questManager.toJSON(),
+                professions: this.professionManager.toJSON(),
+                equipment: this.equipmentManager.toJSON(),
+                crafting: this.craftingManager.toJSON(),
+                buildings: this.buildingManager.toJSON(),
+                storage: this.storageManager.getSaveData(),
+                ui: this.ui.toJSON()
+            };
+            
+            const saveString = JSON.stringify(saveData);
+            localStorage.setItem(GameConfig.SAVE.SAVE_KEY, saveString);
+            
+            this.lastSaveTime = Date.now();
+            this.ui.updateLastSave(this.lastSaveTime);
+            
+            if (GameConfig.DEBUG.logSaves) {
+                console.log('💾 Partie sauvegardée', saveData);
+            }
+            
+            // Notification supprimée pour réduire le spam (auto-save toutes les 30s)
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Erreur lors de la sauvegarde:', error);
+            this.ui.showNotification('Erreur lors de la sauvegarde', 'error');
+            return false;
+        }
+    }
+
+    /**
+     * Charge le jeu depuis une sauvegarde
+     */
+    load() {
+        try {
+            const saveString = localStorage.getItem(GameConfig.SAVE.SAVE_KEY);
+            
+            if (!saveString) {
+                return false; // Pas de sauvegarde
+            }
+            
+            const saveData = JSON.parse(saveString);
+            
+            // Vérification de version (important pour la compatibilité)
+            if (saveData.version !== GameConfig.GAME_VERSION) {
+                console.warn('⚠️ Version de sauvegarde différente, chargement tenté...');
+            }
+            
+            // Restaure les données
+            this.player.fromJSON(saveData.player);
+            this.combat.fromJSON(saveData.combat);
+            if (saveData.quests) {
+                this.questManager.fromJSON(saveData.quests);
+            }
+            if (saveData.professions) {
+                this.professionManager.fromJSON(saveData.professions);
+            }
+            if (saveData.equipment) {
+                this.equipmentManager.fromJSON(saveData.equipment);
+            }
+            if (saveData.crafting) {
+                this.craftingManager.fromJSON(saveData.crafting);
+            }
+            if (saveData.buildings) {
+                this.buildingManager.fromJSON(saveData.buildings);
+            }
+            if (saveData.storage) {
+                this.storageManager.loadSaveData(saveData.storage);
+            }
+            if (saveData.ui) {
+                this.ui.fromJSON(saveData.ui);
+            }
+            
+            this.lastSaveTime = saveData.timestamp;
+            this.ui.updateLastSave(this.lastSaveTime);
+            
+            // Calculer la production offline
+            this.calculateOfflineProgress(saveData.timestamp);
+            
+            if (GameConfig.DEBUG.logSaves) {
+                console.log('📂 Sauvegarde chargée', saveData);
+            }
+            
+            this.ui.showNotification('Partie chargée', 'success');
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Erreur lors du chargement:', error);
+            this.ui.showNotification('Erreur lors du chargement', 'error');
+            return false;
+        }
+    }
+
+    /**
+     * Réinitialise le jeu
+     */
+    reset() {
+        console.log('🔄 RÉINITIALISATION EN COURS...');
+        
+        // Bloquer toute sauvegarde
+        this.isResetting = true;
+        
+        console.log('LocalStorage avant:', localStorage.getItem(GameConfig.SAVE.SAVE_KEY));
+        
+        // Arrête tout
+        this.stop();
+        if (this.autoSaveIntervalId) {
+            clearInterval(this.autoSaveIntervalId);
+            this.autoSaveIntervalId = null;
+        }
+        
+        // Supprime TOUTE la sauvegarde
+        localStorage.clear();
+        
+        console.log('LocalStorage après clear:', localStorage.getItem(GameConfig.SAVE.SAVE_KEY));
+        console.log('Rechargement de la page...');
+        
+        // Force le rechargement complet
+        setTimeout(() => {
+            window.location.reload();
+        }, 100);
+    }
+
+    /**
+     * Ajoute des équipements de départ pour tester
+     */
+    addStarterEquipment() {
+        // Épée de fer
+        const ironSword = new Equipment({
+            id: 'iron_sword',
+            name: 'Épée de Fer',
+            type: 'weapon',
+            slot: 'weapon',
+            rarity: 'common',
+            icon: '⚔️',
+            stats: {
+                force: 5,
+                damage: 8
+            },
+            requiredLevel: 1,
+            description: 'Une simple épée en fer forgé.'
+        });
+        
+        // Bouclier en bois
+        const woodenShield = new Equipment({
+            id: 'wooden_shield',
+            name: 'Bouclier en Bois',
+            type: 'offhand',
+            slot: 'offhand',
+            rarity: 'common',
+            icon: '🛡️',
+            stats: {
+                defense: 5,
+                endurance: 3
+            },
+            requiredLevel: 1,
+            description: 'Un bouclier basique en bois renforcé.'
+        });
+        
+        // Tunique de cuir
+        const leatherChest = new Equipment({
+            id: 'leather_chest',
+            name: 'Tunique de Cuir',
+            type: 'armor',
+            slot: 'chest',
+            rarity: 'uncommon',
+            icon: '👔',
+            stats: {
+                defense: 10,
+                endurance: 5,
+                agility: 2
+            },
+            requiredLevel: 2,
+            description: 'Une armure légère en cuir souple.'
+        });
+        
+        // Gants de travail
+        const workGloves = new Equipment({
+            id: 'work_gloves',
+            name: 'Gants de Travail',
+            type: 'gloves',
+            slot: 'gloves',
+            rarity: 'common',
+            icon: '🧤',
+            stats: {
+                professionXP: 5,
+                dropRate: 3
+            },
+            requiredLevel: 1,
+            description: 'Des gants robustes pour les métiers.'
+        });
+        
+        // Anneau de chance
+        const luckyRing = new Equipment({
+            id: 'lucky_ring',
+            name: 'Anneau de Chance',
+            type: 'ring',
+            slot: 'ring1',
+            rarity: 'rare',
+            icon: '💍',
+            stats: {
+                dropRate: 10,
+                wisdom: 3
+            },
+            requiredLevel: 3,
+            description: 'Un anneau qui attire la fortune.'
+        });
+        
+        // Ajouter à l'inventaire
+        this.equipmentManager.addToInventory(ironSword);
+        this.equipmentManager.addToInventory(woodenShield);
+        this.equipmentManager.addToInventory(leatherChest);
+        this.equipmentManager.addToInventory(workGloves);
+        this.equipmentManager.addToInventory(luckyRing);
+        
+        console.log('🎒 Équipements de départ ajoutés');
+    }
+
+    /**
+     * Démarre l'auto-save
+     */
+    startAutoSave() {
+        // Sauvegarde automatique tous les X secondes
+        this.autoSaveIntervalId = setInterval(() => {
+            this.save();
+        }, GameConfig.SAVE.AUTO_SAVE_INTERVAL);
+        
+        console.log(`⏰ Auto-save activé (toutes les ${GameConfig.SAVE.AUTO_SAVE_INTERVAL / 1000}s)`);
+    }
+
+    /**
+     * Arrête l'auto-save
+     */
+    stopAutoSave() {
+        if (this.autoSaveIntervalId) {
+            clearInterval(this.autoSaveIntervalId);
+            this.autoSaveIntervalId = null;
+        }
+    }
+
+    /**
+     * Exporte la sauvegarde en Base64 (pour partage/backup)
+     */
+    exportSave() {
+        this.save(); // Sauvegarde d'abord
+        
+        const saveString = localStorage.getItem(GameConfig.SAVE.SAVE_KEY);
+        if (!saveString) return null;
+        
+        return btoa(saveString); // Encode en Base64
+    }
+
+    /**
+     * Importe une sauvegarde depuis Base64
+     */
+    importSave(base64String) {
+        try {
+            const saveString = atob(base64String); // Décode depuis Base64
+            const saveData = JSON.parse(saveString);
+            
+            // Valide les données
+            if (!saveData.version || !saveData.player) {
+                throw new Error('Données de sauvegarde invalides');
+            }
+            
+            // Enregistre et charge
+            localStorage.setItem(GameConfig.SAVE.SAVE_KEY, saveString);
+            this.load();
+            
+            console.log('✅ Sauvegarde importée avec succès');
+            return true;
+            
+        } catch (error) {
+            console.error("❌ Erreur lors de l'import:", error);
+            return false;
+        }
+    }
+
+    /**
+     * Calcule la production offline (ressources gagnées pendant l'absence)
+     * @param {number} lastTimestamp - Timestamp de la dernière sauvegarde
+     */
+    calculateOfflineProgress(lastTimestamp) {
+        const now = Date.now();
+        const timeAwayMs = now - lastTimestamp;
+        const timeAwaySec = timeAwayMs / 1000;
+        
+        // Ignorer si moins de 60 secondes
+        if (timeAwaySec < 60) {
+            return;
+        }
+
+        // Limiter à 24 heures max (éviter exploits)
+        const MAX_OFFLINE_HOURS = 24;
+        const maxOfflineMs = MAX_OFFLINE_HOURS * 60 * 60 * 1000;
+        const effectiveTimeMs = Math.min(timeAwayMs, maxOfflineMs);
+        const effectiveTimeSec = effectiveTimeMs / 1000;
+
+        console.log(`⏰ Production offline : ${NumberFormatter.formatTime(effectiveTimeSec, true)} d'absence`);
+
+        // Calculer la production des bâtiments
+        const productions = {};
+        let totalProductionValue = 0;
+
+        for (const building of this.buildingManager.getAllBuildings()) {
+            if (!building.isBuilt()) continue;
+
+            const production = building.getCurrentProduction();
+            
+            for (const [resourceId, amountPerMinute] of Object.entries(production)) {
+                // Convertir en production par seconde
+                const amountPerSecond = amountPerMinute / 60;
+                const amountProduced = Math.floor(amountPerSecond * effectiveTimeSec);
+                
+                if (amountProduced > 0) {
+                    // Ajouter à l'inventaire
+                    this.professionManager.addToInventory(resourceId, amountProduced);
+                    
+                    // Comptabiliser pour le récapitulatif
+                    if (!productions[resourceId]) {
+                        productions[resourceId] = 0;
+                    }
+                    productions[resourceId] += amountProduced;
+                    totalProductionValue += amountProduced;
+                }
+            }
+        }
+
+        // Afficher le récapitulatif si des ressources ont été produites
+        if (totalProductionValue > 0) {
+            this.showOfflineProgressSummary(effectiveTimeSec, productions, timeAwaySec > effectiveTimeSec);
+        }
+    }
+
+    /**
+     * Affiche le récapitulatif de la production offline
+     * @param {number} timeSec - Temps effectif en secondes
+     * @param {object} productions - Ressources produites {resourceId: amount}
+     * @param {boolean} wasCapped - Si le temps a été limité
+     */
+    showOfflineProgressSummary(timeSec, productions, wasCapped) {
+        const timeFormatted = NumberFormatter.formatTime(timeSec, false);
+        
+        let message = `🏭 <strong>Production pendant ton absence</strong><br>`;
+        message += `⏰ Durée : ${timeFormatted}<br><br>`;
+        message += `<strong>Ressources gagnées :</strong><br>`;
+        
+        for (const [resourceId, amount] of Object.entries(productions)) {
+            const resource = window.findResourceById(resourceId);
+            const icon = resource?.icon || '📦';
+            const name = resource?.name || resourceId;
+            message += `${icon} ${name} : +${NumberFormatter.format(amount)}<br>`;
+        }
+
+        if (wasCapped) {
+            message += `<br><em>⚠️ Production limitée à 24h maximum</em>`;
+        }
+
+        // Afficher dans une popup personnalisée
+        this.ui.showOfflinePopup(message);
+    }
+
+    /**
+     * Nettoie avant fermeture
+     */
+    destroy() {
+        this.stop();
+        this.stopAutoSave();
+        this.save(); // Sauvegarde finale
+    }
+
+    /**
+     * Exporte la sauvegarde actuelle en tant que fichier JSON téléchargeable
+     */
+    exportSave() {
+        try {
+            // Sauvegarder d'abord
+            this.save();
+            
+            // Récupérer la sauvegarde
+            const saveString = localStorage.getItem(GameConfig.SAVE.SAVE_KEY);
+            if (!saveString) {
+                this.ui.showNotification('Aucune sauvegarde à exporter', 'error');
+                return false;
+            }
+
+            // Créer un blob avec la sauvegarde
+            const blob = new Blob([saveString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            // Créer un lien de téléchargement
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+            const filename = `nylnato-save-${timestamp}.json`;
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+
+            // Nettoyer
+            URL.revokeObjectURL(url);
+
+            this.ui.showNotification('Sauvegarde exportée !', 'success');
+            console.log('📦 Sauvegarde exportée:', filename);
+            return true;
+
+        } catch (error) {
+            console.error('❌ Erreur lors de l\'export:', error);
+            this.ui.showNotification('Erreur lors de l\'export', 'error');
+            return false;
+        }
+    }
+
+    /**
+     * Exporte la sauvegarde comme texte à copier
+     */
+    exportSaveAsText() {
+        try {
+            // Sauvegarder d'abord
+            this.save();
+            
+            // Récupérer la sauvegarde
+            const saveString = localStorage.getItem(GameConfig.SAVE.SAVE_KEY);
+            if (!saveString) {
+                this.ui.showNotification('Aucune sauvegarde à exporter', 'error');
+                return null;
+            }
+
+            // Encoder en base64 pour faciliter le copier/coller
+            const encoded = btoa(encodeURIComponent(saveString));
+            
+            console.log('📋 Sauvegarde encodée (longueur:', encoded.length, ')');
+            return encoded;
+
+        } catch (error) {
+            console.error('❌ Erreur lors de l\'export texte:', error);
+            this.ui.showNotification('Erreur lors de l\'export', 'error');
+            return null;
+        }
+    }
+
+    /**
+     * Importe une sauvegarde depuis un fichier JSON
+     * @param {File} file - Le fichier JSON à importer
+     */
+    importSaveFromFile(file) {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            try {
+                const saveString = e.target.result;
+                const saveData = JSON.parse(saveString);
+
+                // Valider la sauvegarde
+                if (!this.validateSave(saveData)) {
+                    this.ui.showNotification('Sauvegarde invalide ou corrompue', 'error');
+                    return false;
+                }
+
+                // Confirmer l'import (écrase la sauvegarde actuelle)
+                if (confirm('⚠️ Importer cette sauvegarde écrasera votre progression actuelle. Continuer ?')) {
+                    // Sauvegarder dans localStorage
+                    localStorage.setItem(GameConfig.SAVE.SAVE_KEY, saveString);
+                    
+                    // Recharger la page pour appliquer
+                    this.ui.showNotification('Sauvegarde importée ! Rechargement...', 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                }
+
+            } catch (error) {
+                console.error('❌ Erreur lors de l\'import:', error);
+                this.ui.showNotification('Erreur: fichier invalide', 'error');
+                return false;
+            }
+        };
+
+        reader.onerror = () => {
+            console.error('❌ Erreur de lecture du fichier');
+            this.ui.showNotification('Erreur de lecture du fichier', 'error');
+        };
+
+        reader.readAsText(file);
+    }
+
+    /**
+     * Importe une sauvegarde depuis un texte encodé
+     * @param {string} encodedSave - La sauvegarde encodée en base64
+     */
+    importSaveFromText(encodedSave) {
+        try {
+            // Décoder depuis base64
+            const saveString = decodeURIComponent(atob(encodedSave));
+            const saveData = JSON.parse(saveString);
+
+            // Valider la sauvegarde
+            if (!this.validateSave(saveData)) {
+                this.ui.showNotification('Sauvegarde invalide ou corrompue', 'error');
+                return false;
+            }
+
+            // Confirmer l'import
+            if (confirm('⚠️ Importer cette sauvegarde écrasera votre progression actuelle. Continuer ?')) {
+                // Sauvegarder dans localStorage
+                localStorage.setItem(GameConfig.SAVE.SAVE_KEY, saveString);
+                
+                // Recharger la page
+                this.ui.showNotification('Sauvegarde importée ! Rechargement...', 'success');
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+                return true;
+            }
+
+            return false;
+
+        } catch (error) {
+            console.error('❌ Erreur lors de l\'import:', error);
+            this.ui.showNotification('Erreur: sauvegarde invalide', 'error');
+            return false;
+        }
+    }
+
+    /**
+     * Valide une sauvegarde importée
+     * @param {object} saveData - Les données de sauvegarde à valider
+     * @returns {boolean} - True si valide
+     */
+    validateSave(saveData) {
+        // Vérifier la structure de base
+        if (!saveData || typeof saveData !== 'object') {
+            console.error('❌ Sauvegarde invalide: pas un objet');
+            return false;
+        }
+
+        // Vérifier les champs obligatoires
+        const requiredFields = ['version', 'timestamp', 'player', 'combat'];
+        for (const field of requiredFields) {
+            if (!(field in saveData)) {
+                console.error(`❌ Sauvegarde invalide: champ manquant '${field}'`);
+                return false;
+            }
+        }
+
+        // Vérifier que player a au moins level et resources
+        if (!saveData.player.level || !saveData.player.resources) {
+            console.error('❌ Sauvegarde invalide: données joueur manquantes');
+            return false;
+        }
+
+        // Vérifier la version (warning seulement)
+        if (saveData.version !== GameConfig.GAME_VERSION) {
+            console.warn(`⚠️ Version différente: sauvegarde ${saveData.version}, jeu ${GameConfig.GAME_VERSION}`);
+        }
+
+        return true;
+    }
+}
+
+// Sauvegarde automatique avant fermeture de la page
+window.addEventListener('beforeunload', () => {
+    if (window.game && !window.game.isResetting) {
+        window.game.save();
+    }
+});
+
+// Rendre disponible globalement
+if (typeof window !== 'undefined') {
+    window.Game = Game;
+}

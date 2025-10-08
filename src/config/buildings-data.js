@@ -1,223 +1,85 @@
-/**
- * Données de tous les bâtiments du jeu
- * Séparation données/logique pour faciliter l'équilibrage
- */
+// Configuration des bâtiments de production
+// Les bâtiments produisent des ressources automatiquement
+// NOTE: Les gemmes ne sont PAS produites par les bâtiments (drop joueur uniquement)
 
-export const BUILDINGS_DATA = [
-  {
-    id: "cursor",
-    name: "Curseur",
-    namePlural: "Curseurs",
-    description: "Clique automatiquement pour vous",
-    emoji: "👆",
-    
-    // Économie
-    baseCost: 15,
-    baseProduction: 0.1, // cookies par seconde
-    costMultiplier: 1.15, // Coût augmente de 15% à chaque achat
-    
-    // Déblocage
-    unlockCondition: {
-      type: "always", // Toujours disponible
+const BuildingsData = {
+    sawmill: {
+        id: 'sawmill',
+        name: 'Scierie',
+        icon: '🏗️',
+        description: 'Produit du bois automatiquement',
+        baseProduction: {
+            'wood_oak': 10  // 10 Bois de Chêne/min niveau 1
+        },
+        baseCost: {
+            gold: 100,
+            wood_oak: 100  // 100 Bois de Chêne pour construire
+        },
+        costMultiplier: 1.8,  // Croissance exponentielle forte
+        productionMultiplier: 2.0,  // Production double à chaque niveau
+        profession: 'woodcutter',
+        professionLevelRequired: 5
     },
     
-    // UI
-    color: "#FFD700",
-    sortOrder: 1,
-  },
-  
-  {
-    id: "grandma",
-    name: "Grand-mère",
-    namePlural: "Grand-mères",
-    description: "Une gentille mamie qui cuit des cookies",
-    emoji: "👵",
-    
-    baseCost: 100,
-    baseProduction: 1,
-    costMultiplier: 1.15,
-    
-    unlockCondition: {
-      type: "cookies", // Débloqué quand on a assez de cookies
-      value: 50, // Apparaît à partir de 50 cookies
+    mine: {
+        id: 'mine',
+        name: 'Mine',
+        icon: '⛰️',
+        description: 'Produit des minerais automatiquement (SAUF gemmes)',
+        baseProduction: {
+            'ore_iron': 10  // 10 Fer/min niveau 1
+        },
+        baseCost: {
+            gold: 100,
+            ore_iron: 100  // 100 Fer pour construire
+        },
+        costMultiplier: 1.8,  // Croissance exponentielle forte
+        productionMultiplier: 2.0,  // Production double à chaque niveau
+        profession: 'miner',
+        professionLevelRequired: 5
     },
     
-    color: "#FF69B4",
-    sortOrder: 2,
-  },
-  
-  {
-    id: "farm",
-    name: "Ferme",
-    namePlural: "Fermes",
-    description: "Cultive des ingrédients pour les cookies",
-    emoji: "🌾",
-    
-    baseCost: 1100,
-    baseProduction: 8,
-    costMultiplier: 1.15,
-    
-    unlockCondition: {
-      type: "cookies",
-      value: 500,
+    warehouse: {
+        id: 'warehouse',
+        name: 'Entrepôt de Ressources',
+        icon: '🏚️',
+        description: 'Augmente la capacité de stockage des ressources de récolte (Bois, Minerais, Gemmes)',
+        baseProduction: {}, // Pas de production, seulement amélioration de stockage
+        baseCost: {
+            gold: 500,
+            wood_oak: 200,
+            ore_iron: 100
+        },
+        costMultiplier: 2.5,  // Coût augmente fortement
+        productionMultiplier: 1.0,  // Pas de production
+        storageBonus: 500,  // +500 de stockage par niveau pour les ressources de récolte
+        profession: null,
+        professionLevelRequired: 0
     },
-    
-    color: "#90EE90",
-    sortOrder: 3,
-  },
-  
-  {
-    id: "mine",
-    name: "Mine",
-    namePlural: "Mines",
-    description: "Extrait du chocolat et du sucre",
-    emoji: "⛏️",
-    
-    baseCost: 12000,
-    baseProduction: 47,
-    costMultiplier: 1.15,
-    
-    unlockCondition: {
-      type: "building", // Débloqué quand on possède un certain bâtiment
-      buildingId: "farm",
-      count: 10,
-    },
-    
-    color: "#8B4513",
-    sortOrder: 4,
-  },
-  
-  {
-    id: "factory",
-    name: "Usine",
-    namePlural: "Usines",
-    description: "Production industrielle de cookies",
-    emoji: "🏭",
-    
-    baseCost: 130000,
-    baseProduction: 260,
-    costMultiplier: 1.15,
-    
-    unlockCondition: {
-      type: "cookies",
-      value: 50000,
-    },
-    
-    color: "#808080",
-    sortOrder: 5,
-  },
-  
-  {
-    id: "bank",
-    name: "Banque",
-    namePlural: "Banques",
-    description: "Génère des intérêts sur vos cookies",
-    emoji: "🏦",
-    
-    baseCost: 1400000,
-    baseProduction: 1400,
-    costMultiplier: 1.15,
-    
-    unlockCondition: {
-      type: "cookies",
-      value: 500000,
-    },
-    
-    color: "#4169E1",
-    sortOrder: 6,
-  },
-  
-  {
-    id: "temple",
-    name: "Temple",
-    namePlural: "Temples",
-    description: "Invoque des cookies divins",
-    emoji: "⛩️",
-    
-    baseCost: 20000000,
-    baseProduction: 7800,
-    costMultiplier: 1.15,
-    
-    unlockCondition: {
-      type: "cookies",
-      value: 5000000,
-    },
-    
-    color: "#9370DB",
-    sortOrder: 7,
-  },
-  
-  {
-    id: "wizard_tower",
-    name: "Tour de magicien",
-    namePlural: "Tours de magicien",
-    description: "Transforme la magie en cookies",
-    emoji: "🧙",
-    
-    baseCost: 330000000,
-    baseProduction: 44000,
-    costMultiplier: 1.15,
-    
-    unlockCondition: {
-      type: "cookies",
-      value: 100000000,
-    },
-    
-    color: "#4B0082",
-    sortOrder: 8,
-  },
-  
-  {
-    id: "shipment",
-    name: "Vaisseau spatial",
-    namePlural: "Vaisseaux spatiaux",
-    description: "Rapporte des cookies de l'espace",
-    emoji: "🚀",
-    
-    baseCost: 5100000000,
-    baseProduction: 260000,
-    costMultiplier: 1.15,
-    
-    unlockCondition: {
-      type: "cookies",
-      value: 1000000000,
-    },
-    
-    color: "#00CED1",
-    sortOrder: 9,
-  },
-  
-  {
-    id: "time_machine",
-    name: "Machine temporelle",
-    namePlural: "Machines temporelles",
-    description: "Rapporte des cookies du futur",
-    emoji: "⏰",
-    
-    baseCost: 75000000000,
-    baseProduction: 1600000,
-    costMultiplier: 1.15,
-    
-    unlockCondition: {
-      type: "cookies",
-      value: 20000000000,
-    },
-    
-    color: "#FFD700",
-    sortOrder: 10,
-  },
-];
 
-/**
- * Fonction utilitaire pour obtenir un bâtiment par son ID
- */
-export function getBuildingData(id) {
-  return BUILDINGS_DATA.find(building => building.id === id);
-}
+    treasury: {
+        id: 'treasury',
+        name: 'Trésorerie de Guerre',
+        icon: '🏰',
+        description: 'Augmente la capacité de stockage du butin de combat',
+        baseProduction: {}, // Pas de production, seulement amélioration de stockage
+        baseCost: {
+            gold: 1000,
+            wood_oak: 150,
+            ore_iron: 150
+        },
+        costMultiplier: 2.5,  // Coût augmente fortement
+        productionMultiplier: 1.0,  // Pas de production
+        storageBonus: 250,  // +250 de stockage par niveau pour le butin de combat
+        profession: null,
+        professionLevelRequired: 0,
+        unlockConditions: {
+            playerLevel: 5  // Se débloque au niveau 5 du joueur
+        }
+    }
+};
 
-/**
- * Fonction utilitaire pour obtenir tous les bâtiments triés
- */
-export function getSortedBuildings() {
-  return [...BUILDINGS_DATA].sort((a, b) => a.sortOrder - b.sortOrder);
+if (typeof window !== 'undefined') {
+    window.BuildingsData = BuildingsData;
+    console.log('✅ BuildingsData chargé:', Object.keys(BuildingsData).length, 'bâtiments');
 }

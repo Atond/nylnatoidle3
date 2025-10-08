@@ -1,0 +1,113 @@
+/**
+ * Styles pour le système de qualité d'équipement
+ */
+
+/* Styles de base pour les cartes d'équipement avec qualité */
+.equipment-item-card[data-quality="superior"] {
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+}
+
+.equipment-item-card[data-quality="exceptional"] {
+    box-shadow: 0 0 15px rgba(33, 150, 243, 0.4);
+}
+
+.equipment-item-card[data-quality="perfect"] {
+    box-shadow: 0 0 20px rgba(156, 39, 176, 0.5);
+    animation: perfectGlow 2s ease-in-out infinite;
+}
+
+.equipment-item-card[data-quality="masterwork"] {
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.7);
+    animation: masterworkGlow 1.5s ease-in-out infinite;
+}
+
+/* Animations de lueur */
+@keyframes perfectGlow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(156, 39, 176, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(156, 39, 176, 0.8);
+    }
+}
+
+@keyframes perfectPulse {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(156, 39, 176, 0.6), inset 0 0 25px rgba(156, 39, 176, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(156, 39, 176, 0.9), inset 0 0 35px rgba(156, 39, 176, 0.3);
+    }
+}
+
+@keyframes masterworkGlow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), inset 0 0 30px rgba(255, 215, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(255, 215, 0, 1), inset 0 0 40px rgba(255, 215, 0, 0.4);
+    }
+}
+
+/* Style pour le texte de qualité */
+.equipment-quality {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-top: 2px;
+}
+
+/* Pas d'animation de bordure tournante - juste la bordure de couleur suffit */
+
+/* Particules brillantes pour Œuvre Maître */
+.equipment-item-card[data-quality="masterwork"]::after {
+    content: '✨';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 1.2rem;
+    animation: sparkle 1s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
+}
+
+/* Pas d'effets visuels supplémentaires pour la qualité sur les slots équipés */
+/* La bordure de rareté suffit, la qualité est indiquée par l'icône et le nom */
+
+/* Notification spéciale pour qualités rares */
+.notification.quality-exceptional {
+    background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+}
+
+.notification.quality-perfect {
+    background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+}
+
+.notification.quality-masterwork {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA000 100%);
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.5);
+    animation: notificationPulse 0.5s ease-out;
+}
+
+@keyframes notificationPulse {
+    0% {
+        transform: scale(0.8);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
