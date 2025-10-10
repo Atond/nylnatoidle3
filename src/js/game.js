@@ -27,6 +27,9 @@ class Game {
         // Flag pour empêcher la sauvegarde pendant le reset
         this.isResetting = false;
         
+        // ⚡ OPTIMISATION: Throttle UI updates
+        this.lastUIUpdateTime = 0;
+        
         if (GameConfig.DEBUG.enabled) {
             console.log(`🎮 ${GameConfig.GAME_NAME} v${GameConfig.GAME_VERSION} initialisé`);
         }
@@ -114,7 +117,13 @@ class Game {
         if (!this.isRunning) return;
         
         const currentTime = Date.now();
-        const deltaTime = currentTime - this.lastUpdateTime;
+        let deltaTime = currentTime - this.lastUpdateTime;
+        
+        // ⚡ OPTIMISATION: Limiter deltaTime pour éviter accumulation
+        if (deltaTime > GameConfig.PERFORMANCE.MAX_DELTA_TIME) {
+            console.warn(`⚠️ deltaTime trop élevé (${deltaTime}ms), limité à ${GameConfig.PERFORMANCE.MAX_DELTA_TIME}ms`);
+            deltaTime = GameConfig.PERFORMANCE.MAX_DELTA_TIME;
+        }
         
         // Mise à jour uniquement tous les X ms (défini dans config)
         if (deltaTime >= GameConfig.PERFORMANCE.UPDATE_INTERVAL) {
@@ -140,9 +149,13 @@ class Game {
             this.buildingManager.update(deltaTime);
         }
         
-        // Met à jour l'interface
-        if (this.ui) {
-            this.ui.update();
+        // ⚡ OPTIMISATION: Throttle UI updates (pas besoin de refresh constant)
+        const currentTime = Date.now();
+        if (currentTime - this.lastUIUpdateTime >= GameConfig.PERFORMANCE.UI_UPDATE_INTERVAL) {
+            if (this.ui) {
+                this.ui.update();
+            }
+            this.lastUIUpdateTime = currentTime;
         }
     }
 
@@ -304,27 +317,43 @@ class Game {
     reset() {
         console.log('🔄 RÉINITIALISATION EN COURS...');
         
-        // Bloquer toute sauvegarde
+        // 🛡️ FIX: Bloquer toute sauvegarde ET arrêter tous les timers AVANT
         this.isResetting = true;
         
         console.log('LocalStorage avant:', localStorage.getItem(GameConfig.SAVE.SAVE_KEY));
         
-        // Arrête tout
+        // 🛡️ FIX: Arrêter TOUS les timers AVANT de supprimer (ordre important)
         this.stop();
+        
+        // Arrêter l'auto-save
         if (this.autoSaveIntervalId) {
             clearInterval(this.autoSaveIntervalId);
             this.autoSaveIntervalId = null;
         }
         
-        // Supprime TOUTE la sauvegarde
-        localStorage.clear();
+        // Arrêter tous les timers des managers
+        if (this.buildingManager && this.buildingManager.lastProductionTime) {
+            this.buildingManager.lastProductionTime = 0;
+        }
         
-        console.log('LocalStorage après clear:', localStorage.getItem(GameConfig.SAVE.SAVE_KEY));
-        console.log('Rechargement de la page...');
+        // Arrêter auto-craft si actif
+        if (this.craftingManager && this.craftingManager.autoCraftState.intervalId) {
+            clearInterval(this.craftingManager.autoCraftState.intervalId);
+            this.craftingManager.autoCraftState.intervalId = null;
+        }
         
-        // Force le rechargement complet
+        // 🛡️ FIX: Attendre un cycle complet avant de clear
         setTimeout(() => {
-            window.location.reload();
+            // Supprime TOUTE la sauvegarde
+            localStorage.clear();
+            
+            console.log('LocalStorage après clear:', localStorage.getItem(GameConfig.SAVE.SAVE_KEY));
+            console.log('Rechargement de la page...');
+            
+            // Force le rechargement complet
+            setTimeout(() => {
+                window.location.reload();
+            }, 100);
         }, 100);
     }
 
@@ -505,6 +534,10 @@ class Game {
 
         console.log(`⏰ Production offline : ${NumberFormatter.formatTime(effectiveTimeSec, true)} d'absence`);
 
+        // 🛡️ FIX: Limites maximales de production pour éviter overflow
+        const MAX_PRODUCTION_PER_RESOURCE = 1000000; // 1 million max par ressource
+        const MAX_TOTAL_PRODUCTION = 10000000; // 10 millions max total
+        
         // Calculer la production des bâtiments
         const productions = {};
         let totalProductionValue = 0;
@@ -517,18 +550,29 @@ class Game {
             for (const [resourceId, amountPerMinute] of Object.entries(production)) {
                 // Convertir en production par seconde
                 const amountPerSecond = amountPerMinute / 60;
-                const amountProduced = Math.floor(amountPerSecond * effectiveTimeSec);
+                let amountProduced = Math.floor(amountPerSecond * effectiveTimeSec);
+                
+                // 🛡️ FIX: Limiter la production par ressource
+                amountProduced = Math.min(amountProduced, MAX_PRODUCTION_PER_RESOURCE);
                 
                 if (amountProduced > 0) {
-                    // Ajouter à l'inventaire
-                    this.professionManager.addToInventory(resourceId, amountProduced);
-                    
-                    // Comptabiliser pour le récapitulatif
-                    if (!productions[resourceId]) {
-                        productions[resourceId] = 0;
+                    // 🛡️ FIX: Vérifier qu'on ne dépasse pas la limite totale
+                    if (totalProductionValue + amountProduced > MAX_TOTAL_PRODUCTION) {
+                        console.warn(`⚠️ Production offline limitée à ${MAX_TOTAL_PRODUCTION} pour éviter overflow`);
+                        amountProduced = Math.max(0, MAX_TOTAL_PRODUCTION - totalProductionValue);
                     }
-                    productions[resourceId] += amountProduced;
-                    totalProductionValue += amountProduced;
+                    
+                    if (amountProduced > 0) {
+                        // Ajouter à l'inventaire
+                        this.professionManager.addToInventory(resourceId, amountProduced);
+                        
+                        // Comptabiliser pour le récapitulatif
+                        if (!productions[resourceId]) {
+                            productions[resourceId] = 0;
+                        }
+                        productions[resourceId] += amountProduced;
+                        totalProductionValue += amountProduced;
+                    }
                 }
             }
         }

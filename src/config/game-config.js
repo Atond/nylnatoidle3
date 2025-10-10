@@ -73,9 +73,14 @@ const GameConfig = {
   
   // ========== PERFORMANCE ==========
   PERFORMANCE: {
-    UPDATE_INTERVAL: 100, // 100ms (10 fois par seconde)
+    // ⚡ OPTIMISATION: 250ms pour idle game (4 FPS suffisant)
+    UPDATE_INTERVAL: 250, // 250ms au lieu de 100ms = -60% CPU
     MAX_FPS: 60,
-    ENABLE_MONITORING: true
+    ENABLE_MONITORING: true,
+    // ⚡ Nouvelle option: Limite deltaTime pour éviter accumulation
+    MAX_DELTA_TIME: 1000, // 1 seconde max
+    // ⚡ Throttle UI updates (ne pas refresh à chaque frame)
+    UI_UPDATE_INTERVAL: 500 // Update UI toutes les 500ms
   },
   
   // ========== UI ==========

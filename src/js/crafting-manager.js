@@ -17,6 +17,10 @@ class CraftingManager {
             intervalId: null
         };
         this.autoCraftInterval = 1000; // 1 seconde entre chaque craft auto
+        
+        // 🛡️ FIX: Debounce pour éviter spam-click
+        this.lastCraftTime = 0;
+        this.craftCooldown = 100; // 100ms entre chaque craft manuel
     }
 
     /**
@@ -75,6 +79,13 @@ class CraftingManager {
      * Démarre le craft d'une recette (instantané maintenant)
      */
     startCraft(recipeId, sellDirectly = false) {
+        // 🛡️ FIX: Debounce pour éviter spam-click
+        const now = Date.now();
+        if (now - this.lastCraftTime < this.craftCooldown) {
+            console.warn('⚠️ Craft trop rapide, veuillez patienter');
+            return false;
+        }
+        
         const canCraftResult = this.canCraft(recipeId);
         if (!canCraftResult.canCraft) {
             console.warn('Cannot craft:', canCraftResult.reason);
@@ -91,6 +102,9 @@ class CraftingManager {
 
         // Craft instantané : compléter immédiatement
         this.completeCraft(recipe, sellDirectly);
+        
+        // 🛡️ FIX: Mettre à jour le dernier craft
+        this.lastCraftTime = now;
 
         return true;
     }

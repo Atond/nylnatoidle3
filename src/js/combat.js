@@ -33,6 +33,9 @@ class Combat {
         // Timer pour régénération HP
         this.lastRegenTime = Date.now();
         
+        // 🛡️ FIX: Race condition - empêche le spawn multiple de monstres
+        this.isSpawning = false;
+        
         // Spawn le premier monstre
         this.spawnMonster();
     }
@@ -55,10 +58,19 @@ class Combat {
      * Spawn un nouveau monstre basé sur la zone actuelle
      */
     spawnMonster() {
+        // 🛡️ FIX: Empêcher spawn multiple (race condition)
+        if (this.isSpawning) {
+            console.warn('⚠️ Spawn déjà en cours, ignoré pour éviter duplication');
+            return;
+        }
+        
+        this.isSpawning = true;
+        
         const zoneData = this.getCurrentZoneData();
         
         if (!zoneData) {
             console.error(`Zone ${this.currentRegion}_${this.currentZone} introuvable`);
+            this.isSpawning = false;
             return;
         }
         
@@ -86,6 +98,8 @@ class Combat {
                 this.addLog(`⚠️ 💀 ${this.currentMonster.getName()} apparaît ! (BOSS) 💀`);
                 this.addLog(`✨ Vous avez été complètement soigné !`);
                 
+                // 🛡️ FIX: Débloquer le flag après spawn du boss
+                this.isSpawning = false;
                 return;
             }
             
@@ -128,6 +142,9 @@ class Combat {
         const prefix = rarityPrefix[this.currentMonster.getRarity()] || '';
         
         this.addLog(`${prefix} ${this.currentMonster.getName()} apparaît !`);
+        
+        // 🛡️ FIX: Débloquer le flag après spawn complet
+        this.isSpawning = false;
     }
 
     /**
@@ -257,7 +274,21 @@ class Combat {
         // ⭐ NOUVEAU : Calculer et appliquer les drops
         const drops = this.currentMonster.getDrops();
         if (drops && drops.length > 0 && window.DropsData) {
-            const result = window.DropsData.applyDrops(window.game, drops);
+            // 🛡️ FIX: Validation des drops avant application
+            const validDrops = drops.filter(dropId => {
+                const dropData = window.DropsData[dropId];
+                if (!dropData) {
+                    console.error(`⚠️ Drop invalide détecté: ${dropId} - Ignoré`);
+                    return false;
+                }
+                return true;
+            });
+            
+            if (validDrops.length === 0) {
+                console.warn(`⚠️ Aucun drop valide pour ${monsterName}`);
+            }
+            
+            const result = window.DropsData.applyDrops(window.game, validDrops);
             
             // Afficher les drops dans le log
             if (result.items && result.items.length > 0) {
@@ -347,9 +378,9 @@ class Combat {
                 const zoneData = this.getCurrentZoneData();
                 this.addLog(`🎉 ${zoneData.name} débloquée ! Vous y entrez automatiquement.`);
                 
-                // Spawn dans la nouvelle zone
+                // 🛡️ FIX: Utiliser le flag pour éviter race condition
                 setTimeout(() => {
-                    if (this.player.isAlive) {
+                    if (this.player.isAlive && !this.isSpawning) {
                         this.spawnMonster();
                     }
                 }, 500);
@@ -357,9 +388,9 @@ class Combat {
             }
         }
         
-        // Spawn un nouveau monstre après un court délai
+        // 🛡️ FIX: Utiliser le flag pour éviter race condition
         setTimeout(() => {
-            if (this.player.isAlive) {
+            if (this.player.isAlive && !this.isSpawning) {
                 this.spawnMonster();
             }
         }, 500);

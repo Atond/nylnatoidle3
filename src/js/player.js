@@ -205,18 +205,20 @@ class Player {
     calculateDamage() {
         // Dégâts de base
         const baseDamage = GameConfig.COMBAT.BASE_CLICK_DAMAGE;
-        const forceDamage = this.stats.force * GameConfig.COMBAT.DAMAGE_FORMULA.FORCE_MULTIPLIER;
+        const forceDamage = Math.max(0, this.stats.force) * GameConfig.COMBAT.DAMAGE_FORMULA.FORCE_MULTIPLIER;
         
         // Bonus d'équipement
         let equipmentBonus = 0;
         if (window.game && window.game.equipmentManager) {
             const equipStats = window.game.equipmentManager.calculateTotalStats();
+            // 🛡️ FIX: Protection contre stats négatives
             // Bonus de force de l'équipement
-            equipmentBonus += equipStats.force * GameConfig.COMBAT.DAMAGE_FORMULA.FORCE_MULTIPLIER;
+            equipmentBonus += Math.max(0, equipStats.force || 0) * GameConfig.COMBAT.DAMAGE_FORMULA.FORCE_MULTIPLIER;
             // Bonus de dégâts directs
-            equipmentBonus += equipStats.damage;
+            equipmentBonus += Math.max(0, equipStats.damage || 0);
         }
         
+        // 🛡️ FIX: Toujours garantir au moins 1 dégât
         return Math.max(1, Math.floor(baseDamage + forceDamage + equipmentBonus));
     }
 
@@ -226,7 +228,9 @@ class Player {
     calculateAttackSpeed() {
         // Vitesse de base réduite par l'agilité
         const baseSpeed = GameConfig.COMBAT.BASE_ATTACK_SPEED;
-        const speedBonus = 1 + (this.stats.agility * GameConfig.COMBAT.AGILITY_SPEED_FACTOR);
+        // 🛡️ FIX: Protection contre agilité négative
+        const agility = Math.max(0, this.stats.agility);
+        const speedBonus = 1 + (agility * GameConfig.COMBAT.AGILITY_SPEED_FACTOR);
         
         return Math.max(500, Math.floor(baseSpeed / speedBonus)); // Minimum 500ms
     }
@@ -261,8 +265,10 @@ class Player {
         let finalDamage = amount;
         if (window.game && window.game.equipmentManager) {
             const equipStats = window.game.equipmentManager.calculateTotalStats();
+            // 🛡️ FIX: Protection contre défense négative
+            const defense = Math.max(0, equipStats.defense || 0);
             // La défense réduit les dégâts (1 défense = -1 dégât)
-            finalDamage = Math.max(1, amount - equipStats.defense);
+            finalDamage = Math.max(1, amount - defense);
         }
         
         this.stats.hp -= finalDamage;
@@ -297,16 +303,18 @@ class Player {
      * Obtient les HP maximum (avec bonus d'équipement)
      */
     getMaxHp() {
-        let maxHp = this.stats.maxHp;
+        let maxHp = Math.max(1, this.stats.maxHp); // 🛡️ FIX: Au moins 1 HP
         
         // Bonus d'endurance de l'équipement
         if (window.game && window.game.equipmentManager) {
             const equipStats = window.game.equipmentManager.calculateTotalStats();
+            // 🛡️ FIX: Protection contre endurance négative
+            const endurance = Math.max(0, equipStats.endurance || 0);
             // Chaque point d'endurance donne +5 HP
-            maxHp += equipStats.endurance * 5;
+            maxHp += endurance * 5;
         }
         
-        return maxHp;
+        return Math.max(1, maxHp); // 🛡️ FIX: Toujours au moins 1 HP
     }
 
     /**

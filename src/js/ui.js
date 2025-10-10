@@ -8,6 +8,24 @@ class UI {
         this.notificationOffset = 0; // Pour empiler les notifications verticalement
         this.unlockedTabs = ['home', 'combat', 'quests', 'gathering']; // Tabs débloqués par défaut (equipment/crafting se débloquent avec auto-récoltes)
         
+        // 🛡️ FIX: Flag pour éviter double-appel updateInventory()
+        this.isUpdatingInventory = false;
+        
+        // ⚡ OPTIMISATION: Cache pour éviter re-calculs
+        this.cachedValues = {
+            playerHpPercent: 0,
+            monsterHpPercent: 0,
+            playerXpPercent: 0,
+            lastHpCheck: 0
+        };
+        
+        // ⚡ OPTIMISATION: Cache des query selectors fréquents
+        this.cachedElements = {
+            playerName: null,
+            tabs: null,
+            initialized: false
+        };
+        
         // Éléments DOM - Combat
         this.elements = {
             // Header
@@ -275,23 +293,32 @@ class UI {
             this.elements.playerGold.textContent = NumberFormatter.format(player.resources.gold);
         }
         
-        // Nom du joueur avec icône de classe
-        const playerNameElement = document.getElementById('playerName');
-        if (playerNameElement) {
+        // Nom du joueur avec icône de classe - OPTIMISATION : cache querySelector
+        if (!this.cachedElements.playerName) {
+            this.cachedElements.playerName = document.getElementById('playerName');
+        }
+        if (this.cachedElements.playerName) {
             const classIcon = player.getClassIcon();
-            playerNameElement.textContent = `${classIcon} ${player.name}`;
+            this.cachedElements.playerName.textContent = `${classIcon} ${player.name}`;
         }
         
         // Niveau
         this.elements.playerLevel.textContent = player.level;
         
-        // HP (avec bonus d'équipement)
+        // HP (avec bonus d'équipement) - OPTIMISATION : calcul en cache
         const maxHp = player.getMaxHp();
-        this.elements.playerHp.textContent = Math.floor(player.stats.hp);
+        const currentHp = Math.floor(player.stats.hp);
+        this.elements.playerHp.textContent = currentHp;
         this.elements.playerMaxHp.textContent = maxHp;
-        this.elements.playerHpBar.style.width = player.getHpPercentage() + '%';
         
-        // Stats (avec bonus d'équipement)
+        // Cache la barre de HP si elle n'a pas changé
+        const newHpPercent = player.getHpPercentage();
+        if (this.cachedValues.playerHpPercent !== newHpPercent) {
+            this.cachedValues.playerHpPercent = newHpPercent;
+            this.elements.playerHpBar.style.width = newHpPercent + '%';
+        }
+        
+        // Stats (avec bonus d'équipement) - OPTIMISATION : calcul en cache
         const equipStats = this.game.equipmentManager ? this.game.equipmentManager.calculateTotalStats() : {};
         this.elements.statHp.textContent = maxHp;
         this.elements.statForce.textContent = player.stats.force + (equipStats.force || 0);
@@ -300,10 +327,15 @@ class UI {
         this.elements.statWisdom.textContent = player.stats.wisdom + (equipStats.wisdom || 0);
         this.elements.statEndurance.textContent = player.stats.endurance + (equipStats.endurance || 0);
         
-        // XP
+        // XP - OPTIMISATION : calcul en cache
         this.elements.currentXp.textContent = Math.floor(player.xp);
         this.elements.requiredXp.textContent = player.xpRequired;
-        this.elements.xpBar.style.width = player.getXpPercentage() + '%';
+        
+        const newXpPercent = player.getXpPercentage();
+        if (this.cachedValues.playerXpPercent !== newXpPercent) {
+            this.cachedValues.playerXpPercent = newXpPercent;
+            this.elements.xpBar.style.width = newXpPercent + '%';
+        }
     }
 
     /**
@@ -317,7 +349,14 @@ class UI {
         this.elements.monsterName.textContent = monster.getName();
         this.elements.monsterHp.textContent = Math.floor(monster.hp);
         this.elements.monsterMaxHp.textContent = monster.maxHp;
-        this.elements.monsterHpBar.style.width = monster.getHpPercentage() + '%';
+        
+        // OPTIMISATION : cache la barre de HP si elle n'a pas changé
+        const newMonsterHpPercent = monster.getHpPercentage();
+        if (this.cachedValues.monsterHpPercent !== newMonsterHpPercent) {
+            this.cachedValues.monsterHpPercent = newMonsterHpPercent;
+            this.elements.monsterHpBar.style.width = newMonsterHpPercent + '%';
+        }
+        
         this.elements.monsterSprite.textContent = monster.getEmoji();
     }
 
@@ -884,7 +923,15 @@ class UI {
      * Met à jour l'inventaire des ressources
      */
     updateInventory() {
-        let inventory = this.game.professionManager.getInventory();
+        // 🛡️ FIX: Éviter les double-appels
+        if (this.isUpdatingInventory) {
+            return;
+        }
+        
+        this.isUpdatingInventory = true;
+        
+        try {
+            let inventory = this.game.professionManager.getInventory();
         
         // Appliquer le filtre
         if (this.currentFilter && this.currentFilter !== 'all') {
@@ -951,6 +998,10 @@ class UI {
                 </div>
             `;
         }).join('');
+        } finally {
+            // 🛡️ FIX: Débloquer le flag
+            this.isUpdatingInventory = false;
+        }
     }
 
     /**
