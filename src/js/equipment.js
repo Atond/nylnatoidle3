@@ -156,9 +156,29 @@ class Equipment {
     
     /**
      * Désérialise l'équipement
+     * 🛡️ FIX: Ne pas remultiplier les stats déjà calculées
      */
     static fromJSON(data) {
-        return new Equipment(data);
+        // Créer une copie des données pour éviter de modifier l'original
+        const equipmentData = { ...data };
+        
+        // 🛡️ FIX: Les stats sont déjà multipliées dans la sauvegarde
+        // On les passe directement sans recalcul
+        const equipment = Object.create(Equipment.prototype);
+        equipment.id = data.id;
+        equipment.name = data.name;
+        equipment.type = data.type;
+        equipment.slot = data.slot;
+        equipment.rarity = data.rarity;
+        equipment.quality = data.quality || 'normal';
+        equipment.qualityMultiplier = data.qualityMultiplier || 1.0;
+        equipment.locked = data.locked || false;
+        equipment.icon = data.icon || '⚔️';
+        equipment.stats = { ...data.stats }; // Stats déjà calculées
+        equipment.requiredLevel = data.requiredLevel || 1;
+        equipment.description = data.description || '';
+        
+        return equipment;
     }
 }
 

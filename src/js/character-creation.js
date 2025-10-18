@@ -257,10 +257,23 @@ class CharacterCreationManager {
 
     /**
      * Vérifie si le joueur a déjà créé un personnage
+     * 🛡️ FIX: Vérifier si le personnage a une classe ET un nom personnalisé
      */
     shouldShow() {
-        // Afficher si le joueur n'a pas de classe définie
-        return !this.game.player.class || this.game.player.name === 'Aventurier';
+        // Afficher seulement si:
+        // - Pas de classe OU
+        // - Nom par défaut ET pas de classe
+        // Ne PAS afficher si le joueur a déjà une classe (même avec nom "Aventurier")
+        const hasClass = this.game.player.class !== null;
+        const hasDefaultName = this.game.player.name === 'Aventurier';
+        
+        // Si le joueur a une classe, ne jamais afficher (même si nom = "Aventurier")
+        if (hasClass) {
+            return false;
+        }
+        
+        // Sinon, afficher seulement si vraiment nouveau (pas de classe)
+        return !hasClass;
     }
 }
 

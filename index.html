@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="src/css/enhancements.css">
     <link rel="stylesheet" href="src/css/quality-system.css">
     <link rel="stylesheet" href="src/css/character-creation.css">
+    <link rel="stylesheet" href="src/css/alchemy.css">
+    <link rel="stylesheet" href="src/css/conversion-modal.css">
 </head>
 <body>
     <!-- ========== MODAL CRÉATION DE PERSONNAGE ========== -->
@@ -104,6 +106,7 @@
         <button class="tab-btn active" data-tab="combat">⚔️ Combat</button>
         <button class="tab-btn disabled" data-tab="gathering">⛏️ Récolte</button>
         <button class="tab-btn disabled" data-tab="crafting">🔨 Fabrication</button>
+        <button class="tab-btn disabled" data-tab="alchemy">🧪 Alchimie</button>
         <button class="tab-btn disabled" data-tab="equipment">🎒 Équipement</button>
         <button class="tab-btn disabled" data-tab="town">🏘️ Ville</button>
         <button class="tab-btn disabled" data-tab="dragons">🐉 Dragons</button>
@@ -230,6 +233,21 @@
 
                 <!-- Sidebar droite : Zone Info & Quêtes -->
                 <aside class="sidebar sidebar-right">
+                    <!-- Mini-map des régions -->
+                    <div class="panel minimap-panel">
+                        <div class="minimap-container" id="minimapContainer">
+                            <div class="minimap-header">
+                                <div class="minimap-title">🗺️ Carte du Monde</div>
+                                <div class="minimap-progress">
+                                    <span id="minimapGlobalProgress">0/50</span> zones
+                                </div>
+                            </div>
+                            <div class="minimap-regions" id="minimapRegions">
+                                <!-- Les régions seront générées ici -->
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="panel info-panel">
                         <h3>🗺️ Zone actuelle</h3>
                         <div class="zone-info">
@@ -409,6 +427,73 @@
                                 <p class="text-muted">Sélectionnez une recette pour voir les détails</p>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== ONGLET ALCHIMIE ===== -->
+        <section class="tab-content" id="tab-alchemy">
+            <div class="alchemy-container">
+                <h2>🧪 Alchimie</h2>
+                
+                <!-- Panneau informations -->
+                <div class="alchemy-info-panel">
+                    <div class="alchemy-level-display">
+                        <div class="alchemy-level-text">
+                            Niveau <span id="alchemy-level">1</span>
+                        </div>
+                        <div class="alchemy-xp-bar">
+                            <div class="alchemy-xp-fill" id="alchemy-xp-bar" style="width: 0%"></div>
+                        </div>
+                        <div class="alchemy-xp-text">
+                            <span id="alchemy-xp">0</span> / <span id="alchemy-xp-required">100</span> XP
+                        </div>
+                    </div>
+                    <div class="alchemy-description">
+                        <p>💡 Convertissez vos ressources T1 en ressources supérieures (T2, T3...)</p>
+                        <p><strong>Ratio:</strong> 100 ressources T(n) = 1 ressource T(n+1)</p>
+                    </div>
+                </div>
+
+                <div class="alchemy-layout">
+                    <!-- Conversions disponibles -->
+                    <div class="alchemy-conversions-panel">
+                        <h3>📦 Conversions disponibles</h3>
+                        
+                        <!-- Catégorie Bois -->
+                        <div class="conversion-category">
+                            <h4>🌲 Bois</h4>
+                            <div class="conversions-list" id="conversions-wood">
+                                <!-- Généré dynamiquement -->
+                            </div>
+                        </div>
+
+                        <!-- Catégorie Minerai -->
+                        <div class="conversion-category">
+                            <h4>⛏️ Minerai</h4>
+                            <div class="conversions-list" id="conversions-ore">
+                                <!-- Généré dynamiquement -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File de conversion -->
+                    <div class="alchemy-queue-panel">
+                        <h3>🔄 File de conversion (<span id="queue-count">0</span>/5)</h3>
+                        <div class="conversion-queue" id="conversionQueue">
+                            <div class="empty-state">
+                                <p class="text-muted">Aucune conversion en cours...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bonus actifs -->
+                <div class="alchemy-bonuses-panel">
+                    <h3>✨ Bonus actifs</h3>
+                    <div class="bonuses-list" id="alchemyBonusesList">
+                        <p class="text-muted">Montez de niveau pour débloquer des bonus</p>
                     </div>
                 </div>
             </div>
@@ -788,6 +873,8 @@
     <script src="src/config/buildings-data.js"></script>
     <script src="src/js/building.js"></script>
     <script src="src/js/building-manager.js"></script>
+    <script type="module" src="src/config/alchemy-data.js"></script>
+    <script type="module" src="src/js/alchemy-manager.js"></script>
     <script src="src/js/character-creation.js"></script>
     <script src="src/js/ui.js"></script>
     <script src="src/js/game.js"></script>

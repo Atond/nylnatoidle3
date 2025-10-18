@@ -147,6 +147,13 @@ class BuildingManager {
         for (const building of this.buildings.values()) {
             if (!building.isBuilt()) continue;
             
+            // ========== TRAITEMENT SPÉCIAL LABORATOIRE ==========
+            if (building.id === 'alchemy_lab') {
+                this.processAlchemyLabProduction(building, timePassed);
+                continue; // Passer au bâtiment suivant
+            }
+            
+            // ========== PRODUCTION NORMALE ==========
             const production = building.getCurrentProduction();
             
             for (const [resourceId, amountPerMinute] of Object.entries(production)) {
@@ -175,6 +182,79 @@ class BuildingManager {
         }
         
         this.lastProductionTime = currentTime;
+    }
+
+    /**
+     * Traite la production passive du Laboratoire d'Alchimie
+     * @param {Building} lab - Le laboratoire
+     * @param {number} timePassed - Temps écoulé en secondes
+     */
+    processAlchemyLabProduction(lab, timePassed) {
+        if (!this.game.alchemyManager) return;
+        
+        const alchemy = this.game.alchemyManager;
+        
+        // Calculer nombre de conversions possibles
+        const conversionsPerSecond = window.calculateLabProductionPerSecond(lab.level);
+        const conversionsAvailable = conversionsPerSecond * timePassed;
+        
+        if (conversionsAvailable < 0.01) return; // Trop petit, on attend
+        
+        // Obtenir les conversions disponibles pour le niveau d'alchimie actuel
+        const availableConversions = alchemy.getAvailableConversions();
+        if (availableConversions.length === 0) return;
+        
+        // Stratégie: Convertir les ressources dans l'ordre des tiers (T1→T2 en priorité)
+        let conversionsRemaining = Math.floor(conversionsAvailable);
+        
+        for (const conversion of availableConversions) {
+            if (conversionsRemaining <= 0) break;
+            
+            // Vérifier ressources disponibles
+            const inputAmount = this.game.professionManager.getInventoryAmount(conversion.input.resourceId);
+            const maxConversions = Math.floor(inputAmount / conversion.input.amount);
+            
+            if (maxConversions > 0) {
+                // Faire autant de conversions que possible
+                const conversionsToMake = Math.min(conversionsRemaining, maxConversions);
+                
+                // Consommer input
+                this.game.professionManager.removeFromInventory(
+                    conversion.input.resourceId, 
+                    conversion.input.amount * conversionsToMake
+                );
+                
+                // Produire output (avec chance de bonus)
+                let outputAmount = conversion.output.amount * conversionsToMake;
+                const bonusChance = alchemy.getBonusChance();
+                
+                if (bonusChance > 0 && Math.random() < bonusChance) {
+                    outputAmount *= 2; // Bonus ×2
+                    if (this.game.ui) {
+                        this.game.ui.showNotification(
+                            `🧪✨ Laboratoire bonus ! Output ×2 (${conversion.name})`,
+                            'success'
+                        );
+                    }
+                }
+                
+                // Ajouter output
+                this.game.professionManager.addToInventory(
+                    conversion.output.resourceId, 
+                    outputAmount
+                );
+                
+                // Gagner XP (réduit pour production passive, 25% de l'XP normale)
+                const xpGained = Math.floor(conversion.xpGain * conversionsToMake * 0.25);
+                alchemy.gainXP(xpGained);
+                
+                conversionsRemaining -= conversionsToMake;
+                
+                if (GameConfig.DEBUG.enabled && conversionsToMake > 0) {
+                    console.log(`🧪 Labo: ${conversionsToMake}× ${conversion.name} (+${outputAmount} ${conversion.output.resourceId})`);
+                }
+            }
+        }
     }
 
     /**

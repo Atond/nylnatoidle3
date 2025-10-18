@@ -1,10 +1,20 @@
 # 📚 INDEX DOCUMENTATION - IDLE RPG V2
 
-> **Table des matières complète** pour la refonte du jeu
+> **Table des matières complète** pour la refonte du jeu  
+> **Dernière mise à jour** : 12 Octobre 2025  
+> **Version** : 0.2.0-alpha (🧪 Système Alchimie)
 
 ---
 
 ## 🎯 PAR OÙ COMMENCER ?
+
+### **🔥 NOUVEAUTÉ - SYSTÈME ALCHIMIE**
+
+**Problème résolu** : Comment gérer la progression exponentielle des métiers (millions de ressources) avec des coûts de craft RP-friendly ?
+
+**Solution** : Nouveau métier **Alchimiste** qui convertit ressources T1 → T2 → T3 (ratio 100:1)
+
+→ **LISEZ D'ABORD** : [BALANCE-RESOURCE-ECONOMY.md](BALANCE-RESOURCE-ECONOMY.md)
 
 ### **Vous êtes développeur ?**
 
@@ -37,25 +47,92 @@
 | [BALANCE-PLAYER.md](BALANCE-PLAYER.md)             | Stats, XP, classes, talents | ✅ Mis à jour V2 | Haute    |
 | [BALANCE-STAT-CHANGES.md](BALANCE-STAT-CHANGES.md) | Changements système stats   | ✅ Complet       | Haute    |
 
-### **Métiers & Économie**
+### **Métiers & Économie** 🧪
 
-| Fichier                                                                  | Description             | Statut             | Priorité |
-| ------------------------------------------------------------------------ | ----------------------- | ------------------ | -------- |
-| [BALANCE-PROFESSIONS-EXPONENTIAL.md](BALANCE-PROFESSIONS-EXPONENTIAL.md) | **Métiers V2 (infini)** | ✅ Complet         | 🔥 HAUTE |
-| [BALANCE-CRAFTING.md](BALANCE-CRAFTING.md)                               | Recettes craft          | ⚠️ À mettre à jour | Moyenne  |
-| [BALANCE-BUILDINGS.md](BALANCE-BUILDINGS.md)                             | Ville production        | ⚠️ À mettre à jour | Haute    |
+| Fichier                                                                  | Description                       | Statut             | Priorité |
+| ------------------------------------------------------------------------ | --------------------------------- | ------------------ | -------- |
+| [BALANCE-PROFESSIONS-EXPONENTIAL.md](BALANCE-PROFESSIONS-EXPONENTIAL.md) | **Métiers V2 (infini)**           | ✅ Complet         | 🔥 HAUTE |
+| [BALANCE-RESOURCE-ECONOMY.md](BALANCE-RESOURCE-ECONOMY.md) 🆕            | **Économie & Alchimie**           | ✅ Nouveau         | 🔥 HAUTE |
+| [BALANCE-ALCHEMY.md](BALANCE-ALCHEMY.md) 🆕                              | **Spécifications Alchimiste**     | ✅ Nouveau         | 🔥 HAUTE |
+| [BALANCE-CRAFTING-REVISED.md](BALANCE-CRAFTING-REVISED.md) 🆕            | **Nouveaux coûts craft**          | ✅ Nouveau         | 🔥 HAUTE |
+| [BALANCE-COMPARISON-IDLE-GAMES.md](BALANCE-COMPARISON-IDLE-GAMES.md) 🆕  | **Validation vs références**      | ✅ Nouveau         | Moyenne  |
+| [BALANCE-CRAFTING.md](BALANCE-CRAFTING.md)                               | Recettes craft (ancienne version) | ⚠️ Obsolète        | Basse    |
+| [BALANCE-BUILDINGS.md](BALANCE-BUILDINGS.md)                             | Ville production                  | ⚠️ À mettre à jour | Haute    |
 
-### **Implémentation**
+### **Implémentation & Guides** 🛠️
 
-| Fichier                           | Description                | Statut     | Priorité |
-| --------------------------------- | -------------------------- | ---------- | -------- |
-| [ROADMAP-V2.md](../ROADMAP-V2.md) | **Plan implémentation V2** | ✅ Complet | 🔥 HAUTE |
+| Fichier                                                               | Description                          | Statut     | Priorité |
+| --------------------------------------------------------------------- | ------------------------------------ | ---------- | -------- |
+| [ROADMAP-V2.md](../ROADMAP-V2.md)                                     | **Plan implémentation V2**           | ✅ Complet | 🔥 HAUTE |
+| [IMPLEMENTATION-GUIDE-ALCHEMY.md](IMPLEMENTATION-GUIDE-ALCHEMY.md) 🆕 | **Guide dev Alchimie (20h)**         | ✅ Nouveau | 🔥 HAUTE |
+| [ROADMAP-ALCHEMY.md](ROADMAP-ALCHEMY.md) 🆕                           | **Planning Alchimie (2-3 semaines)** | ✅ Nouveau | 🔥 HAUTE |
+| [EXECUTIVE-SUMMARY-ALCHEMY.md](EXECUTIVE-SUMMARY-ALCHEMY.md) 🆕       | **Résumé exécutif Alchimie**         | ✅ Nouveau | 🔥 HAUTE |
+| [QUICKSTART-ALCHEMY.md](QUICKSTART-ALCHEMY.md) 🆕                     | **Quick Start Alchimie (5 min)**     | ✅ Nouveau | Haute    |
+| [PACKAGE-SUMMARY-ALCHEMY.md](PACKAGE-SUMMARY-ALCHEMY.md) 🆕           | **Récap package complet**            | ✅ Nouveau | Moyenne  |
 
 ---
 
-## 🔥 DOCUMENTS PRIORITAIRES V2
+## 🔥 DOCUMENTS PRIORITAIRES - SYSTÈME ALCHIMIE
 
-Ces **4 documents** contiennent toute la vision V2 :
+### **📋 Pour Chef de Projet / Product Owner**
+
+**[EXECUTIVE-SUMMARY-ALCHEMY.md](EXECUTIVE-SUMMARY-ALCHEMY.md)** (5 min) 🆕
+
+- Résumé problème + solution
+- ROI et coûts
+- Décision Go/No-Go
+- Métriques clés
+
+### **🗺️ Pour Planning**
+
+**[ROADMAP-ALCHEMY.md](ROADMAP-ALCHEMY.md)** (10 min) 🆕
+
+- Timeline 2-3 semaines
+- Milestones et gates
+- Ressources nécessaires
+- Plan de contingence
+
+### **🛠️ Pour Développeurs**
+
+**[IMPLEMENTATION-GUIDE-ALCHEMY.md](IMPLEMENTATION-GUIDE-ALCHEMY.md)** (30 min) 🆕
+
+- Checklist complète (20h)
+- Code examples
+- Structure fichiers
+- Tests à effectuer
+
+### **📊 Pour Comprendre le Système**
+
+**[BALANCE-RESOURCE-ECONOMY.md](BALANCE-RESOURCE-ECONOMY.md)** (15 min) 🆕
+
+- Analyse problème actuel
+- Solution détaillée
+- Exemples gameplay
+- Comparaison idle games
+
+**[BALANCE-ALCHEMY.md](BALANCE-ALCHEMY.md)** (20 min) 🆕
+
+- Spécifications métier
+- Conversions T1-T7
+- Bonus par niveau
+- Bâtiment Laboratoire
+
+**[BALANCE-CRAFTING-REVISED.md](BALANCE-CRAFTING-REVISED.md)** (10 min) 🆕
+
+- Nouveaux coûts craft
+- Tables complètes
+- Progression équilibrée
+
+**[BALANCE-COMPARISON-IDLE-GAMES.md](BALANCE-COMPARISON-IDLE-GAMES.md)** (15 min) 🆕
+
+- Validation vs Melvor, NGU, Cookie Clicker
+- Best practices industrie
+
+---
+
+## 🔥 DOCUMENTS PRIORITAIRES V2 (Anciens)
+
+Ces documents contiennent la vision globale V2 :
 
 ### **1. BALANCE-ENDGAME-VISION.md** 🌟
 

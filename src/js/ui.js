@@ -256,6 +256,9 @@ class UI {
         // Mettre à jour les barres XP des professions de craft
         this.updateCraftingProfessions();
         
+        // 🧪 Mettre à jour l'alchimie (conversions, queue, unlock)
+        this.updateAlchemy();
+        
         // NE PAS mettre à jour les métiers ici - uniquement lors des clics !
         
         // Vérifier HP du joueur
@@ -417,6 +420,134 @@ class UI {
             this.elements.monsterType.textContent = combat.currentMonster.getName();
             this.elements.monsterType.style.color = rarityColor;
         }
+
+        // Mettre à jour la mini-map
+        this.updateMinimap();
+    }
+
+    /**
+     * Met à jour la mini-map des régions
+     */
+    updateMinimap() {
+        const minimapRegions = document.getElementById('minimapRegions');
+        if (!minimapRegions) return;
+
+        const combat = this.game.combat;
+        if (!combat) return;
+
+        const regionsData = window.RegionsData;
+        if (!regionsData || !regionsData.regions) return;
+        
+        const regions = regionsData.regions;
+        const player = this.game.player;
+
+        // Calculer la progression globale
+        let totalZones = 0;
+        let completedZones = 0;
+        
+        regions.forEach(region => {
+            region.zones.forEach(zone => {
+                totalZones++;
+                const zoneKey = `${region.id}_${zone.id}`;
+                const killed = combat.monstersKilledPerZone[zoneKey] || 0;
+                if (killed >= GameConfig.ZONES.MONSTERS_TO_UNLOCK) {
+                    completedZones++;
+                }
+            });
+        });
+
+        // Mettre à jour la progression globale
+        const globalProgress = document.getElementById('minimapGlobalProgress');
+        if (globalProgress) {
+            globalProgress.textContent = `${completedZones}/${totalZones}`;
+        }
+
+        // Générer les régions
+        minimapRegions.innerHTML = '';
+        
+        regions.forEach((region, index) => {
+            const isLocked = player.level < region.levelRange.min;
+            const isCurrentRegion = combat.currentRegion === region.id;
+            
+            // Calculer la progression de cette région
+            let regionZonesCompleted = 0;
+            let regionTotalZones = region.zones.length;
+            
+            region.zones.forEach(zone => {
+                const zoneKey = `${region.id}_${zone.id}`;
+                const killed = combat.monstersKilledPerZone[zoneKey] || 0;
+                if (killed >= GameConfig.ZONES.MONSTERS_TO_UNLOCK) {
+                    regionZonesCompleted++;
+                }
+            });
+            
+            const regionCompleted = regionZonesCompleted === regionTotalZones;
+            const progressPercent = Math.floor((regionZonesCompleted / regionTotalZones) * 100);
+
+            // Créer l'élément région
+            const regionDiv = document.createElement('div');
+            regionDiv.className = 'minimap-region';
+            
+            if (isLocked) {
+                regionDiv.classList.add('locked');
+            } else if (isCurrentRegion) {
+                regionDiv.classList.add('active');
+            } else if (regionCompleted) {
+                regionDiv.classList.add('completed');
+            }
+
+            // Contenu de la région
+            let statusBadge = '';
+            if (isLocked) {
+                statusBadge = `<span class="minimap-region-badge locked">🔒 Niv. ${region.levelRange.min}</span>`;
+            } else if (isCurrentRegion) {
+                statusBadge = '<span class="minimap-region-badge current">En cours</span>';
+            } else if (regionCompleted) {
+                statusBadge = '<span class="minimap-region-badge completed">✓ Terminée</span>';
+            }
+
+            regionDiv.innerHTML = `
+                <div class="minimap-region-header">
+                    <div class="minimap-region-name">
+                        <span class="minimap-region-icon">${region.icon}</span>
+                        <span>${region.name}</span>
+                    </div>
+                    <div class="minimap-region-status">
+                        ${statusBadge}
+                    </div>
+                </div>
+                <div class="minimap-zones-progress">
+                    <div class="minimap-zones-bar">
+                        <div class="minimap-zones-bar-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div class="minimap-zones-text">${regionZonesCompleted}/${regionTotalZones}</div>
+                </div>
+                <div class="minimap-region-info">
+                    <div class="minimap-region-stat">
+                        <span>📊</span>
+                        <span>Niv. ${region.levelRange.min}+</span>
+                    </div>
+                    <div class="minimap-region-stat">
+                        <span>🗺️</span>
+                        <span>${region.zones.length} zones</span>
+                    </div>
+                </div>
+            `;
+
+            // Click sur la région pour y aller (si débloquée)
+            if (!isLocked) {
+                regionDiv.style.cursor = 'pointer';
+                regionDiv.addEventListener('click', () => {
+                    // Aller à la première zone de cette région
+                    combat.currentRegion = region.id;
+                    combat.currentZone = 1;
+                    combat.generateMonster();
+                    this.update();
+                });
+            }
+
+            minimapRegions.appendChild(regionDiv);
+        });
     }
 
     /**
@@ -1601,7 +1732,7 @@ class UI {
     startAutoCraft(recipeId, sellDirectly = true) {
         this.game.craftingManager.startAutoCraft(recipeId, sellDirectly);
         this.showNotification(
-            sellDirectly ? '🔄💰 Auto-Craft avec vente activé !' : '🔄📦 Auto-Craft activé !',
+            sellDirectly ? '🔄💰 Auto-Craft avec vente activé!' : '🔄📦 Auto-Craft activé!',
             'success'
         );
         this.showRecipeDetail(recipeId);
@@ -1698,6 +1829,15 @@ class UI {
                                     <div style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px;">
                                         Limite actuelle : ${NumberFormatter.format(this.game.storageManager.baseLimitLoot + this.game.storageManager.getTreasuryBonus())} par butin
                                     </div>
+                                ` : building.id === 'alchemy_lab' ? `
+                                    <strong>🧪 Production alchimique actuelle :</strong>
+                                    <div>⚗️ ${NumberFormatter.format(window.calculateLabProductionPerHour(building.level))} conversions/heure</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px;">
+                                        (${NumberFormatter.format(window.calculateLabProductionPerMinute(building.level))} conversions/min • ${window.calculateLabProductionPerSecond(building.level).toFixed(2)} conversions/sec)
+                                    </div>
+                                    <div style="color: var(--accent-primary); font-size: 0.85rem; margin-top: 8px;">
+                                        💡 Convertit automatiquement vos ressources T1→T2→T3 en arrière-plan
+                                    </div>
                                 ` : `
                                     <strong>📦 Production actuelle :</strong>
                                     ${Object.entries(production).map(([resourceId, amount]) => {
@@ -1758,6 +1898,17 @@ class UI {
                                         <div>+${NumberFormatter.format((building.level + 1) * 250)} total pour le Butin</div>
                                         <div style="color: var(--color-success); font-size: 0.9rem;">
                                             ${isBuilt ? `(+250 supplémentaires)` : `(+250 par butin)`}
+                                        </div>
+                                    </div>
+                                ` : building.id === 'alchemy_lab' ? `
+                                    <div class="bonus-preview">
+                                        <strong>${isBuilt ? '🧪 Après amélioration :' : '🧪 Après construction :'}</strong>
+                                        <div>⚗️ ${NumberFormatter.format(window.calculateLabProductionPerHour(building.level + 1))} conversions/heure</div>
+                                        <div style="color: var(--color-success); font-size: 0.9rem;">
+                                            ${isBuilt ? 
+                                                `(×2 production → ${NumberFormatter.format(window.calculateLabProductionPerHour(building.level + 1) - window.calculateLabProductionPerHour(building.level))} conversions/heure supplémentaires)` : 
+                                                `(Production passive automatique)`
+                                            }
                                         </div>
                                     </div>
                                 ` : `
@@ -1958,9 +2109,57 @@ class UI {
      * Affiche le dialogue pour importer depuis texte
      */
     showImportTextDialog() {
-        const saveText = prompt('Colle ta sauvegarde encodée ici :');
+        const saveText = prompt('Colle ta sauvegarde ici (JSON ou Base64) :');
         if (saveText && saveText.trim()) {
-            this.game.importSaveFromText(saveText.trim());
+            try {
+                let saveData;
+                const trimmed = saveText.trim();
+                
+                // ✅ Détecter le format automatiquement
+                if (trimmed.startsWith('{')) {
+                    // JSON brut
+                    console.log('🔍 Format détecté: JSON brut');
+                    saveData = JSON.parse(trimmed);
+                } else {
+                    // Base64 encodé
+                    console.log('🔍 Format détecté: Base64');
+                    const decoded = decodeURIComponent(atob(trimmed));
+                    saveData = JSON.parse(decoded);
+                }
+                
+                // Vérifier la validité
+                if (!saveData.player || !saveData.player.name) {
+                    this.showNotification('Sauvegarde invalide : structure incorrecte', 'error');
+                    return;
+                }
+                
+                // Confirmer l'import
+                if (confirm('⚠️ Importer cette sauvegarde écrasera votre progression actuelle. Continuer ?')) {
+                    // ✅ PROTECTION 1: Bloquer la session actuelle
+                    this.game.stopAutoSave();
+                    this.game.isResetting = true;
+                    console.log('🛑 Auto-save désactivé et beforeunload bloqué');
+                    
+                    // ✅ PROTECTION 2: Flag pour la prochaine session
+                    localStorage.setItem('nylnato_importing', 'true');
+                    
+                    // Écrire dans localStorage
+                    localStorage.setItem('nylnatoIdleSave_v1', JSON.stringify(saveData));
+                    
+                    // Vérifier l'écriture
+                    const verification = JSON.parse(localStorage.getItem('nylnatoIdleSave_v1'));
+                    console.log('✅ Sauvegarde écrite:', verification.player.name, 'niveau', verification.player.level);
+                    
+                    // Recharger la page
+                    this.showNotification(`Sauvegarde de ${saveData.player.name} importée ! Rechargement...`, 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error('❌ Erreur lors de l\'import:', error);
+                this.showNotification('Erreur: sauvegarde invalide ou corrompue', 'error');
+            }
         }
     }
 
@@ -1970,7 +2169,53 @@ class UI {
     handleImportFile(event) {
         const file = event.target.files[0];
         if (file) {
-            this.game.importSaveFromFile(file);
+            // ✅ Utiliser la méthode sécurisée directement ici
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                try {
+                    const saveData = JSON.parse(e.target.result);
+                    
+                    // Vérifier que c'est bien une sauvegarde valide
+                    if (!saveData.player || !saveData.player.name) {
+                        this.showNotification('Fichier JSON invalide : structure de sauvegarde incorrecte', 'error');
+                        return;
+                    }
+                    
+                    // Confirmer l'import
+                    if (confirm('⚠️ Importer cette sauvegarde écrasera votre progression actuelle. Continuer ?')) {
+                        // ✅ PROTECTION 1: Bloquer la session actuelle
+                        this.game.stopAutoSave();
+                        this.game.isResetting = true;
+                        console.log('🛑 Auto-save désactivé et beforeunload bloqué');
+                        
+                        // ✅ PROTECTION 2: Flag pour la prochaine session
+                        localStorage.setItem('nylnato_importing', 'true');
+                        
+                        // Écrire dans localStorage
+                        localStorage.setItem('nylnatoIdleSave_v1', JSON.stringify(saveData));
+                        
+                        // Vérifier l'écriture
+                        const verification = JSON.parse(localStorage.getItem('nylnatoIdleSave_v1'));
+                        console.log('✅ Sauvegarde écrite:', verification.player.name, 'niveau', verification.player.level);
+                        
+                        // Recharger la page
+                        this.showNotification(`Sauvegarde de ${saveData.player.name} importée ! Rechargement...`, 'success');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    }
+                } catch (error) {
+                    console.error('❌ Erreur lors de l\'import:', error);
+                    this.showNotification('Erreur: fichier JSON invalide', 'error');
+                }
+            };
+            
+            reader.onerror = () => {
+                this.showNotification('Erreur de lecture du fichier', 'error');
+            };
+            
+            reader.readAsText(file);
         }
         // Réinitialiser l'input pour permettre de re-sélectionner le même fichier
         event.target.value = '';
@@ -2006,6 +2251,541 @@ class UI {
             </div>
         `;
         document.body.appendChild(popup);
+    }
+
+    // ========== ALCHIMIE ==========
+
+    /**
+     * Met à jour l'onglet Alchimie
+     */
+    updateAlchemy() {
+        if (!this.game.alchemyManager) return;
+
+        const alchemy = this.game.alchemyManager;
+
+        // Mettre à jour niveau et XP
+        const levelEl = document.getElementById('alchemy-level');
+        const xpEl = document.getElementById('alchemy-xp');
+        const xpRequiredEl = document.getElementById('alchemy-xp-required');
+        const xpBarEl = document.getElementById('alchemy-xp-bar');
+
+        if (levelEl) levelEl.textContent = alchemy.level;
+        if (xpEl) xpEl.textContent = Math.floor(alchemy.xp);
+        
+        const xpRequired = window.ALCHEMY_CONFIG ? window.ALCHEMY_CONFIG.xpFormula(alchemy.level) : 100;
+        if (xpRequiredEl) xpRequiredEl.textContent = xpRequired;
+        
+        const xpPercent = (alchemy.xp / xpRequired) * 100;
+        if (xpBarEl) xpBarEl.style.width = `${Math.min(xpPercent, 100)}%`;
+
+        // Mettre à jour conversions disponibles (seulement si niveau a changé)
+        if (!this.cachedAlchemyLevel || this.cachedAlchemyLevel !== alchemy.level) {
+            this.cachedAlchemyLevel = alchemy.level;
+            this.updateAlchemyConversions();
+        }
+
+        // Mettre à jour queue
+        this.updateAlchemyQueue();
+
+        // Mettre à jour bonus
+        this.updateAlchemyBonuses();
+
+        // Débloquer onglet si nécessaire
+        if (alchemy.unlocked) {
+            this.unlockTab('alchemy', 'Alchimie débloquée ! Transformez vos ressources en versions supérieures 🧪');
+        }
+    }
+
+    /**
+     * Met à jour les conversions disponibles
+     */
+    updateAlchemyConversions() {
+        const alchemy = this.game.alchemyManager;
+        if (!alchemy || !window.ALCHEMY_CONVERSIONS) return;
+
+        const woodList = document.getElementById('conversions-wood');
+        const oreList = document.getElementById('conversions-ore');
+
+        if (!woodList || !oreList) return;
+
+        // Conversions bois
+        const woodConversions = Object.values(window.ALCHEMY_CONVERSIONS)
+            .filter(c => c.category === 'wood');
+        woodList.innerHTML = this.renderConversionsList(woodConversions, alchemy);
+
+        // Conversions minerai
+        const oreConversions = Object.values(window.ALCHEMY_CONVERSIONS)
+            .filter(c => c.category === 'ore');
+        oreList.innerHTML = this.renderConversionsList(oreConversions, alchemy);
+    }
+
+    /**
+     * Génère le HTML pour une liste de conversions
+     */
+    renderConversionsList(conversions, alchemy) {
+        return conversions.map(conv => {
+            const locked = alchemy.level < conv.levelRequired;
+            const currentAmount = this.game.professionManager.getInventoryAmount(conv.input.resourceId);
+            const sufficient = currentAmount >= conv.input.amount;
+            
+            const convTime = alchemy.getConversionTime(conv.id);
+            const bonusChance = alchemy.getBonusChance();
+
+            return `
+                <div class="conversion-item ${locked ? 'locked' : ''}" 
+                     onclick="${locked ? '' : `game.ui.openConversionModal('${conv.id}')`}">
+                    ${locked ? '<div class="conversion-lock-icon">🔒</div>' : ''}
+                    
+                    <div class="conversion-header">
+                        <div class="conversion-name">${conv.name}</div>
+                        <div class="conversion-time">⏱️ ${convTime.toFixed(1)}s</div>
+                    </div>
+                    
+                    <div class="conversion-ratio">
+                        <div class="conversion-input">
+                            ${conv.input.amount} ${this.getResourceIcon(conv.input.resourceId)}
+                        </div>
+                        <div class="conversion-arrow">→</div>
+                        <div class="conversion-output">
+                            ${conv.output.amount} ${this.getResourceIcon(conv.output.resourceId)}
+                        </div>
+                    </div>
+                    
+                    <div class="conversion-resources">
+                        <span class="resource-available ${sufficient ? 'sufficient' : 'insufficient'}">
+                            ${locked ? `Requis niveau ${conv.levelRequired}` : 
+                                `Disponible: ${NumberFormatter.format(currentAmount)}`}
+                        </span>
+                    </div>
+                    
+                    <div class="conversion-xp">
+                        +${conv.xpGain} XP${bonusChance > 0 ? ` • ${Math.floor(bonusChance * 100)}% bonus ×2` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    /**
+     * Ouvre la modal de conversion avec sélecteur de quantité
+     */
+    openConversionModal(conversionId) {
+        console.log('🧪 openConversionModal appelé pour:', conversionId);
+        const conversion = window.ALCHEMY_CONVERSIONS[conversionId];
+        if (!conversion) {
+            console.log('❌ Conversion introuvable:', conversionId);
+            return;
+        }
+
+        const alchemy = this.game.alchemyManager;
+        const currentAmount = this.game.professionManager.getInventoryAmount(conversion.input.resourceId);
+        const maxPossible = Math.floor(currentAmount / conversion.input.amount);
+
+        console.log('📊 Ressources:', currentAmount, '/ Max possible:', maxPossible);
+
+        if (maxPossible === 0) {
+            this.showNotification('❌ Ressources insuffisantes', 'error');
+            return;
+        }
+
+        // Créer overlay avec styles inline FORCÉS pour garantir le centrage
+        const overlay = document.createElement('div');
+        overlay.className = 'conversion-modal-overlay';
+        overlay.id = 'alchemy-conversion-overlay';
+        
+        // FORCER tous les styles en inline pour éviter conflits CSS
+        overlay.style.cssText = `
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            z-index: 999999 !important;
+            background: rgba(0, 0, 0, 0.85) !important;
+            opacity: 1 !important;
+        `;
+        
+        // Fermer UNIQUEMENT si clic sur le fond noir (pas sur la modal)
+        overlay.addEventListener('click', (e) => {
+            // Vérifier si le clic vient de l'overlay lui-même (pas d'un élément enfant)
+            const modal = overlay.querySelector('.conversion-modal');
+            const isClickOnOverlay = !modal || (e.target instanceof Node && !modal.contains(e.target));
+            
+            console.log('🔍 Overlay clicked, target:', e.target, 'modal:', modal, 'isClickOnOverlay:', isClickOnOverlay);
+            if (isClickOnOverlay) {
+                console.log('✅ Fermeture de la modal (clic sur overlay)');
+                this.closeConversionModal();
+            } else {
+                console.log('❌ Clic ignoré (clic dans la modal)');
+            }
+        });
+
+        // Créer modal
+        const inputResource = this.game.professionManager.getResourceData(conversion.input.resourceId);
+        const outputResource = this.game.professionManager.getResourceData(conversion.output.resourceId);
+        const convTime = alchemy.getConversionTime(conversionId);
+
+        let selectedQuantity = 1;
+
+        const modal = document.createElement('div');
+        modal.className = 'conversion-modal';
+        modal.id = 'alchemy-conversion-modal';
+        
+        // FORCER le centrage et la taille de la modal
+        modal.style.cssText = `
+            position: relative !important;
+            margin: auto !important;
+            max-width: 500px !important;
+            width: 90% !important;
+            opacity: 1 !important;
+            z-index: 1000000 !important;
+            pointer-events: auto !important;
+        `;
+        
+        // Empêcher la propagation des clics dans la modal
+        modal.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        modal.innerHTML = `
+            <div class="conversion-modal-header">
+                <div class="conversion-modal-title">🧪 ${conversion.name}</div>
+                <button class="conversion-modal-close" onclick="game.ui.closeConversionModal()">×</button>
+            </div>
+
+            <div class="conversion-modal-content">
+                <div class="conversion-modal-left">
+                    <div class="conversion-modal-info">
+                        <div class="conversion-modal-info-title">ℹ️ Conversion</div>
+                        <div class="conversion-modal-info-row">
+                            <span class="conversion-modal-info-label">Ratio :</span>
+                            <span class="conversion-modal-info-value">
+                                ${conversion.input.amount} ${inputResource?.icon || '📦'} → ${conversion.output.amount} ${outputResource?.icon || '📦'}
+                            </span>
+                        </div>
+                        <div class="conversion-modal-info-row">
+                            <span class="conversion-modal-info-label">Temps :</span>
+                            <span class="conversion-modal-info-value">${convTime.toFixed(1)}s</span>
+                        </div>
+                    </div>
+
+                    <div class="conversion-modal-quantity">
+                        <label class="conversion-modal-label">📈 Quantité :</label>
+                        <div class="quantity-presets">
+                            <button class="quantity-preset-btn ${1 <= maxPossible ? 'active' : ''}" 
+                                    ${1 > maxPossible ? 'disabled' : ''} 
+                                    onclick="event.stopPropagation(); game.ui.updateModalQuantity(1, ${maxPossible})"
+                                    style="pointer-events: auto !important;">×1</button>
+                            <button class="quantity-preset-btn" 
+                                    ${5 > maxPossible ? 'disabled' : ''} 
+                                    onclick="event.stopPropagation(); game.ui.updateModalQuantity(5, ${maxPossible})"
+                                    style="pointer-events: auto !important;">×5</button>
+                            <button class="quantity-preset-btn" 
+                                    ${10 > maxPossible ? 'disabled' : ''} 
+                                    onclick="event.stopPropagation(); game.ui.updateModalQuantity(10, ${maxPossible})"
+                                    style="pointer-events: auto !important;">×10</button>
+                            <button class="quantity-preset-btn" 
+                                    onclick="event.stopPropagation(); game.ui.updateModalQuantity(${maxPossible}, ${maxPossible})"
+                                    style="pointer-events: auto !important;">MAX</button>
+                        </div>
+                        <div class="quantity-slider-container">
+                            <input type="range" class="quantity-slider" id="quantitySlider" 
+                                   min="1" max="${maxPossible}" value="1" 
+                                   oninput="event.stopPropagation(); game.ui.updateModalQuantity(parseInt(this.value), ${maxPossible})"
+                                   style="pointer-events: auto !important;">
+                            <div class="quantity-slider-value" id="quantityValue">1</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="conversion-modal-right">
+                    <div class="conversion-modal-cost" id="modalCost">
+                        <div class="conversion-modal-cost-title">📊 Résumé</div>
+                        <div class="cost-item">
+                            <span class="cost-item-label">Coût total :</span>
+                            <span class="cost-item-value sufficient" id="modalCostAmount">
+                                ${conversion.input.amount} ${inputResource?.icon || '📦'} ${inputResource?.name || ''}
+                            </span>
+                        </div>
+                        <div class="cost-item">
+                            <span class="cost-item-label">Production :</span>
+                            <span class="cost-item-value" id="modalOutputAmount">
+                                ${conversion.output.amount} ${outputResource?.icon || '📦'} ${outputResource?.name || ''}
+                            </span>
+                        </div>
+                        <div class="cost-item">
+                            <span class="cost-item-label">Temps total :</span>
+                            <span class="cost-item-value" id="modalTimeTotal">
+                                ${convTime.toFixed(1)}s
+                            </span>
+                        </div>
+                        <div class="cost-item">
+                            <span class="cost-item-label">XP gagnée :</span>
+                            <span class="cost-item-value" id="modalXpTotal">
+                                +${conversion.xpGain} XP
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="conversion-modal-actions">
+                <button class="conversion-modal-btn conversion-modal-cancel" 
+                        onclick="event.stopPropagation(); game.ui.closeConversionModal()"
+                        style="pointer-events: auto !important;">
+                    ❌ Annuler
+                </button>
+                <button class="conversion-modal-btn conversion-modal-confirm" 
+                        id="modalConfirmBtn"
+                        onclick="event.stopPropagation(); game.ui.confirmConversion('${conversionId}')"
+                        style="pointer-events: auto !important;">
+                    ✅ Convertir
+                </button>
+            </div>
+        `;
+
+        overlay.appendChild(modal);
+        console.log('✅ Modal ajoutée à overlay, children:', overlay.children.length);
+        
+        document.body.appendChild(overlay);
+        console.log('✅ Overlay ajouté à document.body');
+
+        // Stocker les infos pour update
+        this.currentModal = {
+            overlay: overlay,
+            conversionId: conversionId,
+            conversion: conversion,
+            inputResource: inputResource,
+            outputResource: outputResource,
+            convTime: convTime,
+            maxPossible: maxPossible,
+            currentAmount: currentAmount,
+            selectedQuantity: 1
+        };
+        console.log('✅ currentModal stocké:', this.currentModal);
+
+        // IMPORTANT: Attendre que le DOM soit prêt avant d'initialiser
+        // setTimeout avec 0ms permet au navigateur de "rendre" le HTML d'abord
+        console.log('⏳ Attente du rendu DOM...');
+        setTimeout(() => {
+            console.log('🔄 DOM prêt, initialisation de la modal avec quantité 1');
+            this.updateModalQuantity(1, maxPossible);
+            
+            console.log('✅ Modal complètement initialisée et affichée');
+        }, 0);
+    }
+
+    /**
+     * Met à jour la quantité sélectionnée dans la modal
+     */
+    updateModalQuantity(quantity, maxPossible) {
+        console.log('📊 updateModalQuantity appelé:', quantity, '/', maxPossible);
+        if (!this.currentModal) {
+            console.log('❌ Pas de currentModal');
+            return;
+        }
+
+        // Clamp quantity
+        quantity = Math.max(1, Math.min(quantity, maxPossible));
+        this.currentModal.selectedQuantity = quantity;
+
+        const { conversion, inputResource, outputResource, convTime } = this.currentModal;
+
+        // Update slider value
+        const slider = document.getElementById('quantitySlider');
+        const valueDisplay = document.getElementById('quantityValue');
+        console.log('🔍 Éléments trouvés - slider:', slider, 'valueDisplay:', valueDisplay);
+        if (slider) slider.value = quantity;
+        if (valueDisplay) valueDisplay.textContent = quantity;
+
+        // Update preset buttons
+        document.querySelectorAll('.quantity-preset-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        const activeBtn = Array.from(document.querySelectorAll('.quantity-preset-btn')).find(
+            btn => btn.textContent.includes(`×${quantity}`) || 
+                   (btn.textContent === 'MAX' && quantity === maxPossible)
+        );
+        if (activeBtn) activeBtn.classList.add('active');
+
+        // Update cost summary
+        const totalCost = conversion.input.amount * quantity;
+        const totalOutput = conversion.output.amount * quantity;
+        const totalTime = convTime * quantity;
+        const totalXp = conversion.xpGain * quantity;
+
+        const sufficient = this.currentModal.currentAmount >= totalCost;
+
+        document.getElementById('modalCostAmount').innerHTML = 
+            `${NumberFormatter.format(totalCost)} ${inputResource?.icon || '📦'} ${inputResource?.name || ''}`;
+        document.getElementById('modalCostAmount').className = 
+            `conversion-modal-cost-value ${sufficient ? 'sufficient' : 'insufficient'}`;
+
+        document.getElementById('modalOutputAmount').textContent = 
+            `${NumberFormatter.format(totalOutput)} ${outputResource?.icon || '📦'} ${outputResource?.name || ''}`;
+
+        document.getElementById('modalTimeTotal').textContent = 
+            this.formatTime(Math.floor(totalTime));
+
+        document.getElementById('modalXpTotal').textContent = 
+            `+${NumberFormatter.format(totalXp)} XP`;
+
+        // Enable/disable confirm button
+        const confirmBtn = document.getElementById('modalConfirmBtn');
+        if (confirmBtn) {
+            confirmBtn.disabled = !sufficient;
+        }
+    }
+
+    /**
+     * Confirme et lance les conversions
+     */
+    confirmConversion(conversionId) {
+        if (!this.currentModal) return;
+
+        const quantity = this.currentModal.selectedQuantity;
+        this.game.alchemyManager.startConversion(conversionId, quantity);
+        this.closeConversionModal();
+    }
+
+    /**
+     * Ferme la modal de conversion
+     */
+    closeConversionModal() {
+        console.log('🚪 closeConversionModal appelé, currentModal:', this.currentModal);
+        if (this.currentModal && this.currentModal.overlay) {
+            console.log('✅ Suppression de l\'overlay');
+            this.currentModal.overlay.remove();
+            this.currentModal = null;
+        } else {
+            console.log('❌ Pas de currentModal ou overlay');
+        }
+    }
+
+    /**
+     * Met à jour la file de conversion
+     */
+    updateAlchemyQueue() {
+        const alchemy = this.game.alchemyManager;
+        if (!alchemy) return;
+
+        const queueCount = document.getElementById('queue-count');
+        const queueContainer = document.getElementById('conversionQueue');
+
+        if (!queueContainer) return;
+
+        if (queueCount) {
+            queueCount.textContent = alchemy.conversionQueue.length;
+        }
+
+        if (alchemy.conversionQueue.length === 0) {
+            queueContainer.innerHTML = `
+                <div class="empty-state">
+                    <p class="text-muted">Aucune conversion en cours...</p>
+                </div>
+            `;
+            return;
+        }
+
+        queueContainer.innerHTML = alchemy.conversionQueue.map(item => {
+            const progressPercent = (item.progress * 100).toFixed(1);
+            const remainingTime = Math.max(0, (item.duration * (1 - item.progress)) / 1000);
+
+            return `
+                <div class="queue-item">
+                    <div class="queue-item-header">
+                        <div class="queue-item-name">${item.conversion.name}</div>
+                        <button class="queue-item-cancel" 
+                                onclick="game.alchemyManager.cancelConversion(${item.id})">
+                            ✕ Annuler
+                        </button>
+                    </div>
+                    
+                    <div class="queue-progress-bar">
+                        <div class="queue-progress-fill" style="width: ${progressPercent}%"></div>
+                        <div class="queue-progress-text">${progressPercent}%</div>
+                    </div>
+                    
+                    <div class="queue-item-info">
+                        <span class="queue-item-quantity">×${item.quantity}</span>
+                        <span>⏱️ ${this.formatTime(remainingTime)}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    /**
+     * Met à jour les bonus d'alchimie
+     */
+    updateAlchemyBonuses() {
+        const alchemy = this.game.alchemyManager;
+        if (!alchemy || !window.ALCHEMY_CONFIG) return;
+
+        const bonusesList = document.getElementById('alchemyBonusesList');
+        if (!bonusesList) return;
+
+        const bonuses = Object.entries(window.ALCHEMY_CONFIG.bonuses);
+        
+        if (bonuses.length === 0) {
+            bonusesList.innerHTML = '<p class="text-muted">Aucun bonus disponible</p>';
+            return;
+        }
+
+        bonusesList.innerHTML = bonuses.map(([level, bonus]) => {
+            const levelNum = parseInt(level);
+            const active = alchemy.level >= levelNum;
+            const locked = alchemy.level < levelNum;
+
+            return `
+                <div class="bonus-item ${active ? 'active' : ''} ${locked ? 'locked' : ''}">
+                    <div class="bonus-level">Niveau ${level}</div>
+                    <div class="bonus-description">${bonus.description}</div>
+                    ${active ? '<div style="color: var(--success-color); margin-top: 5px;">✅ Actif</div>' : ''}
+                </div>
+            `;
+        }).join('');
+    }
+
+    /**
+     * Obtient l'icône d'une ressource
+     */
+    getResourceIcon(resourceId) {
+        const icons = {
+            wood_oak: '🌳',
+            wood_maple: '🍁',
+            wood_walnut: '🌰',
+            wood_sequoia: '🌲',
+            wood_lunar: '🌙',
+            wood_crystal: '💎',
+            wood_eternal: '✨',
+            ore_copper: '🟤',
+            ore_iron: '⚙️',
+            ore_steel: '🔩',
+            ore_mithril: '💠',
+            ore_adamantite: '💎',
+            ore_orichalcum: '🔱',
+            ore_celestial: '⭐'
+        };
+        return icons[resourceId] || '❓';
+    }
+
+    /**
+     * Formate un temps en secondes en format lisible
+     */
+    formatTime(seconds) {
+        if (seconds < 60) {
+            return `${Math.ceil(seconds)}s`;
+        }
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.ceil(seconds % 60);
+        return `${mins}m ${secs}s`;
     }
 }
 

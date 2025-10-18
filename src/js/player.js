@@ -363,6 +363,16 @@ class Player {
      * Importe les données du joueur depuis une sauvegarde
      */
     fromJSON(data) {
+        if (!data) {
+            console.error('❌ fromJSON: data est null ou undefined');
+            return;
+        }
+        
+        // 🛡️ DEBUG: Logger le chargement
+        if (GameConfig.DEBUG.enabled) {
+            console.log('📥 Player.fromJSON appelé avec:', data);
+        }
+        
         // Données de personnalisation
         this.name = data.name || "Aventurier";
         this.gender = data.gender || null;
@@ -377,6 +387,16 @@ class Player {
         this.equipment = data.equipment || this.equipment;
         this.resources = data.resources || this.resources;
         this.isAlive = data.isAlive !== undefined ? data.isAlive : true;
+        
+        // 🛡️ DEBUG: Logger le résultat
+        if (GameConfig.DEBUG.enabled) {
+            console.log('✅ Player chargé:', {
+                nom: this.name,
+                classe: this.class,
+                niveau: this.level,
+                or: this.resources.gold
+            });
+        }
     }
 }
 

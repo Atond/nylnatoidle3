@@ -98,6 +98,186 @@
     font-weight: bold;
 }
 
+/* ========== MINI-MAP ========== */
+.minimap-container {
+    background: var(--bg-panel);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 15px;
+}
+
+.minimap-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.minimap-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--color-primary);
+}
+
+.minimap-progress {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.minimap-regions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.minimap-region {
+    background: var(--bg-light);
+    border-radius: 8px;
+    padding: 10px;
+    border-left: 4px solid var(--border-color);
+    transition: all var(--transition-normal);
+    cursor: pointer;
+}
+
+.minimap-region.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.minimap-region.active {
+    border-left-color: var(--color-primary);
+    background: rgba(74, 144, 226, 0.1);
+    box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
+}
+
+.minimap-region.completed {
+    border-left-color: var(--color-success);
+    background: rgba(76, 175, 80, 0.05);
+}
+
+.minimap-region:not(.locked):hover {
+    transform: translateX(5px);
+    box-shadow: var(--shadow-sm);
+}
+
+.minimap-region-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.minimap-region-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.minimap-region-icon {
+    font-size: 1.2rem;
+}
+
+.minimap-region-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+}
+
+.minimap-region-badge {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.minimap-region-badge.current {
+    background: var(--color-primary);
+    color: white;
+}
+
+.minimap-region-badge.completed {
+    background: var(--color-success);
+    color: white;
+}
+
+.minimap-region-badge.locked {
+    background: var(--bg-dark);
+    color: var(--text-muted);
+}
+
+.minimap-zones-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.minimap-zones-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--bg-dark);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.minimap-zones-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-success));
+    transition: width var(--transition-normal);
+    border-radius: 4px;
+}
+
+.minimap-zones-text {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    min-width: 60px;
+    text-align: right;
+}
+
+.minimap-region-info {
+    display: flex;
+    gap: 15px;
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.minimap-region-stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.minimap-toggle {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.minimap-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: all var(--transition-fast);
+}
+
+.minimap-toggle-btn:hover {
+    background: rgba(74, 144, 226, 0.1);
+}
+
 .table tr:hover {
     background: var(--bg-light);
 }

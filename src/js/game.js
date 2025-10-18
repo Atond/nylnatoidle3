@@ -14,6 +14,7 @@ class Game {
         this.equipmentManager = null;
         this.storageManager = null;
         this.characterCreation = null;
+        this.alchemyManager = null; // 🧪 Système de conversion alchimique
         
         // Boucle de jeu
         this.lastUpdateTime = 0;
@@ -39,6 +40,14 @@ class Game {
      * Initialise le jeu
      */
     init() {
+        // ✅ Vérifier si on est en train d'importer une sauvegarde
+        const isImporting = localStorage.getItem('nylnato_importing');
+        if (isImporting === 'true') {
+            this.isResetting = true; // Bloquer beforeunload
+            localStorage.removeItem('nylnato_importing'); // Nettoyer le flag
+            console.log('🔄 Import de sauvegarde détecté - Auto-save désactivé');
+        }
+        
         // Création des instances
         this.player = new Player();
         this.combat = new Combat(this.player);
@@ -47,6 +56,7 @@ class Game {
         this.equipmentManager = new EquipmentManager(this);
         this.craftingManager = new CraftingManager(this);
         this.buildingManager = new BuildingManager(this);
+        this.alchemyManager = new AlchemyManager(this); // 🧪 Alchimie
         this.storageManager = new StorageManager(this);
         this.ui = new UI(this);
         this.characterCreation = new CharacterCreationManager(this);
@@ -59,6 +69,12 @@ class Game {
             // Plus besoin d'équipement de test, on peut les fabriquer !
         } else {
             console.log('💾 Sauvegarde chargée');
+        }
+        
+        // ✅ Réactiver la sauvegarde après le chargement réussi
+        if (this.isResetting) {
+            this.isResetting = false;
+            console.log('✅ Import terminé - Auto-save réactivé');
         }
         
         // Mise à jour initiale de l'interface
@@ -149,6 +165,13 @@ class Game {
             this.buildingManager.update(deltaTime);
         }
         
+        // 🧪 Met à jour l'alchimie (conversions en cours)
+        if (this.alchemyManager) {
+            this.alchemyManager.update(deltaTime);
+            // Vérifier déblocage alchimie
+            this.alchemyManager.checkUnlock(this.player.level);
+        }
+        
         // ⚡ OPTIMISATION: Throttle UI updates (pas besoin de refresh constant)
         const currentTime = Date.now();
         if (currentTime - this.lastUIUpdateTime >= GameConfig.PERFORMANCE.UI_UPDATE_INTERVAL) {
@@ -224,6 +247,7 @@ class Game {
                 equipment: this.equipmentManager.toJSON(),
                 crafting: this.craftingManager.toJSON(),
                 buildings: this.buildingManager.toJSON(),
+                alchemy: this.alchemyManager.save(), // 🧪 Alchimie
                 storage: this.storageManager.getSaveData(),
                 ui: this.ui.toJSON()
             };
@@ -284,6 +308,9 @@ class Game {
             if (saveData.buildings) {
                 this.buildingManager.fromJSON(saveData.buildings);
             }
+            if (saveData.alchemy) { // 🧪 Charger alchimie
+                this.alchemyManager.load(saveData.alchemy);
+            }
             if (saveData.storage) {
                 this.storageManager.loadSaveData(saveData.storage);
             }
@@ -297,8 +324,22 @@ class Game {
             // Calculer la production offline
             this.calculateOfflineProgress(saveData.timestamp);
             
+            // 🛡️ FIX: Forcer une mise à jour complète de l'UI après chargement
+            if (this.ui) {
+                this.ui.update();
+                this.ui.updateProfessions();
+                this.ui.updateInventory();
+                this.ui.updateAutoGatherButtons();
+            }
+            
             if (GameConfig.DEBUG.logSaves) {
                 console.log('📂 Sauvegarde chargée', saveData);
+                console.log('👤 Joueur chargé:', {
+                    nom: this.player.name,
+                    classe: this.player.class,
+                    niveau: this.player.level,
+                    or: this.player.resources.gold
+                });
             }
             
             this.ui.showNotification('Partie chargée', 'success');
@@ -710,6 +751,9 @@ class Game {
 
                 // Confirmer l'import (écrase la sauvegarde actuelle)
                 if (confirm('⚠️ Importer cette sauvegarde écrasera votre progression actuelle. Continuer ?')) {
+                    // ✅ PROTECTION: Bloquer beforeunload avec un flag
+                    localStorage.setItem('nylnato_importing', 'true');
+                    
                     // Sauvegarder dans localStorage
                     localStorage.setItem(GameConfig.SAVE.SAVE_KEY, saveString);
                     
@@ -741,9 +785,21 @@ class Game {
      */
     importSaveFromText(encodedSave) {
         try {
-            // Décoder depuis base64
-            const saveString = decodeURIComponent(atob(encodedSave));
-            const saveData = JSON.parse(saveString);
+            let saveString;
+            let saveData;
+            
+            // ✅ Détecter si c'est du JSON brut ou du Base64
+            if (encodedSave.trim().startsWith('{')) {
+                // C'est du JSON brut
+                console.log('🔍 Format détecté: JSON brut');
+                saveString = encodedSave;
+                saveData = JSON.parse(saveString);
+            } else {
+                // C'est du Base64 encodé
+                console.log('🔍 Format détecté: Base64');
+                saveString = decodeURIComponent(atob(encodedSave));
+                saveData = JSON.parse(saveString);
+            }
 
             // Valider la sauvegarde
             if (!this.validateSave(saveData)) {
@@ -753,6 +809,9 @@ class Game {
 
             // Confirmer l'import
             if (confirm('⚠️ Importer cette sauvegarde écrasera votre progression actuelle. Continuer ?')) {
+                // ✅ PROTECTION: Bloquer beforeunload avec un flag
+                localStorage.setItem('nylnato_importing', 'true');
+                
                 // Sauvegarder dans localStorage
                 localStorage.setItem(GameConfig.SAVE.SAVE_KEY, saveString);
                 

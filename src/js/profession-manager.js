@@ -65,6 +65,14 @@ class ProfessionManager {
             0
         ));
 
+        // Alchimiste (conversion ressources T1→T2→T3...)
+        this.professions.set('alchemy', new Profession(
+            'alchemy',
+            'Alchimiste',
+            null, // Pas de ressource directe (conversions uniquement)
+            0 // XP gagné par conversion
+        ));
+
         if (GameConfig.DEBUG.enabled) {
             console.log('✅ Métiers initialisés:', Array.from(this.professions.keys()));
         }
