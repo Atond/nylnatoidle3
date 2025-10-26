@@ -177,14 +177,14 @@ const ResourcesData = {
         { id: 'fabric_fine_wool', name: 'Laine fine', unlockLevel: 16, rarity: 'uncommon', productionRate: 0.45, tier: 2 },
 
         // T3 - Région 3 (21-30) - Ferme niveau 7-9
-        { id: 'fabric_simple_leather', name: 'Cuir simple', unlockLevel: 18, rarity: 'rare', productionRate: 0.1, tier: 3 },
+        // fabric_simple_leather RETIRÉ - Produit par le TANNEUR (2x monster_hide -> 1x fabric_simple_leather)
         { id: 'fabric_refined_silk', name: 'Soie raffinée', unlockLevel: 20, rarity: 'rare', productionRate: 0.4, tier: 3 },
         { id: 'fabric_silk', name: 'Soie', unlockLevel: 21, rarity: 'rare', productionRate: 0.38, tier: 3 },
         { id: 'fabric_velvet', name: 'Velours', unlockLevel: 22, rarity: 'rare', productionRate: 0.35, tier: 3 },
         { id: 'fabric_wolf_skin', name: 'Peau de loup', unlockLevel: 25, rarity: 'epic', productionRate: 0.3, tier: 3 },
 
         // T4 - Région 4 (31-40) - Ferme niveau 10+
-        { id: 'fabric_tanned_leather', name: 'Cuir tanné', unlockLevel: 30, rarity: 'epic', productionRate: 0.2, tier: 4 },
+        // fabric_tanned_leather RETIRÉ - Produit par le TANNEUR (2x robust_hide -> 1x fabric_tanned_leather)
         { id: 'fabric_spider_silk', name: 'Soie d\'araignée', unlockLevel: 32, rarity: 'epic', productionRate: 0.18, tier: 4 },
         { id: 'fabric_lunar_silk', name: 'Soie lunaire', unlockLevel: 35, rarity: 'epic', productionRate: 0.15, tier: 4 },
         { id: 'fabric_basilisk_leather', name: 'Cuir de basilic', unlockLevel: 40, rarity: 'legendary', productionRate: 0.12, tier: 4 },
@@ -209,7 +209,6 @@ const ResourcesData = {
         { id: 'monster_scale', name: 'Écaille de monstre', rarity: 'rare', icon: '🛡️' },
         { id: 'monster_heart', name: 'Cœur de monstre', rarity: 'epic', icon: '❤️' },
         { id: 'monster_essence', name: 'Essence de monstre', rarity: 'legendary', icon: '✨' },
-        { id: 'loot_peau_animale', name: 'Peau Animale', rarity: 'common', icon: '🦌' },
         { id: 'loot_griffes_usees', name: 'Griffes Usées', rarity: 'common', icon: '🦅' },
         { id: 'loot_plumes_sombres', name: 'Plumes Sombres', rarity: 'common', icon: '🪶' },
         { id: 'loot_cuir_robuste', name: 'Cuir Robuste', rarity: 'uncommon', icon: '🎒' },
@@ -221,6 +220,12 @@ const ResourcesData = {
         { id: 'loot_corne_ancienne', name: 'Corne Ancienne', rarity: 'legendary', icon: '🦌' },
         { id: 'loot_cuir_legendaire', name: 'Cuir Légendaire', rarity: 'legendary', icon: '🎯' },
         { id: 'loot_essence_vie_sauvage', name: 'Essence de Vie Sauvage', rarity: 'legendary', icon: '✨' }
+    ],
+
+    // ========== CUIRS TRAITÉS (Produits par le TANNEUR) ==========
+    processed_leather: [
+        { id: 'fabric_simple_leather', name: 'Cuir Simple', rarity: 'rare', icon: '🎒', tier: 1, description: 'Cuir traité de qualité basique. Créé par le Tanneur à partir de peaux brutes.' },
+        { id: 'fabric_tanned_leather', name: 'Cuir Tanné', rarity: 'epic', icon: '🧳', tier: 2, description: 'Cuir de haute qualité tanné avec soin. Requis pour les armures avancées.' }
     ],
 
     // ========== GEMMES (Drops rares du Mineur) ==========

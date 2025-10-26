@@ -43,13 +43,15 @@ class CraftingManager {
         const armorRecipes = window.CraftRecipesArmors || [];
         const accessoryRecipes = window.CraftRecipesAccessories || [];
         const consumableRecipes = window.CraftRecipesConsumables || [];
+        const tannerRecipes = window.CraftRecipesTanner || [];
         
         const allRecipes = [
             ...baseRecipes,
             ...weaponRecipes,
             ...armorRecipes,
             ...accessoryRecipes,
-            ...consumableRecipes
+            ...consumableRecipes,
+            ...tannerRecipes
         ];
         
         if (GameConfig.DEBUG.enabled && allRecipes.length === 0) {
@@ -57,7 +59,7 @@ class CraftingManager {
         }
         
         if (GameConfig.DEBUG.enabled) {
-            console.log(`📋 Total recettes chargées: ${allRecipes.length} (Base: ${baseRecipes.length}, Armes: ${weaponRecipes.length}, Armures: ${armorRecipes.length}, Accessoires: ${accessoryRecipes.length}, Consommables: ${consumableRecipes.length})`);
+            console.log(`📋 Total recettes chargées: ${allRecipes.length} (Base: ${baseRecipes.length}, Armes: ${weaponRecipes.length}, Armures: ${armorRecipes.length}, Accessoires: ${accessoryRecipes.length}, Consommables: ${consumableRecipes.length}, Tanneur: ${tannerRecipes.length})`);
         }
         
         return allRecipes;

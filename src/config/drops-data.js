@@ -9,11 +9,11 @@ const DropsData = {
     // ========== DROPS COMMUNS ==========
     // Monstres communs : Loups, Sangliers, Bandits, Corbeaux
     
-    peau_animale: {
-        id: 'peau_animale',
-        name: "Peau Animale",
-        description: "Peau brute d'un animal sauvage",
-        icon: "🦴",
+    monster_hide: {
+        id: 'monster_hide',
+        name: "Peau de Monstre",
+        description: "Peau brute récupérée sur une bête sauvage. Peut être utilisée telle quelle ou traitée par un Tanneur.",
+        icon: "�",
         type: "resource",
         rarity: "common",
         dropChance: 0.40, // 40% de chance

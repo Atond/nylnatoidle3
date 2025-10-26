@@ -116,6 +116,14 @@ class ProfessionManager {
             0 // XP gagné par conversion
         ));
 
+        // Tanneur (traitement de peaux brutes en cuir)
+        this.professions.set('tanner', new Profession(
+            'tanner',
+            'Tanneur',
+            null, // Pas de ressource directe (traitement uniquement)
+            0 // XP gagné par craft de cuir
+        ));
+
         if (GameConfig.DEBUG.enabled) {
             console.log('✅ Métiers initialisés:', Array.from(this.professions.keys()));
         }

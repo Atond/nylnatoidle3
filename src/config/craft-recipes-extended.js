@@ -26,7 +26,7 @@ const CraftRecipesExtended = [
         materials: [
             { resourceId: 'ore_copper', amount: 12 },
             { resourceId: 'wood_ash', amount: 6 },
-            { resourceId: 'loot_peau_animale', amount: 3 }
+            { resourceId: 'monster_hide', amount: 3 }
         ],
         craftTime: 2500,
         stats: {
@@ -51,7 +51,7 @@ const CraftRecipesExtended = [
         materials: [
             { resourceId: 'wood_oak', amount: 15 },
             { resourceId: 'ore_iron', amount: 5 },
-            { resourceId: 'loot_peau_animale', amount: 5 }
+            { resourceId: 'monster_hide', amount: 5 }
         ],
         craftTime: 2000,
         stats: {

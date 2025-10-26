@@ -36,7 +36,7 @@ const MonstersData = {
                 gold: 5
             },
             
-            dropTable: ['peau_animale', 'griffes_usees']
+            dropTable: ['monster_hide', 'griffes_usees']
         },
         
         sanglier_sauvage: {
@@ -58,7 +58,7 @@ const MonstersData = {
                 gold: 8
             },
             
-            dropTable: ['peau_animale', 'griffes_usees']
+            dropTable: ['monster_hide', 'griffes_usees']
         },
         
         bandit_routes: {
@@ -80,7 +80,7 @@ const MonstersData = {
                 gold: 15
             },
             
-            dropTable: ['petit_sac_bandit', 'peau_animale']
+            dropTable: ['petit_sac_bandit', 'monster_hide']
         },
         
         corbeau_noir: {
@@ -560,7 +560,7 @@ const MonstersData = {
                 gold: 25
             },
             
-            dropTable: ['crocs_venimeux', 'peau_animale']
+            dropTable: ['crocs_venimeux', 'monster_hide']
         },
         
         epouvantail_anime: {
