@@ -1680,7 +1680,7 @@ class UI {
      * Met à jour les niveaux des professions de craft
      */
     updateCraftingProfessions() {
-        const professions = ['blacksmith', 'armorsmith', 'jeweler'];
+        const professions = ['blacksmith', 'armorsmith', 'jeweler', 'tanner'];
 
         professions.forEach(profId => {
             const profession = this.game.professionManager.getProfession(profId);

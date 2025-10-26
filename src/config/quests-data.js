@@ -429,6 +429,30 @@ const QuestsData = [
             message: '🧪 ALCHIMIE DÉBLOQUÉE ! Vous pouvez maintenant transmuter les ressources.'
         }
     },
+
+    // M16b : Apprenti Tanneur (DÉBLOQUER TANNEUR)
+    {
+        id: 'main_016b',
+        title: '🎒 Apprenti Tanneur',
+        description: 'Atteignez le niveau 10 pour maîtriser le traitement des peaux.',
+        type: 'level_up',
+        target: 10,
+        chapter: 3,
+        difficulty: 'easy',
+        isMainQuest: true,
+        
+        requirements: {
+            quest: 'main_010',
+            level: 10
+        },
+        
+        rewards: {
+            xp: 300,
+            gold: 100,
+            unlocks: ['profession_tanner'],
+            message: '🎒 MÉTIER TANNEUR DÉBLOQUÉ ! Vous pouvez maintenant traiter les peaux brutes en cuir de qualité.'
+        }
+    },
     
     // M17 : Pêcheur et Herboriste
     {

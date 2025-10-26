@@ -807,7 +807,7 @@ window.CraftRecipesArmors = [
     professionLevel: 12,
     materials: [
       { resourceId: 'fabric_wool', amount: 8 },
-      { resourceId: 'monster_hide', amount: 8 },
+      { resourceId: 'fabric_simple_leather', amount: 4 },
       { resourceId: 'ore_tin', amount: 4 },
       { resourceId: 'wood_birch', amount: 3 }
     ],
@@ -838,7 +838,7 @@ window.CraftRecipesArmors = [
     professionLevel: 15,
     materials: [
       { resourceId: 'fabric_wool', amount: 14 },
-      { resourceId: 'monster_hide', amount: 12 },
+      { resourceId: 'fabric_simple_leather', amount: 6 },
       { resourceId: 'ore_tin', amount: 8 },
       { resourceId: 'wood_birch', amount: 6 },
       { resourceId: 'monster_scale', amount: 3 }
@@ -871,7 +871,7 @@ window.CraftRecipesArmors = [
     professionLevel: 14,
     materials: [
       { resourceId: 'fabric_wool', amount: 12 },
-      { resourceId: 'monster_hide', amount: 10 },
+      { resourceId: 'fabric_simple_leather', amount: 5 },
       { resourceId: 'ore_tin', amount: 6 },
       { resourceId: 'wood_birch', amount: 4 }
     ],
@@ -902,7 +902,7 @@ window.CraftRecipesArmors = [
     professionLevel: 13,
     materials: [
       { resourceId: 'fabric_wool', amount: 8 },
-      { resourceId: 'monster_hide', amount: 6 },
+      { resourceId: 'fabric_simple_leather', amount: 3 },
       { resourceId: 'ore_tin', amount: 4 },
       { resourceId: 'wood_birch', amount: 3 }
     ],
@@ -933,7 +933,7 @@ window.CraftRecipesArmors = [
     professionLevel: 16,
     materials: [
       { resourceId: 'fabric_wool', amount: 6 },
-      { resourceId: 'monster_hide', amount: 5 },
+      { resourceId: 'fabric_simple_leather', amount: 3 },
       { resourceId: 'ore_tin', amount: 3 },
       { resourceId: 'monster_claw', amount: 4 }
     ],

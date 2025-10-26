@@ -60,6 +60,18 @@ const DropsData = {
     // ========== DROPS RARES ==========
     // Monstres rares : Ours, Serpents, Épouvantails
     
+    robust_hide: {
+        id: 'robust_hide',
+        name: "Peau Robuste",
+        description: "Peau épaisse et résistante d'une bête puissante. Peut être tannée pour créer du cuir de haute qualité.",
+        icon: "🎒",
+        type: "resource",
+        rarity: "uncommon",
+        dropChance: 0.35, // 35% de chance (monstres R2+)
+        quantity: { min: 1, max: 2 },
+        sellPrice: 15
+    },
+    
     cuir_robuste: {
         id: 'cuir_robuste',
         name: "Cuir Robuste",
@@ -172,6 +184,18 @@ const DropsData = {
         dropChance: 0.50,
         quantity: { min: 1, max: 2 },
         sellPrice: 10
+    },
+    
+    peau_robuste_r2: {
+        id: 'robust_hide',
+        name: "Peau Robuste",
+        description: "Peau épaisse de bête des montagnes. Peut être tannée pour créer du cuir de haute qualité.",
+        icon: "🎒",
+        type: "resource",
+        rarity: "common",
+        dropChance: 0.40, // 40% de chance (monstres R2 communs)
+        quantity: { min: 1, max: 2 },
+        sellPrice: 15
     },
     
     // Drops Uncommon Région 2

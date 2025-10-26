@@ -148,7 +148,7 @@ const MonstersData = {
                 gold: 15
             },
             
-            dropTable: ['fourrure_epaisse', 'croc_acere']
+            dropTable: ['robust_hide', 'fourrure_epaisse', 'croc_acere']
         },
         
         bouc_sauvage: {
@@ -170,7 +170,7 @@ const MonstersData = {
                 gold: 12
             },
             
-            dropTable: ['corne_bouc', 'fourrure_epaisse']
+            dropTable: ['robust_hide', 'corne_bouc', 'fourrure_epaisse']
         },
         
         // === RÉGION 3 : LA FORÊT ANCESTRALE ===

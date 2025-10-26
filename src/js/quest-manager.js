@@ -515,6 +515,10 @@ class QuestManager {
                 window.game.ui.showNotification('👗 Vous êtes maintenant Tailleur !', 'success');
                 break;
             
+            case 'profession_tanner':
+                window.game.ui.showNotification('🎒 Vous êtes maintenant Tanneur !', 'success');
+                break;
+            
             case 'profession_transmutation':
                 window.game.ui.showNotification('⚗️ Vous êtes maintenant Transmutateur !', 'success');
                 break;

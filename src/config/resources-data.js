@@ -209,6 +209,11 @@ const ResourcesData = {
         { id: 'monster_scale', name: 'Écaille de monstre', rarity: 'rare', icon: '🛡️' },
         { id: 'monster_heart', name: 'Cœur de monstre', rarity: 'epic', icon: '❤️' },
         { id: 'monster_essence', name: 'Essence de monstre', rarity: 'legendary', icon: '✨' },
+        
+        // Région 2 - Les Montagnes Grises
+        { id: 'robust_hide', name: 'Peau robuste', rarity: 'common', icon: '🎒' },
+        
+        // Drops génériques
         { id: 'loot_griffes_usees', name: 'Griffes Usées', rarity: 'common', icon: '🦅' },
         { id: 'loot_plumes_sombres', name: 'Plumes Sombres', rarity: 'common', icon: '🪶' },
         { id: 'loot_cuir_robuste', name: 'Cuir Robuste', rarity: 'uncommon', icon: '🎒' },
