@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Nyln'ato Idle - Un RPG Idle avec combat, métiers et construction de ville">
     <title>Nyln'ato Idle - RPG Idle Game</title>
-    
+
     <!-- CSS -->
     <link rel="stylesheet" href="src/css/main.css">
     <link rel="stylesheet" href="src/css/components.css">
@@ -15,21 +16,26 @@
     <link rel="stylesheet" href="src/css/character-creation.css">
     <link rel="stylesheet" href="src/css/alchemy.css">
     <link rel="stylesheet" href="src/css/conversion-modal.css">
+    <link rel="stylesheet" href="src/css/dragons.css">
+    <link rel="stylesheet" href="src/css/dragon-selector.css">
+    <link rel="stylesheet" href="src/css/stats-tooltips.css">
 </head>
+
 <body>
     <!-- ========== MODAL CRÉATION DE PERSONNAGE ========== -->
     <div class="modal-overlay" id="characterCreationModal" style="display: none;">
         <div class="character-creation-modal">
             <h2>🎭 Création de Personnage</h2>
             <p class="creation-subtitle">Bienvenue dans Nyln'ato ! Créez votre héros.</p>
-            
+
             <!-- Étape 1 : Nom -->
             <div class="creation-step active" id="step-name">
                 <h3>📝 Nom de votre personnage</h3>
-                <input type="text" id="characterName" class="character-name-input" placeholder="Entrez un nom..." maxlength="20" />
+                <input type="text" id="characterName" class="character-name-input" placeholder="Entrez un nom..."
+                    maxlength="20" />
                 <p class="input-hint">3 à 20 caractères</p>
             </div>
-            
+
             <!-- Étape 2 : Genre -->
             <div class="creation-step" id="step-gender">
                 <h3>⚧ Genre</h3>
@@ -48,7 +54,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <!-- Étape 3 : Classe -->
             <div class="creation-step" id="step-class">
                 <h3>⚔️ Choisissez votre classe</h3>
@@ -80,12 +86,13 @@
                     </button>
                 </div>
             </div>
-            
+
             <!-- Boutons de navigation -->
             <div class="creation-actions">
                 <button class="btn btn-secondary" id="btnPrevStep" style="display: none;">← Retour</button>
                 <button class="btn btn-primary" id="btnNextStep">Suivant →</button>
-                <button class="btn btn-success" id="btnConfirmCreation" style="display: none;">✨ Commencer l'aventure</button>
+                <button class="btn btn-success" id="btnConfirmCreation" style="display: none;">✨ Commencer
+                    l'aventure</button>
             </div>
         </div>
     </div>
@@ -97,55 +104,58 @@
             <span class="player-gold">💰 <span id="playerGold">0</span></span>
             <span class="player-name" id="playerName">Aventurier</span>
             <span class="player-level">Niveau <span id="playerLevel">1</span></span>
-            <button class="btn btn-secondary btn-options" onclick="if(window.game && window.game.ui) window.game.ui.toggleOptionsPanel()">⚙️</button>
+            <button class="btn btn-secondary btn-options"
+                onclick="if(window.game && window.game.ui) window.game.ui.toggleOptionsPanel()">⚙️</button>
         </div>
     </header>
 
     <!-- ========== NAVIGATION TABS ========== -->
     <nav class="tabs-nav">
         <button class="tab-btn active" data-tab="combat">⚔️ Combat</button>
-        <button class="tab-btn disabled" data-tab="gathering">⛏️ Récolte</button>
-        <button class="tab-btn disabled" data-tab="crafting">🔨 Fabrication</button>
-        <button class="tab-btn disabled" data-tab="alchemy">🧪 Alchimie</button>
-        <button class="tab-btn disabled" data-tab="equipment">🎒 Équipement</button>
-        <button class="tab-btn disabled" data-tab="town">🏘️ Ville</button>
-        <button class="tab-btn disabled" data-tab="dragons">🐉 Dragons</button>
-        <button class="tab-btn disabled" data-tab="guild">👥 Guilde</button>
+        <button class="tab-btn disabled" data-tab="gathering" style="display: none;">⛏️ Récolte</button>
+        <button class="tab-btn disabled" data-tab="crafting" style="display: none;">🔨 Fabrication</button>
+        <button class="tab-btn disabled" data-tab="alchemy" style="display: none;">⚗️ Transmutation</button>
+        <button class="tab-btn disabled" data-tab="equipment" style="display: none;">🎒 Équipement</button>
+        <button class="tab-btn disabled" data-tab="town" style="display: none;">🏘️ Ville</button>
+        <button class="tab-btn disabled" data-tab="characters" style="display: none;">🎭 Personnages</button>
+        <button class="tab-btn disabled" data-tab="dungeons" style="display: none;">🏰 Donjons</button>
+        <button class="tab-btn disabled" data-tab="dragons" style="display: none;">🐉 Dragons</button>
+        <button class="tab-btn disabled" data-tab="guild" style="display: none;">👥 Guilde</button>
     </nav>
 
     <!-- ========== MAIN CONTENT ========== -->
     <main class="game-container">
-        
+
         <!-- ===== ONGLET COMBAT ===== -->
         <section class="tab-content active" id="tab-combat">
             <div class="combat-layout">
-                
+
                 <!-- Sidebar gauche : Stats & XP -->
                 <aside class="sidebar sidebar-left">
                     <div class="panel stats-panel">
                         <h3>📊 Statistiques</h3>
                         <div class="stats-grid">
-                            <div class="stat-item">
+                            <div class="stat-item" title="Points de Vie : Votre santé actuelle. Si vous atteignez 0 PV, vous mourrez !">
                                 <span class="stat-label">❤️ PV</span>
                                 <span class="stat-value" id="statHp">100</span>
                             </div>
-                            <div class="stat-item">
+                            <div class="stat-item" title="Force : Augmente vos dégâts physiques. Chaque point de Force augmente vos dégâts.">
                                 <span class="stat-label">💪 Force</span>
                                 <span class="stat-value" id="statForce">5</span>
                             </div>
-                            <div class="stat-item">
+                            <div class="stat-item" title="Agilité : Augmente vos chances de critique et d'esquive. 1% de critique et 0.5% d'esquive par point (max 50% crit, 40% esquive).">
                                 <span class="stat-label">⚡ Agilité</span>
                                 <span class="stat-value" id="statAgility">5</span>
                             </div>
-                            <div class="stat-item">
+                            <div class="stat-item" title="Intelligence : Augmente les dégâts magiques. Utile pour les Mages dans les Donjons.">
                                 <span class="stat-label">🧠 Intelligence</span>
                                 <span class="stat-value" id="statIntelligence">5</span>
                             </div>
-                            <div class="stat-item">
+                            <div class="stat-item" title="Sagesse : Augmente l'efficacité des soins. Important pour les Soigneurs dans les Donjons.">
                                 <span class="stat-label">✨ Sagesse</span>
                                 <span class="stat-value" id="statWisdom">5</span>
                             </div>
-                            <div class="stat-item">
+                            <div class="stat-item" title="Endurance : Augmente vos PV maximum. Chaque point d'Endurance = +5 PV max.">
                                 <span class="stat-label">🛡️ Endurance</span>
                                 <span class="stat-value" id="statEndurance">5</span>
                             </div>
@@ -162,19 +172,24 @@
                         </div>
                     </div>
                 </aside>
-                
+
                 <!-- Zone de combat centrale -->
                 <div class="combat-area">
                     <div class="combat-header">
                         <div class="zone-navigation">
                             <button class="btn-zone-nav" id="prevZoneBtn" title="Zone précédente">◀</button>
                             <div class="zone-info-center">
-                                <h2 class="zone-name" id="zoneName">🌾 Les Plaines Verdoyantes - ⛺ Camp des Débutants</h2>
+                                <h2 class="zone-name" id="zoneName">🌾 Les Plaines Verdoyantes - ⛺ Camp des Débutants
+                                </h2>
                                 <div class="zone-progress">
                                     <span id="zoneProgress">0 / 10</span> monstres vaincus
                                 </div>
                             </div>
                             <button class="btn-zone-nav" id="nextZoneBtn" title="Zone suivante">▶</button>
+                            <button class="btn btn-info" onclick="window.game.ui.showCombatHelp()"
+                                style="padding: 8px 16px; margin-left: 10px;">
+                                ❓ Aide
+                            </button>
                         </div>
                     </div>
 
@@ -233,21 +248,15 @@
 
                 <!-- Sidebar droite : Zone Info & Quêtes -->
                 <aside class="sidebar sidebar-right">
-                    <!-- Mini-map des régions -->
-                    <div class="panel minimap-panel">
-                        <div class="minimap-container" id="minimapContainer">
-                            <div class="minimap-header">
-                                <div class="minimap-title">🗺️ Carte du Monde</div>
-                                <div class="minimap-progress">
-                                    <span id="minimapGlobalProgress">0/50</span> zones
-                                </div>
-                            </div>
-                            <div class="minimap-regions" id="minimapRegions">
-                                <!-- Les régions seront générées ici -->
-                            </div>
+                    <!-- 📜 QUÊTES EN PRIORITÉ (60% hauteur) -->
+                    <div class="panel quests-panel">
+                        <h3>📜 Quêtes Actives</h3>
+                        <div class="quests-list" id="questsList">
+                            <!-- Les quêtes seront ajoutées dynamiquement ici -->
                         </div>
                     </div>
 
+                    <!-- 🗺️ INFO ZONE (15% hauteur) -->
                     <div class="panel info-panel">
                         <h3>🗺️ Zone actuelle</h3>
                         <div class="zone-info">
@@ -257,17 +266,26 @@
                         </div>
                     </div>
 
-                    <div class="panel quests-panel">
-                        <h3>📜 Quêtes</h3>
-                        <div class="quests-list" id="questsList">
-                            <!-- Les quêtes seront ajoutées dynamiquement ici -->
+                    <!-- 🗺️ MINIMAP COMPACTE (20% hauteur) -->
+                    <div class="panel minimap-panel">
+                        <div class="minimap-container minimap-compact" id="minimapContainer">
+                            <div class="minimap-header">
+                                <div class="minimap-title">�️ Carte</div>
+                                <div class="minimap-progress">
+                                    <span id="minimapGlobalProgress">0/50</span>
+                                </div>
+                            </div>
+                            <div class="minimap-regions" id="minimapRegions">
+                                <!-- Les régions seront générées ici -->
+                            </div>
                         </div>
                     </div>
 
+                    <!-- 🎒 BUTIN RÉCENT (5% hauteur) -->
                     <div class="panel combat-inventory-panel">
-                        <h3>🎒 Butin récent</h3>
+                        <h3>🎒 Butin</h3>
                         <div class="combat-inventory-grid" id="combatInventoryGrid">
-                            <p class="text-muted">Aucun butin pour l'instant...</p>
+                            <p class="text-muted">Aucun butin...</p>
                         </div>
                     </div>
                 </aside>
@@ -278,8 +296,14 @@
         <!-- ===== ONGLET RÉCOLTE ===== -->
         <section class="tab-content" id="tab-gathering">
             <div class="professions-container">
-                <h2>⛏️ Métiers de Récolte</h2>
-                
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>⛏️ Métiers de Récolte</h2>
+                    <button class="btn btn-info" onclick="window.game.ui.showGatheringHelp()"
+                        style="padding: 8px 16px;">
+                        ❓ Aide
+                    </button>
+                </div>
+
                 <div class="professions-grid">
                     <!-- Tuile Bûcheron -->
                     <div class="profession-tile" id="profession-woodcutter">
@@ -296,7 +320,8 @@
                             <button class="btn btn-gather" id="btn-woodcutter" data-profession="woodcutter">
                                 🪵 Récolter du Bois
                             </button>
-                            <button class="btn btn-auto-gather" id="btn-auto-woodcutter" data-profession="woodcutter" disabled>
+                            <button class="btn btn-auto-gather" id="btn-auto-woodcutter" data-profession="woodcutter"
+                                disabled>
                                 <span class="btn-label">⚡ Auto-Récolte (T1)</span>
                                 <span class="btn-cost">🪵50 🪨50</span>
                             </button>
@@ -324,6 +349,51 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- Tuile Herboriste -->
+                    <div class="profession-tile" id="profession-herbalist">
+                        <div class="profession-icon">🌿</div>
+                        <h3 class="profession-name">Herboriste</h3>
+                        <div class="profession-level">Niveau <span id="herbalist-level">1</span></div>
+                        <div class="profession-xp-bar">
+                            <div class="profession-xp-fill" id="herbalist-xp-bar" style="width: 0%"></div>
+                        </div>
+                        <div class="profession-xp-text">
+                            <span id="herbalist-xp">0</span> / <span id="herbalist-xp-required">100</span> XP
+                        </div>
+                        <div class="profession-buttons">
+                            <button class="btn btn-gather" id="btn-herbalist" data-profession="herbalist">
+                                🌱 Cueillir des Plantes
+                            </button>
+                            <button class="btn btn-auto-gather" id="btn-auto-herbalist" data-profession="herbalist"
+                                disabled>
+                                <span class="btn-label">⚡ Auto-Récolte (T1)</span>
+                                <span class="btn-cost">🪵50 🪨50</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tuile Pêcheur -->
+                    <div class="profession-tile" id="profession-fisher">
+                        <div class="profession-icon">🎣</div>
+                        <h3 class="profession-name">Pêcheur</h3>
+                        <div class="profession-level">Niveau <span id="fisher-level">1</span></div>
+                        <div class="profession-xp-bar">
+                            <div class="profession-xp-fill" id="fisher-xp-bar" style="width: 0%"></div>
+                        </div>
+                        <div class="profession-xp-text">
+                            <span id="fisher-xp">0</span> / <span id="fisher-xp-required">100</span> XP
+                        </div>
+                        <div class="profession-buttons">
+                            <button class="btn btn-gather" id="btn-fisher" data-profession="fisher">
+                                🐟 Pêcher du Poisson
+                            </button>
+                            <button class="btn btn-auto-gather" id="btn-auto-fisher" data-profession="fisher" disabled>
+                                <span class="btn-label">⚡ Auto-Récolte (T1)</span>
+                                <span class="btn-cost">🪵50 🪨50</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Section Inventaire -->
@@ -333,6 +403,8 @@
                         <button class="filter-btn active" data-filter="all">Tout</button>
                         <button class="filter-btn" data-filter="wood">🪵 Bois</button>
                         <button class="filter-btn" data-filter="ore">⚒️ Minerais</button>
+                        <button class="filter-btn" data-filter="plants">🌿 Plantes</button>
+                        <button class="filter-btn" data-filter="fish">🐟 Poissons</button>
                         <button class="filter-btn" data-filter="gems">💎 Gemmes</button>
                         <button class="filter-btn" data-filter="loot">🎁 Butin</button>
                     </div>
@@ -346,21 +418,28 @@
         <!-- ===== ONGLET FABRICATION ===== -->
         <section class="tab-content" id="tab-crafting">
             <div class="crafting-container">
-                <h2>🔨 Métiers de Fabrication</h2>
-                
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>🔨 Métiers de Fabrication</h2>
+                    <button class="btn btn-info" onclick="window.game.ui.showCraftingHelp()"
+                        style="padding: 8px 16px;">
+                        ❓ Aide
+                    </button>
+                </div>
+
                 <!-- Info Qualité -->
-                <div class="quality-info-banner" style="background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(33, 150, 243, 0.1)); padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #2196F3;">
+                <div class="quality-info-banner"
+                    style="background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(33, 150, 243, 0.1)); padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #2196F3;">
                     <div style="font-weight: 600; margin-bottom: 5px;">🎲 Système de Qualité</div>
                     <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">
                         Chaque objet crafté a une chance d'avoir une qualité supérieure !
-                        <span style="color: #9E9E9E;">Normal</span> • 
-                        <span style="color: #4CAF50;">✨ Supérieur (×1.2)</span> • 
-                        <span style="color: #2196F3;">💎 Exceptionnel (×1.5)</span> • 
-                        <span style="color: #9C27B0;">⭐ Parfait (×2.0)</span> • 
+                        <span style="color: #9E9E9E;">Normal</span> •
+                        <span style="color: #4CAF50;">✨ Supérieur (×1.2)</span> •
+                        <span style="color: #2196F3;">💎 Exceptionnel (×1.5)</span> •
+                        <span style="color: #9C27B0;">⭐ Parfait (×2.0)</span> •
                         <span style="color: #FFD700;">👑 Œuvre Maître (×3.0)</span>
                     </div>
                 </div>
-                
+
                 <div class="crafting-layout">
                     <!-- Panneau gauche : Métiers de fabrication -->
                     <div class="crafting-professions-panel">
@@ -377,7 +456,7 @@
                                 <div class="craft-prof-xp">0 / 100 XP</div>
                                 <p class="profession-desc">Forge des armes</p>
                             </div>
-                            
+
                             <!-- Armurier -->
                             <div class="crafting-profession-card craft-profession-card" data-profession="armorsmith">
                                 <div class="profession-icon">🛡️</div>
@@ -389,7 +468,7 @@
                                 <div class="craft-prof-xp">0 / 100 XP</div>
                                 <p class="profession-desc">Fabrique des armures</p>
                             </div>
-                            
+
                             <!-- Bijoutier -->
                             <div class="crafting-profession-card craft-profession-card" data-profession="jeweler">
                                 <div class="profession-icon">💍</div>
@@ -401,24 +480,54 @@
                                 <div class="craft-prof-xp">0 / 100 XP</div>
                                 <p class="profession-desc">Crée des bijoux</p>
                             </div>
+
+                            <!-- Alchimiste -->
+                            <div class="crafting-profession-card craft-profession-card" data-profession="alchemist">
+                                <div class="profession-icon">🧪</div>
+                                <h4>Alchimiste</h4>
+                                <div class="craft-prof-level">Niveau 1</div>
+                                <div class="profession-xp-bar">
+                                    <div class="profession-xp-fill" id="alchemist-xp-bar" style="width: 0%"></div>
+                                </div>
+                                <div class="craft-prof-xp">0 / 100 XP</div>
+                                <p class="profession-desc">Prépare des potions</p>
+                            </div>
+
+                            <!-- Poissonnier -->
+                            <div class="crafting-profession-card craft-profession-card" data-profession="fishmonger">
+                                <div class="profession-icon">🍽️</div>
+                                <h4>Poissonnier</h4>
+                                <div class="craft-prof-level">Niveau 1</div>
+                                <div class="profession-xp-bar">
+                                    <div class="profession-xp-fill" id="fishmonger-xp-bar" style="width: 0%"></div>
+                                </div>
+                                <div class="craft-prof-xp">0 / 100 XP</div>
+                                <p class="profession-desc">Cuisine du poisson</p>
+                            </div>
+
+                            <!-- Tailleur -->
+                            <div class="crafting-profession-card craft-profession-card" data-profession="tailor">
+                                <div class="profession-icon">🧵</div>
+                                <h4>Tailleur</h4>
+                                <div class="craft-prof-level">Niveau 1</div>
+                                <div class="profession-xp-bar">
+                                    <div class="profession-xp-fill" id="tailor-xp-bar" style="width: 0%"></div>
+                                </div>
+                                <div class="craft-prof-xp">0 / 100 XP</div>
+                                <p class="profession-desc">Confectionne des vêtements</p>
+                            </div>
                         </div>
                     </div>
-                    
+
                     <!-- Panneau central : Recettes de craft -->
                     <div class="craft-recipes-panel">
                         <h3>📜 Recettes</h3>
-                        <div class="craft-filters">
-                            <button class="filter-btn active" data-craft-filter="all">Toutes</button>
-                            <button class="filter-btn" data-craft-filter="weapon">⚔️ Armes</button>
-                            <button class="filter-btn" data-craft-filter="armor">🛡️ Armures</button>
-                            <button class="filter-btn" data-craft-filter="accessory">💍 Accessoires</button>
-                        </div>
-                        
+
                         <div class="craft-recipes-list" id="craftRecipesList">
                             <!-- Les recettes seront affichées ici dynamiquement -->
                         </div>
                     </div>
-                    
+
                     <!-- Panneau droit : Détails de la recette sélectionnée -->
                     <div class="craft-detail-panel">
                         <h3>🔍 Détails</h3>
@@ -432,11 +541,11 @@
             </div>
         </section>
 
-        <!-- ===== ONGLET ALCHIMIE ===== -->
+        <!-- ===== ONGLET TRANSMUTATION ===== -->
         <section class="tab-content" id="tab-alchemy">
             <div class="alchemy-container">
-                <h2>🧪 Alchimie</h2>
-                
+                <h2>⚗️ Transmutation</h2>
+
                 <!-- Panneau informations -->
                 <div class="alchemy-info-panel">
                     <div class="alchemy-level-display">
@@ -460,7 +569,7 @@
                     <!-- Conversions disponibles -->
                     <div class="alchemy-conversions-panel">
                         <h3>📦 Conversions disponibles</h3>
-                        
+
                         <!-- Catégorie Bois -->
                         <div class="conversion-category">
                             <h4>🌲 Bois</h4>
@@ -502,14 +611,20 @@
         <!-- ===== ONGLET ÉQUIPEMENT ===== -->
         <section class="tab-content" id="tab-equipment">
             <div class="equipment-container">
-                <h2>🎒 Équipement</h2>
-                
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>🎒 Équipement</h2>
+                    <button class="btn btn-info" onclick="window.game.ui.showEquipmentHelp()"
+                        style="padding: 8px 16px;">
+                        ❓ Aide
+                    </button>
+                </div>
+
                 <div class="equipment-layout">
                     <!-- Panneau gauche : Statistiques du joueur -->
                     <div class="player-stats-panel">
                         <h3>📊 Statistiques du Joueur</h3>
                         <div class="player-stats-grid">
-                            <div class="player-stat-item">
+                            <div class="player-stat-item" title="Force : Augmente vos dégâts physiques. Chaque point de Force augmente vos dégâts.">
                                 <span class="stat-icon">💪</span>
                                 <div class="stat-info">
                                     <div class="stat-name">Force</div>
@@ -519,8 +634,8 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="player-stat-item">
+
+                            <div class="player-stat-item" title="Agilité : Augmente vos chances de critique et d'esquive. 1% de critique et 0.5% d'esquive par point (max 50% crit, 40% esquive).">
                                 <span class="stat-icon">⚡</span>
                                 <div class="stat-info">
                                     <div class="stat-name">Agilité</div>
@@ -530,8 +645,8 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="player-stat-item">
+
+                            <div class="player-stat-item" title="Intelligence : Augmente les dégâts magiques. Utile pour les Mages dans les Donjons.">
                                 <span class="stat-icon">🧠</span>
                                 <div class="stat-info">
                                     <div class="stat-name">Intelligence</div>
@@ -541,8 +656,8 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="player-stat-item">
+
+                            <div class="player-stat-item" title="Sagesse : Augmente l'efficacité des soins. Important pour les Soigneurs dans les Donjons.">
                                 <span class="stat-icon">✨</span>
                                 <div class="stat-info">
                                     <div class="stat-name">Sagesse</div>
@@ -552,8 +667,8 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="player-stat-item">
+
+                            <div class="player-stat-item" title="Endurance : Augmente vos PV maximum. Chaque point d'Endurance = +5 PV max.">
                                 <span class="stat-icon">🛡️</span>
                                 <div class="stat-info">
                                     <div class="stat-name">Endurance</div>
@@ -563,8 +678,8 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="player-stat-item">
+
+                            <div class="player-stat-item" title="Dégâts : Vos dégâts totaux en combat. Dépend de votre Force et de votre équipement.">
                                 <span class="stat-icon">⚔️</span>
                                 <div class="stat-info">
                                     <div class="stat-name">Dégâts</div>
@@ -574,8 +689,8 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="player-stat-item">
+
+                            <div class="player-stat-item" title="Défense : Réduit les dégâts reçus. Chaque point de Défense réduit les dégâts de 1.">
                                 <span class="stat-icon">🔰</span>
                                 <div class="stat-info">
                                     <div class="stat-name">Défense</div>
@@ -585,8 +700,8 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="player-stat-item">
+
+                            <div class="player-stat-item" title="XP Métiers : Augmente l'expérience gagnée dans tous les métiers (récolte et craft).">
                                 <span class="stat-icon">⚒️</span>
                                 <div class="stat-info">
                                     <div class="stat-name">XP Métiers</div>
@@ -596,8 +711,8 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="player-stat-item">
+
+                            <div class="player-stat-item" title="Drop Rate : Augmente vos chances d'obtenir des ressources rares et des objets en combat.">
                                 <span class="stat-icon">💎</span>
                                 <div class="stat-info">
                                     <div class="stat-name">Drop Rate</div>
@@ -609,7 +724,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Panneau central : Équipement équipé -->
                     <div class="equipment-panel">
                         <h3>⚔️ Équipement Porté</h3>
@@ -690,16 +805,20 @@
                             <div class="inventory-controls">
                                 <!-- Boutons de vente sélective -->
                                 <div class="sell-buttons">
-                                    <button class="btn btn-sm btn-sell-normal" id="sellNormalBtn" title="Vendre uniquement les objets Normaux">
+                                    <button class="btn btn-sm btn-sell-normal" id="sellNormalBtn"
+                                        title="Vendre uniquement les objets Normaux">
                                         💰 Normal
                                     </button>
-                                    <button class="btn btn-sm btn-sell-superior" id="sellSuperiorBtn" title="Vendre Normal + Supérieur">
+                                    <button class="btn btn-sm btn-sell-superior" id="sellSuperiorBtn"
+                                        title="Vendre Normal + Supérieur">
                                         💰 ≤ Supérieur
                                     </button>
-                                    <button class="btn btn-sm btn-sell-exceptional" id="sellExceptionalBtn" title="Vendre Normal + Supérieur + Exceptionnel">
+                                    <button class="btn btn-sm btn-sell-exceptional" id="sellExceptionalBtn"
+                                        title="Vendre Normal + Supérieur + Exceptionnel">
                                         💰 ≤ Exceptionnel
                                     </button>
-                                    <button class="btn btn-sm btn-danger" id="sellAllInventoryBtn" title="Vendre TOUT (sauf verrouillés)">
+                                    <button class="btn btn-sm btn-danger" id="sellAllInventoryBtn"
+                                        title="Vendre TOUT (sauf verrouillés)">
                                         ⚠️ TOUT Vendre
                                     </button>
                                 </div>
@@ -716,13 +835,15 @@
                             </div>
                         </div>
                         <!-- Info Qualité -->
-                        <div style="background: rgba(33, 150, 243, 0.1); padding: 8px 10px; border-radius: 6px; margin: 0 10px 10px 10px; font-size: 0.8rem; color: var(--text-secondary);">
-                            💡 <strong>Qualités :</strong> 
-                            <span style="color: #4CAF50;">✨ Sup.</span> • 
-                            <span style="color: #2196F3;">💎 Exc.</span> • 
-                            <span style="color: #9C27B0;">⭐ Parf.</span> • 
-                            <span style="color: #FFD700;">👑 Œuvre</span> | 
-                            <strong>🔒 Verrouillés :</strong> <span style="color: var(--text-secondary);">Ne peuvent pas être vendus</span>
+                        <div
+                            style="background: rgba(33, 150, 243, 0.1); padding: 8px 10px; border-radius: 6px; margin: 0 10px 10px 10px; font-size: 0.8rem; color: var(--text-secondary);">
+                            💡 <strong>Qualités :</strong>
+                            <span style="color: #4CAF50;">✨ Sup.</span> •
+                            <span style="color: #2196F3;">💎 Exc.</span> •
+                            <span style="color: #9C27B0;">⭐ Parf.</span> •
+                            <span style="color: #FFD700;">👑 Œuvre</span> |
+                            <strong>🔒 Verrouillés :</strong> <span style="color: var(--text-secondary);">Ne peuvent pas
+                                être vendus</span>
                         </div>
                         <div class="equipment-inventory" id="equipmentInventory">
                             <!-- L'inventaire d'équipement sera généré ici -->
@@ -736,16 +857,72 @@
         <!-- ===== ONGLET VILLE ===== -->
         <section class="tab-content" id="tab-town">
             <div class="town-container">
-                <h2>🏘️ Ville</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>🏘️ Ville</h2>
+                    <button class="btn btn-info" onclick="window.game.ui.showTownHelp()"
+                        style="padding: 8px 16px;">
+                        ❓ Aide
+                    </button>
+                </div>
                 <p class="town-description">
                     Construisez des bâtiments pour automatiser la production de ressources !
                 </p>
-                
+
+                <!-- 🏘️ NOUVELLE SECTION: GESTION DE LA VILLE -->
+                <div class="city-management-container">
+                    <h3>👥 Gestion de la Ville</h3>
+
+                    <!-- Vue d'ensemble de la population -->
+                    <div class="city-overview" id="cityOverview">
+                        <!-- Sera rempli dynamiquement -->
+                    </div>
+
+                    <!-- Sections de construction par catégorie -->
+                    <div class="city-sections">
+                        <!-- Habitations -->
+                        <div class="city-section">
+                            <h4>🏠 Habitations</h4>
+                            <div class="city-buildings-grid" id="cityHousingGrid">
+                                <!-- Sera rempli dynamiquement -->
+                            </div>
+                        </div>
+
+                        <!-- Production de Nourriture -->
+                        <div class="city-section">
+                            <h4>🍖 Production de Nourriture</h4>
+                            <div class="city-buildings-grid" id="cityFoodGrid">
+                                <!-- Sera rempli dynamiquement -->
+                            </div>
+                        </div>
+
+                        <!-- Revenus (Taxes) -->
+                        <div class="city-section">
+                            <h4>💰 Revenus & Taxes</h4>
+                            <div class="city-buildings-grid" id="cityIncomeGrid">
+                                <!-- Sera rempli dynamiquement -->
+                            </div>
+                        </div>
+
+                        <!-- Services -->
+                        <div class="city-section">
+                            <h4>🏛️ Services</h4>
+                            <div class="city-buildings-grid" id="cityServicesGrid">
+                                <!-- Sera rempli dynamiquement -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SÉPARATEUR VISUEL -->
+                <hr style="margin: 2rem 0; border: 1px solid var(--border-color);">
+
+                <h3>🏭 Bâtiments de Production</h3>
+
                 <!-- Production totale -->
                 <div class="town-production-summary" id="townProductionSummary">
                     <!-- Sera rempli dynamiquement -->
                 </div>
-                
+
                 <!-- Liste des bâtiments -->
                 <div class="buildings-grid" id="buildingsGrid">
                     <!-- Les bâtiments seront générés ici -->
@@ -753,11 +930,144 @@
             </div>
         </section>
 
+        <!-- ===== ONGLET PERSONNAGES ===== -->
+        <section class="tab-content" id="tab-characters">
+            <div id="characters_content">
+                <!-- Rempli par ui-alt-characters.js -->
+            </div>
+        </section>
+
+        <!-- ===== ONGLET DONJONS ===== -->
+        <section class="tab-content" id="tab-dungeons">
+            <div id="dungeons_content">
+                <!-- Rempli par ui-dungeons.js -->
+            </div>
+        </section>
+
         <!-- ===== ONGLET DRAGONS ===== -->
         <section class="tab-content" id="tab-dragons">
             <div class="dragons-container">
-                <h2>🐉 Dragons</h2>
-                <p class="text-muted">Contenu à venir...</p>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>🐉 Dragons</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" onclick="window.game.ui.showBestiary()"
+                            style="padding: 8px 16px;">
+                            📖 Bestiaire
+                        </button>
+                        <button class="btn btn-info" onclick="window.game.ui.showDragonHelp()"
+                            style="padding: 8px 16px;">
+                            ❓ Aide
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Ressources -->
+                <div class="dragon-resources">
+                    <div class="dragon-resource-item">
+                        <span class="dragon-resource-icon">🥩</span>
+                        <span>Nourriture: <span id="dragonFoodCount">0</span></span>
+                    </div>
+                    <div class="dragon-resource-item">
+                        <span class="dragon-resource-icon">✨</span>
+                        <span>Essences: <span id="dragonEssenceCount">0</span></span>
+                    </div>
+                    <div class="dragon-resource-item">
+                        <span class="dragon-resource-icon">📊</span>
+                        <span>Dragons: <span id="dragonsCount">0</span>/<span id="dragonsMaxCount">10</span></span>
+                    </div>
+                </div>
+
+                <div class="dragons-layout">
+                    <!-- Panneau gauche: Dragon équipé -->
+                    <div class="equipped-dragon-panel">
+                        <h3>⭐ Dragon Actif</h3>
+                        <div id="equippedDragonDisplay">
+                            <div class="no-dragon-equipped">
+                                <p style="font-size: 3rem;">🐣</p>
+                                <p>Aucun dragon équipé</p>
+                                <p style="font-size: 0.9rem; margin-top: 10px;">Sélectionnez un dragon dans votre
+                                    collection</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panneau central: Collection -->
+                    <div class="dragons-collection-panel">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3>📚 Ma Collection</h3>
+                        </div>
+
+                        <div class="collection-filters">
+                            <button class="filter-btn active" data-filter="all">Tous</button>
+                            <button class="filter-btn" data-filter="force">💪 Force</button>
+                            <button class="filter-btn" data-filter="agility">⚡ Agilité</button>
+                            <button class="filter-btn" data-filter="intelligence">🧠 Intelligence</button>
+                            <button class="filter-btn" data-filter="wisdom">✨ Sagesse</button>
+                            <button class="filter-btn" data-filter="endurance">🛡️ Endurance</button>
+                            <button class="filter-btn" data-filter="alive">❤️ Vivants</button>
+                            <button class="filter-btn" data-filter="dead">💀 Morts</button>
+                        </div>
+
+                        <div id="dragonsGrid" class="dragons-grid">
+                            <!-- Dragons générés dynamiquement -->
+                        </div>
+
+                        <div id="emptyCollection" class="empty-collection" style="display: none;">
+                            <div class="empty-collection-icon">🐉</div>
+                            <p>Aucun dragon dans votre collection</p>
+                            <p style="font-size: 0.9rem; margin-top: 10px;">Reproduisez vos premiers dragons pour
+                                commencer !</p>
+                        </div>
+                    </div>
+
+                    <!-- Panneau droit: Reproduction -->
+                    <div class="breeding-panel">
+                        <h3>🥚 Reproduction</h3>
+
+                        <div class="breeding-selection">
+                            <div class="breeding-slot" id="breedingSlot1" data-slot="0">
+                                <div class="breeding-slot-icon">🐉</div>
+                                <div>Parent 1</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Cliquez pour
+                                    sélectionner</div>
+                            </div>
+
+                            <div class="breeding-plus">+</div>
+
+                            <div class="breeding-slot" id="breedingSlot2" data-slot="1">
+                                <div class="breeding-slot-icon">🐉</div>
+                                <div>Parent 2</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Cliquez pour
+                                    sélectionner</div>
+                            </div>
+                        </div>
+
+                        <div class="breeding-result" id="breedingResult" style="display: none;">
+                            <h4>📊 Probabilités</h4>
+                            <div class="breeding-probabilities" id="breedingProbabilities">
+                                <!-- Généré dynamiquement -->
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary btn-block" id="btnBreed" disabled style="margin-top: 15px;">
+                            🥚 Reproduire (Coût: <span id="breedingCost">?</span> 💰)
+                        </button>
+
+                        <div
+                            style="margin-top: 20px; padding: 15px; background: var(--info-bg); border-radius: 10px; font-size: 0.9rem;">
+                            <strong>💡 Astuce:</strong> La pureté génétique et la lignée augmentent les chances
+                            d'obtenir un tier supérieur !
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Arbre généalogique (affiché quand on clique sur un dragon) -->
+                <div class="genealogy-panel" id="genealogyPanel" style="display: none;">
+                    <h3>🌳 Arbre Généalogique</h3>
+                    <div class="genealogy-tree" id="genealogyTree">
+                        <!-- Généré dynamiquement -->
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -778,12 +1088,12 @@
                 <h2>⚙️ Options & Sauvegarde</h2>
                 <button class="btn-close" onclick="window.game.ui.toggleOptionsPanel()">✕</button>
             </div>
-            
+
             <div class="options-body">
                 <!-- Section Export/Import -->
                 <div class="options-section">
                     <h3>💾 Gestion des Sauvegardes</h3>
-                    
+
                     <div class="options-group">
                         <h4>📤 Exporter</h4>
                         <button class="btn btn-primary" onclick="window.game.exportSave()">
@@ -793,11 +1103,11 @@
                             📋 Copier comme Texte
                         </button>
                     </div>
-                    
+
                     <div class="options-group">
                         <h4>📥 Importer</h4>
-                        <input type="file" id="importFileInput" accept=".json" style="display: none;" 
-                               onchange="window.game.ui.handleImportFile(event)">
+                        <input type="file" id="importFileInput" accept=".json" style="display: none;"
+                            onchange="window.game.ui.handleImportFile(event)">
                         <button class="btn btn-primary" onclick="document.getElementById('importFileInput').click()">
                             📂 Charger depuis Fichier
                         </button>
@@ -848,16 +1158,23 @@
     <script src="src/config/quests-data.js"></script>
     <script src="src/config/resources-data.js"></script>
     <script src="src/config/craft-recipes-data.js"></script>
-    
+    <script src="src/config/craft-recipes-extended.js"></script> <!-- Armes archétypes -->
+    <script src="src/config/craft-recipes-armors.js"></script> <!-- Armures archétypes -->
+    <script src="src/config/craft-recipes-accessories.js"></script> <!-- Accessoires archétypes -->
+    <script src="src/config/craft-recipes-consumables.js"></script> <!-- Consommables -->
+    <script src="src/config/dragons-data.js"></script>
+    <script src="src/config/dungeons-data.js"></script> <!-- 🏰 Donjons -->
+    <script src="src/config/endgame-config.js"></script> <!-- Systèmes endgame -->
+
     <!-- Combat Data -->
     <script src="src/config/regions-data.js"></script>
     <script src="src/config/monsters-data.js"></script>
     <script src="src/config/drops-data.js"></script>
-    
+
     <!-- Utilities -->
     <script src="src/js/utils/number-formatter.js"></script>
     <script src="src/js/storage-manager.js"></script>
-    
+
     <!-- Core Classes -->
     <script src="src/js/utils.js"></script>
     <script src="src/js/player.js"></script>
@@ -869,10 +1186,21 @@
     <script src="src/js/profession-manager.js"></script>
     <script src="src/js/equipment.js"></script>
     <script src="src/js/equipment-manager.js"></script>
+    <script src="src/js/character.js"></script> <!-- 🎭 Character class -->
+    <script src="src/js/shared-storage.js"></script> <!-- 📦 Coffre partagé -->
+    <script src="src/js/alt-character-manager.js"></script> <!-- 🎭 Alt Characters -->
+    <script src="src/js/dungeon-manager.js"></script> <!-- 🏰 Donjons -->
+    <script src="src/js/ui-alt-characters.js"></script> <!-- 🎭 UI Alt Characters -->
+    <script src="src/js/ui-dungeons.js"></script> <!-- 🏰 UI Donjons -->
     <script src="src/js/crafting-manager.js"></script>
     <script src="src/config/buildings-data.js"></script>
     <script src="src/js/building.js"></script>
     <script src="src/js/building-manager.js"></script>
+    <script src="src/config/city-buildings-data.js"></script>
+    <script src="src/js/city-manager.js"></script>
+    <script src="src/js/dragon.js"></script>
+    <script src="src/js/dragon-manager.js"></script>
+    <script src="src/js/dragon-test-helper.js"></script>
     <script type="module" src="src/config/alchemy-data.js"></script>
     <script type="module" src="src/js/alchemy-manager.js"></script>
     <script src="src/js/character-creation.js"></script>
@@ -888,4 +1216,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -1,230 +1,358 @@
-# 🍪 Idle Game V1
+# 🎮 Nyln'ato Idle RPG
 
-Un jeu incrémental (idle game) inspiré de Cookie Clicker et Dodecadragons, développé en HTML5/CSS3/JavaScript vanilla.
+Un RPG incrémental (idle game) avec combat, crafting, professions et construction de ville, développé en HTML5/CSS3/JavaScript vanilla.
 
-![Version](https://img.shields.io/badge/version-0.1.0-blue)
+![Version](https://img.shields.io/badge/version-0.1.0--alpha-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
+![Status](https://img.shields.io/badge/status-Alpha-orange)
 
 ---
 
-## 🎮 À propos
+## 📖 À propos
 
-Idle Game V1 est un jeu incrémental où vous devez accumuler des cookies en cliquant et en achetant des bâtiments automatiques. Votre objectif : devenir le plus grand producteur de cookies de tous les temps !
+**Nyln'ato Idle** est un RPG incrémental où vous incarnez un aventurier explorant 5 régions, combattant des monstres, craftant de l'équipement et développant votre propre ville. Votre objectif : devenir le héros le plus puissant du royaume !
 
-### ✨ Fonctionnalités
+### ✨ Fonctionnalités principales
 
-- 🖱️ **Système de clics** : Gagnez des cookies en cliquant
-- 🏗️ **10 bâtiments différents** : Curseur, Grand-mère, Ferme, Mine, etc.
-- 🔧 **Système d'upgrades** : Améliorez votre production
-- 💾 **Sauvegarde automatique** : Vos progrès sont sauvegardés automatiquement
-- 📊 **Production offline** : Continuez à gagner des cookies même hors ligne
-- 📱 **Design responsive** : Jouable sur mobile, tablette et desktop
-- 🎨 **Animations fluides** : Interface réactive et agréable
+#### ⚔️ Combat
+- **5 régions explorables** avec environnements uniques
+- **50 zones** à débloquer progressivement
+- **45+ monstres** (communs, rares, élites, boss)
+- **Système de combat automatique** ou manuel
+- **Progression de niveau** avec gains de stats
+
+#### 🎒 Équipement & Crafting
+- **Système de crafting complet** (armes, armures, accessoires)
+- **Système de qualité** (Normal → Superior → Exceptional → Perfect → Masterwork)
+- **7 raretés d'équipement** (Common → Divine)
+- **Drops aléatoires** depuis les monstres
+- **Gestion d'inventaire** avec tri et filtres
+
+#### 🌳 Professions
+- **Bûcheron** : Récolte de bois (Chêne, Pin, etc.)
+- **Mineur** : Extraction de minerais (Fer, Cuivre, etc.)
+- **Auto-récolte** déblocable
+- **Progression de niveau** pour chaque profession
+
+#### 🏘️ Système de Ville
+- **15+ bâtiments** constructibles
+- **Production automatique** de ressources
+- **Gestion de population** et nourriture
+- **Taxes et économie**
+
+#### 🧪 Alchimie
+- **Conversion de ressources** (ex: bois → charbon)
+- **Recettes déblocables** par niveau
+- **Production automatique**
+
+#### 🎭 Personnalisation
+- **Création de personnage** (nom, genre, classe)
+- **4 classes** : Guerrier, Archer, Mage, Prêtre
+- **Bonus de classe** uniques
+
+#### 💾 Sauvegarde
+- **Sauvegarde automatique** (toutes les 30s)
+- **Import/Export** de sauvegarde
+- **Production offline** (jusqu'à 24h)
+
+---
+
+## 🎯 Objectif du jeu
+
+1. **Explorer** les 5 régions (Plaines Verdoyantes → Montagnes Grises → Désert de Cendres → Terres Glacées → Terres Démoniaques)
+2. **Combattre** les monstres et battre les boss de région
+3. **Crafter** l'équipement le plus puissant
+4. **Développer** votre ville et vos professions
+5. **Atteindre le niveau maximum** et dominer le royaume
 
 ---
 
 ## 🚀 Démarrage rapide
 
-### Prérequis
+### 🌐 Jouer en ligne
 
-- Node.js 16+ (pour le serveur de développement)
+**[▶️ Jouer maintenant](https://atond.github.io/nylnatoidle3/)** (GitHub Pages)
+
+### 💻 Installation locale
+
+#### Prérequis
 - Un navigateur moderne (Chrome, Firefox, Edge, Safari)
+- Python 3 (pour serveur local) OU Node.js
 
-### Installation
+#### Méthode 1 : Serveur Python (recommandé)
+```bash
+# Cloner le projet
+git clone https://github.com/Atond/nylnatoidle3.git
+cd nylnatoidle3
 
-1. **Cloner le projet**
-   ```bash
-   git clone https://github.com/votre-username/idle-game-v1.git
-   cd idle-game-v1
-   ```
+# Lancer le serveur
+python -m http.server 8080
 
-2. **Installer les dépendances**
-   ```bash
-   npm install
-   ```
-
-3. **Lancer le serveur de développement**
-   ```bash
-   npm run dev
-   ```
-
-4. **Ouvrir dans le navigateur**
-   - Le jeu s'ouvre automatiquement sur `http://localhost:3000`
-   - Ou ouvrez manuellement `index.html` dans votre navigateur
-
----
-
-## 📁 Structure du projet
-
+# Ouvrir http://localhost:8080
 ```
-idle-game-v1/
-├── .vscode/                    # Configuration VS Code et Copilot
-│   ├── copilot-instructions.md # Instructions pour l'IA
-│   ├── tasks.json             # Tâches automatisées
-│   └── settings.json          # Paramètres de l'éditeur
-│
-├── .prompts/                   # Bibliothèque de prompts pour l'IA
-│   ├── debugging.md           # Stratégies de débogage
-│   ├── ui-design.md          # Guidelines d'interface
-│   ├── game-architecture.md  # Architecture du jeu
-│   ├── performance-optimization.md
-│   ├── testing-strategies.md
-│   ├── game-mechanics.md
-│   └── expert-prompts.md
-│
-├── src/                       # Code source (à créer)
-│   ├── js/
-│   │   ├── main.js           # Point d'entrée
-│   │   ├── game.js           # Classe principale
-│   │   ├── buildings.js      # Gestion des bâtiments
-│   │   ├── upgrades.js       # Système d'améliorations
-│   │   ├── ui.js             # Interface utilisateur
-│   │   ├── save.js           # Système de sauvegarde
-│   │   └── utils.js          # Fonctions utilitaires
-│   │
-│   ├── css/
-│   │   ├── main.css          # Styles principaux
-│   │   ├── components.css    # Composants UI
-│   │   └── animations.css    # Animations
-│   │
-│   ├── config/
-│   │   ├── game-config.js    # Configuration du jeu
-│   │   ├── buildings-data.js # Données des bâtiments
-│   │   └── upgrades-data.js  # Données des upgrades
-│   │
-│   └── assets/
-│       ├── images/           # Images du jeu
-│       └── sounds/           # Effets sonores (futur)
-│
-├── index.html                 # Point d'entrée HTML (à créer)
-├── package.json              # Dépendances Node.js
-├── .gitignore               # Fichiers ignorés par Git
-├── ROADMAP.md               # Plan de développement
-├── TEST-CHECKLIST.md        # Tests manuels
-├── DEPLOYMENT.md            # Guide de déploiement
-└── README.md                # Ce fichier
+
+#### Méthode 2 : Serveur Node.js
+```bash
+# Cloner le projet
+git clone https://github.com/Atond/nylnatoidle3.git
+cd nylnatoidle3
+
+# Installer dépendances
+npm install
+
+# Lancer le serveur
+npm run dev
+
+# Ouvrir http://localhost:8080
+```
+
+#### Méthode 3 : Ouvrir directement
+```bash
+# Simplement ouvrir index.html dans votre navigateur
+# Note : Certaines fonctionnalités peuvent être limitées sans serveur
 ```
 
 ---
 
-## 🎯 Roadmap
+## 📚 Documentation
 
-Le développement est organisé en 4 phases :
+### 📊 Analyse & Rapports
+- **[INDEX-ANALYSE.md](INDEX-ANALYSE.md)** - Index de la documentation d'analyse
+- **[RECAP-VISUEL.md](RECAP-VISUEL.md)** - Vue d'ensemble rapide (⭐ Recommandé)
+- **[ANALYSE-COMPLETE-RAPPORT.md](ANALYSE-COMPLETE-RAPPORT.md)** - Rapport détaillé
+- **[FIX-BUGS-CRITIQUES.md](FIX-BUGS-CRITIQUES.md)** - Guide de correction
+- **[ACTION-PLAN-PRIORITAIRE.md](ACTION-PLAN-PRIORITAIRE.md)** - Roadmap v1.0
 
-### Phase 1 - MVP (Semaine 1) ✅
-- Clic et compteur
-- 3 bâtiments de base
-- Production automatique
-- Sauvegarde LocalStorage
-- UI responsive basique
+### 🎮 Guides de jeu
+- **[GUIDE-TEST-RAPIDE.md](docs/guides/GUIDE-TEST-RAPIDE.md)** - Guide de test
+- **[RESOURCES-OVERVIEW.md](docs/RESOURCES-OVERVIEW.md)** - Vue d'ensemble des ressources
 
-### Phase 2 - Enrichissement (Semaine 2)
-- Système d'upgrades complet
-- 10 bâtiments au total
-- Achievements
-- Statistiques
+### ⚖️ Équilibrage
+- **[docs/balance/](docs/balance/)** - Documentation d'équilibrage complet
+  - BALANCE-OVERVIEW.md
+  - BALANCE-CRAFTING.md
+  - BALANCE-PLAYER.md
+  - etc.
 
-### Phase 3 - Polish (Semaine 3)
-- Design avancé
-- Animations complexes
-- Optimisations performance
-- Tests et debug
+### 🏗️ Architecture
+Voir [docs/implementation/](docs/implementation/) pour les détails d'implémentation
 
-### Phase 4 - Fonctionnalités avancées (Optionnel)
-- Système de prestige
-- Événements temporaires
-- Mini-jeux
-- Effets sonores
+---
 
-Voir [ROADMAP.md](ROADMAP.md) pour le détail complet.
+## 🎮 Comment jouer
+
+### Premiers pas
+
+1. **Créez votre personnage**
+   - Choisissez nom, genre et classe
+   - Confirmez pour commencer
+
+2. **Combattez votre premier monstre**
+   - Cliquez sur "Attaquer" ou appuyez sur **Espace**
+   - Activez l'auto-combat avec le bouton ou **A**
+
+3. **Équipez-vous**
+   - Récoltez du bois et des minerais (onglet Métiers)
+   - Craftez votre premier équipement (onglet Crafting)
+   - Équipez vos créations (onglet Équipement)
+
+4. **Progressez**
+   - Tuez 10 monstres pour débloquer la zone suivante
+   - Montez de niveau pour devenir plus fort
+   - Battez les boss de région (zone 10)
+
+5. **Développez votre ville**
+   - Construisez des bâtiments (onglet Ville)
+   - Gérez population et ressources
+   - Améliorez vos bâtiments
+
+### ⌨️ Raccourcis clavier
+
+| Touche | Action |
+|--------|--------|
+| **Espace** | Attaquer manuellement |
+| **A** | Toggle auto-combat |
+| **I** | Ouvrir l'inventaire |
+| **C** | Ouvrir le crafting |
+| **←** **→** | Changer de zone |
+| **Ctrl+S** | Sauvegarder manuellement |
+
+---
+
+## 🗺️ Régions du jeu
+
+### 🌾 Région 1 : Les Plaines Verdoyantes
+- **Niveaux** : 1-10
+- **Faction** : Les Humains d'Érialis
+- **Monstres** : Loups, Sangliers, Bandits
+- **Boss** : La Bête des Prairies
+
+### ⛰️ Région 2 : Les Montagnes Grises
+- **Niveaux** : 11-20
+- **Faction** : Les Nains de Karak-Thar
+- **Monstres** : Chauves-souris, Gobelins, Trolls
+- **Boss** : Le Roi Troll Ancestral
+
+### 🏜️ Région 3 : Le Désert de Cendres
+- **Niveaux** : 21-30
+- **Faction** : Les Nomades du Sable
+- **Monstres** : Scorpions, Serpents de sable, Momies
+- **Boss** : Le Wyrm des Sables
+
+### ❄️ Région 4 : Les Terres Glacées
+- **Niveaux** : 31-40
+- **Faction** : Les Guerriers du Nord
+- **Monstres** : Yetis, Loups des glaces, Dragons de glace
+- **Boss** : Le Seigneur de Glace
+
+### 🔥 Région 5 : Les Terres Démoniaques
+- **Niveaux** : 41-50
+- **Faction** : Résistance contre les Démons
+- **Monstres** : Diablotins, Succubes, Chevaliers des Enfers
+- **Boss** : Le Seigneur Démon
 
 ---
 
 ## 🛠️ Technologies utilisées
 
-- **HTML5** - Structure
-- **CSS3** - Styles et animations
-- **JavaScript ES6+** - Logique du jeu (vanilla, pas de framework)
-- **LocalStorage** - Sauvegarde des données
-- **requestAnimationFrame** - Boucle de jeu optimisée
+- **Frontend** : HTML5, CSS3, JavaScript ES6+
+- **Architecture** : MVC-like pattern
+- **Sauvegarde** : LocalStorage API
+- **Animations** : CSS Animations + requestAnimationFrame
+- **Icônes** : Emojis Unicode
+- **Serveur dev** : Python http.server / Node.js http-server
 
 ---
 
-## 📖 Documentation
+## 📊 État du projet
 
-- [ROADMAP.md](ROADMAP.md) - Plan de développement détaillé
-- [TEST-CHECKLIST.md](TEST-CHECKLIST.md) - Checklist de tests manuels
-- [DEPLOYMENT.md](DEPLOYMENT.md) - Guide de déploiement
-- [README-PROMPTS.md](README-PROMPTS.md) - Utilisation des prompts IA
-- [.prompts/](./prompts/) - Bibliothèque de prompts pour l'IA
+### Version actuelle : 0.1.0-alpha
 
----
+#### ✅ Fonctionnalités implémentées
+- [x] Système de combat (manuel + auto)
+- [x] 5 régions, 50 zones, 45+ monstres
+- [x] Système de crafting complet
+- [x] Professions (Bûcheron, Mineur)
+- [x] Système de ville avec 15+ bâtiments
+- [x] Alchimie (conversion de ressources)
+- [x] Création de personnage (genre, classe)
+- [x] Sauvegarde/Chargement
+- [x] Import/Export de sauvegarde
+- [x] Production offline
+- [x] Système de qualité d'équipement
 
-## 🧪 Tests
+#### 🚧 En cours de développement
+- [ ] Quêtes (système existant mais incomplet)
+- [ ] Achievements
+- [ ] Statistiques détaillées
+- [ ] Tooltips informatifs
+- [ ] Raccourcis clavier
+- [ ] Mobile responsiveness complet
 
-### Tests manuels
-```bash
-# Lancer le jeu en local et suivre la checklist
-npm run dev
-```
-
-Voir [TEST-CHECKLIST.md](TEST-CHECKLIST.md) pour la liste complète des tests.
-
-### Tests automatisés
-```bash
-# À implémenter dans une future version
-npm test
-```
-
----
-
-## 🚀 Déploiement
-
-Le jeu peut être déployé sur :
-- **GitHub Pages** (gratuit, le plus simple)
-- **Azure Static Web Apps** (gratuit, recommandé pour Azure)
-- **Netlify** (gratuit, excellent pour hobby projects)
-- **Vercel** (gratuit, très rapide)
-
-Voir [DEPLOYMENT.md](DEPLOYMENT.md) pour les instructions détaillées.
+#### 🔮 Fonctionnalités futures (v0.2+)
+- [ ] PvP / Arène
+- [ ] Guildes
+- [ ] Événements temporaires
+- [ ] Système de mascottes/dragons
+- [ ] Enchantement d'équipement
+- [ ] Mode prestige
 
 ---
 
-## 🤝 Contribution
+## 🐛 Bugs connus
 
-Ce projet est actuellement en développement solo, mais les suggestions sont les bienvenues !
+### 🔴 Critiques (à corriger immédiatement)
+1. **Duplication `exportSave()`** - Deux fonctions identiques
+2. **StorageManager méthodes manquantes** - `getSaveData()` et `loadSaveData()`
+3. **Debug mode actif** - Logs en production
 
-### Comment contribuer
-1. Fork le projet
-2. Créer une branche (`git checkout -b feature/amelioration`)
-3. Commit les changements (`git commit -m 'Ajout fonctionnalité X'`)
-4. Push sur la branche (`git push origin feature/amelioration`)
-5. Ouvrir une Pull Request
+👉 Voir [FIX-BUGS-CRITIQUES.md](FIX-BUGS-CRITIQUES.md) pour les corrections
+
+### 🟡 Non critiques
+- 89 erreurs TypeScript (non bloquantes)
+- Query selectors répétés (impact performance léger)
+
+---
+
+## 🤝 Contribuer
+
+Les contributions sont les bienvenues ! Voici comment participer :
+
+1. **Fork** le projet
+2. **Créer une branche** (`git checkout -b feature/AmazingFeature`)
+3. **Commit** vos changements (`git commit -m 'Add: Amazing feature'`)
+4. **Push** sur la branche (`git push origin feature/AmazingFeature`)
+5. **Ouvrir une Pull Request**
+
+### Conventions de commit
+- `feat:` Nouvelle fonctionnalité
+- `fix:` Correction de bug
+- `docs:` Documentation
+- `style:` Formatage
+- `refactor:` Refactoring
+- `test:` Tests
+- `chore:` Tâches diverses
+
+---
+
+## 📜 Changelog
+
+Voir [CHANGELOG.md](CHANGELOG.md) pour l'historique complet des modifications.
+
+### [0.1.0-alpha] - 2025-10-19
+- ✅ Version initiale fonctionnelle
+- ✅ Système de combat complet
+- ✅ Crafting et professions
+- ✅ Système de ville
+- 🐛 3 bugs critiques identifiés
 
 ---
 
 ## 📝 License
 
-Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+---
+
+## 👤 Auteur
+
+**Atond**
+- GitHub: [@Atond](https://github.com/Atond)
+- Projet: [nylnatoidle3](https://github.com/Atond/nylnatoidle3)
 
 ---
 
 ## 🙏 Remerciements
 
-- Inspiré par [Cookie Clicker](https://orteil.dashnet.org/cookieclicker/) d'Orteil
-- Inspiré par [Dodecadragons](https://demonin.com/games/dodecaDragons/)
-- Développé avec l'aide de GitHub Copilot
+- Inspiration : Cookie Clicker, Dodecadragons, Melvor Idle
+- Communauté des idle games sur Reddit
+- GitHub Copilot pour l'analyse et l'assistance
 
 ---
 
-## 📧 Contact
+## 📞 Support
 
-Pour toute question ou suggestion :
-- **GitHub Issues** : [Ouvrir un ticket](https://github.com/votre-username/idle-game-v1/issues)
-- **Email** : votre.email@example.com
+- **Bugs** : Ouvrir une [issue](https://github.com/Atond/nylnatoidle3/issues)
+- **Questions** : Discussions GitHub
+- **Suggestions** : Feature requests dans issues
 
 ---
 
-## 🎮 Amusez-vous bien !
+## 🎉 Fun Facts
 
-Bon courage pour devenir le plus grand producteur de cookies de tous les temps ! 🍪
+- **Lignes de code** : ~15,000+
+- **Fichiers JS** : 18 fichiers
+- **Temps de développement** : Plusieurs semaines
+- **Monstres créés** : 45+ avec lore complet
+- **Crafting recipes** : 50+ recettes
+- **Bâtiments** : 15+ dans le système de ville
+
+---
+
+**⭐ Si vous aimez ce projet, n'hésitez pas à lui donner une étoile sur GitHub ! ⭐**
+
+---
+
+**Dernière mise à jour** : 19 Octobre 2025  
+**Version** : 0.1.0-alpha  
+**Status** : 🎮 Jouable (avec corrections mineures recommandées)

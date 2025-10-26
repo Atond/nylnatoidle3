@@ -3,7 +3,11 @@
  */
 
 class Player {
-    constructor() {
+    constructor(equipmentManager = null, dragonManager = null) {
+        // 🏗️ Injection de dépendances pour réduire le couplage
+        this.equipmentManager = equipmentManager;
+        this.dragonManager = dragonManager;
+        
         // Personnalisation du personnage
         this.name = "Aventurier";
         this.gender = null; // male, female, neutral
@@ -181,6 +185,11 @@ class Player {
         this.stats.wisdom += gains.wisdom;
         this.stats.endurance += gains.endurance;
         
+        // 🎯 Mise à jour des quêtes de type 'level_up'
+        if (window.game && window.game.questManager) {
+            window.game.questManager.updateLevelUpQuest(this.level);
+        }
+        
         if (GameConfig.DEBUG.enabled) {
             console.log(`🎉 Level Up! Niveau ${this.level} atteint!`);
         }
@@ -200,39 +209,106 @@ class Player {
     }
 
     /**
-     * Calcule les dégâts d'attaque du joueur
+     * Calcule les bonus du dragon équipé
      */
-    calculateDamage() {
-        // Dégâts de base
-        const baseDamage = GameConfig.COMBAT.BASE_CLICK_DAMAGE;
-        const forceDamage = Math.max(0, this.stats.force) * GameConfig.COMBAT.DAMAGE_FORMULA.FORCE_MULTIPLIER;
+    calculateDragonBonus() {
+        const dragonBonus = {
+            force: 0,
+            agility: 0,
+            intelligence: 0,
+            wisdom: 0,
+            endurance: 0
+        };
         
-        // Bonus d'équipement
-        let equipmentBonus = 0;
-        if (window.game && window.game.equipmentManager) {
-            const equipStats = window.game.equipmentManager.calculateTotalStats();
-            // 🛡️ FIX: Protection contre stats négatives
-            // Bonus de force de l'équipement
-            equipmentBonus += Math.max(0, equipStats.force || 0) * GameConfig.COMBAT.DAMAGE_FORMULA.FORCE_MULTIPLIER;
-            // Bonus de dégâts directs
-            equipmentBonus += Math.max(0, equipStats.damage || 0);
+        if (this.dragonManager) {
+            const equippedDragon = this.dragonManager.getEquippedDragon();
+            if (equippedDragon && equippedDragon.isAlive) {
+                const dragonStats = equippedDragon.getTotalStats();
+                Object.keys(dragonStats).forEach(stat => {
+                    if (dragonBonus.hasOwnProperty(stat)) {
+                        dragonBonus[stat] = dragonStats[stat] || 0;
+                    }
+                });
+            }
         }
         
-        // 🛡️ FIX: Toujours garantir au moins 1 dégât
-        return Math.max(1, Math.floor(baseDamage + forceDamage + equipmentBonus));
+        return dragonBonus;
+    }
+
+    /**
+     * Met à jour les statistiques après changement d'équipement/dragon
+     */
+    updateEquipmentStats() {
+        // Cette méthode sera appelée quand l'équipement ou le dragon change
+        // Pour le moment, elle ne fait rien mais est appelée par les managers
+        // Les bonus sont calculés dynamiquement dans calculateDamage() et calculateDefense()
+    }
+
+    /**
+     * Calcule les dégâts d'attaque du joueur
+     * Gère les dégâts physiques (Force) ET magiques (Intelligence) selon la classe
+     */
+    calculateDamage() {
+        const baseDamage = GameConfig.COMBAT.BASE_CLICK_DAMAGE;
+        
+        // 🎯 CLASSE : Déterminer le type de dégâts (Physique ou Magique)
+        // Par défaut, si pas de classe définie, utiliser physique (rétrocompatibilité)
+        const playerClass = this.class || 'warrior';
+        const isMagicClass = (playerClass === 'mage' || playerClass === 'priest');
+        
+        // 💪 DÉGÂTS PHYSIQUES (Guerrier/Archer)
+        let physicalDamage = 0;
+        if (!isMagicClass) {
+            const playerForce = Math.max(0, this.stats.force);
+            physicalDamage = playerForce * GameConfig.COMBAT.DAMAGE_FORMULA.FORCE_MULTIPLIER;
+        }
+        
+        // 🧠 DÉGÂTS MAGIQUES (Mage/Prêtre)
+        let magicalDamage = 0;
+        if (isMagicClass) {
+            const playerIntelligence = Math.max(0, this.stats.intelligence);
+            magicalDamage = playerIntelligence * GameConfig.COMBAT.DAMAGE_FORMULA.INTELLIGENCE_MULTIPLIER;
+        }
+        
+        // 🎒 BONUS D'ÉQUIPEMENT
+        let equipmentBonus = 0;
+        if (this.equipmentManager) {
+            const equipStats = this.equipmentManager.calculateTotalStats();
+            
+            if (!isMagicClass) {
+                // Classe physique : bonus de Force + dégâts directs
+                equipmentBonus += Math.max(0, equipStats.force || 0) * GameConfig.COMBAT.DAMAGE_FORMULA.FORCE_MULTIPLIER;
+                equipmentBonus += Math.max(0, equipStats.damage || 0);
+            } else {
+                // Classe magique : bonus d'Intelligence
+                equipmentBonus += Math.max(0, equipStats.intelligence || 0) * GameConfig.COMBAT.DAMAGE_FORMULA.INTELLIGENCE_MULTIPLIER;
+                equipmentBonus += Math.max(0, equipStats.damage || 0); // Dégâts directs aussi
+            }
+        }
+        
+        // 🐉 BONUS DE DRAGON
+        const dragonBonus = this.calculateDragonBonus();
+        let dragonDamage = 0;
+        if (!isMagicClass) {
+            dragonDamage = Math.max(0, dragonBonus.force || 0) * GameConfig.COMBAT.DAMAGE_FORMULA.FORCE_MULTIPLIER;
+        } else {
+            dragonDamage = Math.max(0, dragonBonus.intelligence || 0) * GameConfig.COMBAT.DAMAGE_FORMULA.INTELLIGENCE_MULTIPLIER;
+        }
+        
+        // 🎯 TOTAL : Base + (Physique OU Magique) + Équipement + Dragon
+        const totalDamage = baseDamage + physicalDamage + magicalDamage + equipmentBonus + dragonDamage;
+        
+        return Math.max(1, Math.floor(totalDamage));
     }
 
     /**
      * Calcule la vitesse d'attaque du joueur (en millisecondes)
      */
     calculateAttackSpeed() {
-        // Vitesse de base réduite par l'agilité
+        // Vitesse de base fixe (pas de bonus d'agilité)
         const baseSpeed = GameConfig.COMBAT.BASE_ATTACK_SPEED;
-        // 🛡️ FIX: Protection contre agilité négative
-        const agility = Math.max(0, this.stats.agility);
-        const speedBonus = 1 + (agility * GameConfig.COMBAT.AGILITY_SPEED_FACTOR);
         
-        return Math.max(500, Math.floor(baseSpeed / speedBonus)); // Minimum 500ms
+        return Math.max(500, baseSpeed); // Minimum 500ms
     }
 
     /**
@@ -249,27 +325,51 @@ class Player {
     attack(target) {
         if (!this.isAlive || !target) return 0;
         
-        const damage = this.calculateDamage();
+        let damage = this.calculateDamage();
         this.lastAttackTime = Date.now();
         
-        return damage;
+        // ⚔️ CRITICAL HIT : Basé sur l'Agilité (1% par point d'Agilité)
+        const critChance = Math.min(50, this.stats.agility); // Max 50% crit
+        const isCritical = Math.random() * 100 < critChance;
+        
+        if (isCritical) {
+            damage = Math.floor(damage * 2); // Double dégâts
+            return { damage, isCritical: true };
+        }
+        
+        return { damage, isCritical: false };
     }
 
     /**
      * Subit des dégâts
      */
     takeDamage(amount) {
-        if (!this.isAlive) return;
+        if (!this.isAlive) return { damage: 0, blocked: false, evaded: false };
+        
+        let equipStats = {};
+        if (this.equipmentManager) {
+            equipStats = this.equipmentManager.calculateTotalStats();
+        }
+        
+        // 🛡️ BLOCK CHANCE : Chance de bloquer l'attaque complètement
+        const blockChance = Math.max(0, equipStats.blockChance || 0);
+        const isBlocked = Math.random() * 100 < blockChance;
+        
+        if (isBlocked) {
+            return { damage: 0, blocked: true, evaded: false };
+        }
+        
+        // 🏃 EVASION : Basée sur l'Agilité (0.5% par point d'Agilité, max 40%)
+        const evasionChance = Math.min(40, (this.stats.agility || 0) * 0.5);
+        const isEvaded = Math.random() * 100 < evasionChance;
+        
+        if (isEvaded) {
+            return { damage: 0, blocked: false, evaded: true };
+        }
         
         // Réduction des dégâts par la défense de l'équipement
-        let finalDamage = amount;
-        if (window.game && window.game.equipmentManager) {
-            const equipStats = window.game.equipmentManager.calculateTotalStats();
-            // 🛡️ FIX: Protection contre défense négative
-            const defense = Math.max(0, equipStats.defense || 0);
-            // La défense réduit les dégâts (1 défense = -1 dégât)
-            finalDamage = Math.max(1, amount - defense);
-        }
+        const defense = Math.max(0, equipStats.defense || 0);
+        let finalDamage = Math.max(1, amount - defense);
         
         this.stats.hp -= finalDamage;
         
@@ -279,7 +379,7 @@ class Player {
             this.onDeath();
         }
         
-        return finalDamage; // Retourne les dégâts réels subis
+        return { damage: finalDamage, blocked: false, evaded: false };
     }
 
     /**
@@ -306,8 +406,9 @@ class Player {
         let maxHp = Math.max(1, this.stats.maxHp); // 🛡️ FIX: Au moins 1 HP
         
         // Bonus d'endurance de l'équipement
-        if (window.game && window.game.equipmentManager) {
-            const equipStats = window.game.equipmentManager.calculateTotalStats();
+        // 🏗️ FIX: Utilisation de l'instance injectée au lieu de window.game
+        if (this.equipmentManager) {
+            const equipStats = this.equipmentManager.calculateTotalStats();
             // 🛡️ FIX: Protection contre endurance négative
             const endurance = Math.max(0, equipStats.endurance || 0);
             // Chaque point d'endurance donne +5 HP

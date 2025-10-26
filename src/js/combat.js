@@ -22,6 +22,10 @@ class Combat {
         this.monstersKilledPerZone = {};
         this.monstersKilledPerZone['1_1'] = 0; // Format: "regionId_zoneId"
         
+        // 🛡️ FIX EXPLOIT : Cache des monstres par zone pour éviter le re-roll
+        // Format: { "regionId_zoneId": Monster }
+        this.monstersByZone = {};
+        
         // État du combat
         this.isActive = true;
         this.isFighting = false;
@@ -160,10 +164,15 @@ class Combat {
         }
         
         // Le joueur attaque
-        const damage = this.player.attack(this.currentMonster);
-        const actualDamage = this.currentMonster.takeDamage(damage);
+        const attackResult = this.player.attack(this.currentMonster);
+        const actualDamage = this.currentMonster.takeDamage(attackResult.damage);
         
-        this.addLog(`Vous infligez ${actualDamage} dégâts au ${this.currentMonster.getName()}`);
+        // Message avec critique
+        if (attackResult.isCritical) {
+            this.addLog(`💥 CRITIQUE! Vous infligez ${actualDamage} dégâts au ${this.currentMonster.getName()}`);
+        } else {
+            this.addLog(`Vous infligez ${actualDamage} dégâts au ${this.currentMonster.getName()}`);
+        }
         
         // Vérifier si le monstre est mort
         if (!this.currentMonster.isAlive) {
@@ -174,9 +183,16 @@ class Combat {
         // ⚔️ LE MONSTRE RIPOSTE IMMÉDIATEMENT après l'attaque du joueur
         if (this.currentMonster && this.currentMonster.isAlive) {
             const monsterDamage = this.currentMonster.attack();
-            const actualMonsterDamage = this.player.takeDamage(monsterDamage);
+            const damageResult = this.player.takeDamage(monsterDamage);
             
-            this.addLog(`${this.currentMonster.getName()} riposte et inflige ${actualMonsterDamage} dégâts`);
+            // Message selon le résultat
+            if (damageResult.blocked) {
+                this.addLog(`🛡️ BLOQUÉ! Vous bloquez l'attaque du ${this.currentMonster.getName()}`);
+            } else if (damageResult.evaded) {
+                this.addLog(`💨 ESQUIVÉ! Vous esquivez l'attaque du ${this.currentMonster.getName()}`);
+            } else {
+                this.addLog(`${this.currentMonster.getName()} riposte et inflige ${damageResult.damage} dégâts`);
+            }
             
             // Vérifier si le joueur est mort
             if (!this.player.isAlive) {
@@ -205,10 +221,15 @@ class Combat {
         
         // Le joueur attaque automatiquement (auto-combat ON)
         if (this.player.canAttack(currentTime) && this.currentMonster && this.currentMonster.isAlive) {
-            const damage = this.player.attack(this.currentMonster);
-            const actualDamage = this.currentMonster.takeDamage(damage);
+            const attackResult = this.player.attack(this.currentMonster);
+            const actualDamage = this.currentMonster.takeDamage(attackResult.damage);
             
-            this.addLog(`Vous infligez ${actualDamage} dégâts`);
+            // Message avec critique
+            if (attackResult.isCritical) {
+                this.addLog(`💥 CRITIQUE! ${actualDamage} dégâts`);
+            } else {
+                this.addLog(`Vous infligez ${actualDamage} dégâts`);
+            }
             
             if (!this.currentMonster.isAlive) {
                 this.onMonsterDeath();
@@ -219,9 +240,16 @@ class Combat {
         // Le monstre attaque automatiquement (auto-combat ON)
         if (this.currentMonster && this.currentMonster.isAlive && this.currentMonster.canAttack(currentTime)) {
             const damage = this.currentMonster.attack();
-            const actualDamage = this.player.takeDamage(damage);
+            const damageResult = this.player.takeDamage(damage);
             
-            this.addLog(`${this.currentMonster.getName()} riposte et inflige ${actualDamage} dégâts`);
+            // Message selon le résultat
+            if (damageResult.blocked) {
+                this.addLog(`🛡️ BLOQUÉ!`);
+            } else if (damageResult.evaded) {
+                this.addLog(`💨 ESQUIVÉ!`);
+            } else {
+                this.addLog(`${this.currentMonster.getName()} riposte et inflige ${damageResult.damage} dégâts`);
+            }
             
             if (!this.player.isAlive) {
                 this.onPlayerDeath();
@@ -234,13 +262,13 @@ class Combat {
      * Régénération HP passive
      */
     updateHealthRegen(deltaTime) {
-        if (!this.player.isAlive || this.player.hp >= this.player.getMaxHp()) return;
+        if (!this.player.isAlive || this.player.stats.hp >= this.player.getMaxHp()) return;
         
         const currentTime = Date.now();
         const timeSinceLastRegen = (currentTime - this.lastRegenTime) / 1000; // en secondes
         
         if (timeSinceLastRegen >= 1) { // Regen toutes les secondes
-            const regenRate = this.isFighting ? 0.01 : 0.05; // 1% en combat, 5% hors combat
+            const regenRate = this.isFighting ? 0.02 : 0.10; // 2% en combat, 10% hors combat (doublé!)
             const healAmount = Math.floor(this.player.getMaxHp() * regenRate);
             
             if (healAmount > 0) {
@@ -267,6 +295,25 @@ class Combat {
         const levelUps = this.player.gainXp(xp);
         this.player.resources.gold += gold;
         
+        // 💪 CARRY MODE : Alt gagne aussi de l'XP
+        if (window.game && window.game.altCharacterManager) {
+            const carryState = window.game.altCharacterManager.getCarryState();
+            if (carryState.isActive) {
+                const alt = window.game.altCharacterManager.getCharacter(carryState.altId);
+                if (alt) {
+                    // Alt gagne 75% de l'XP
+                    const altXP = Math.floor(xp * 0.75);
+                    alt.gainXP(altXP);
+                    this.addLog(`💪 ${alt.name} (Carry) : +${altXP} XP`);
+                    
+                    // Notifier quête si level up
+                    if (window.game.questManager) {
+                        window.game.questManager.updateCreateAltQuest(carryState.altId);
+                    }
+                }
+            }
+        }
+        
         // Message de victoire
         const victoryIcon = isBoss ? '👑' : '⚔️';
         this.addLog(`${victoryIcon} Victoire ! +${xp} XP, +${gold} or`);
@@ -274,11 +321,11 @@ class Combat {
         // ⭐ NOUVEAU : Calculer et appliquer les drops
         const drops = this.currentMonster.getDrops();
         if (drops && drops.length > 0 && window.DropsData) {
-            // 🛡️ FIX: Validation des drops avant application
-            const validDrops = drops.filter(dropId => {
-                const dropData = window.DropsData[dropId];
-                if (!dropData) {
-                    console.error(`⚠️ Drop invalide détecté: ${dropId} - Ignoré`);
+            // 🛡️ FIX: Les drops sont déjà des objets {id, name, icon, quantity, rarity}
+            // Validation des drops (vérifier qu'ils ont bien un id et une quantity)
+            const validDrops = drops.filter(drop => {
+                if (!drop || typeof drop !== 'object' || !drop.id || !drop.quantity) {
+                    console.error(`⚠️ Drop invalide détecté:`, drop, `- Ignoré`);
                     return false;
                 }
                 return true;
@@ -336,6 +383,28 @@ class Combat {
             this.bossKillsInRegion++; // Compte vers le spawn du boss
         }
         
+        // 🛡️ FIX EXPLOIT : Supprimer le monstre du cache quand il meurt
+        const zoneKey = `${this.currentRegion}_${this.currentZone}`;
+        delete this.monstersByZone[zoneKey];
+        
+        // 🎯 Mise à jour des quêtes
+        if (window.game && window.game.questManager) {
+            // Quêtes de type 'kill'
+            window.game.questManager.updateKillQuest(monsterName, this.currentZone);
+            
+            // Quêtes de type 'boss_kill'
+            if (isBoss && this.currentMonster.id) {
+                window.game.questManager.updateBossKillQuest(this.currentMonster.id);
+            }
+            
+            // Quêtes de type 'collect_drops' (compte chaque item droppé)
+            if (drops && drops.length > 0) {
+                drops.forEach(() => {
+                    window.game.questManager.updateCollectDropsQuest(1);
+                });
+            }
+        }
+        
         // 🎯 Si on a tué le BOSS de la région (Zone 10), débloquer la région suivante
         if (isBoss && this.currentZone === 10) {
             // Débloquer la région suivante
@@ -352,7 +421,6 @@ class Combat {
         }
         
         // Compteur par zone (pour déblocage)
-        const zoneKey = `${this.currentRegion}_${this.currentZone}`;
         this.monstersKilledPerZone[zoneKey] = (this.monstersKilledPerZone[zoneKey] || 0) + 1;
         
         // Mettre à jour les quêtes de type 'kill'
@@ -431,6 +499,15 @@ class Combat {
      * Toggle le combat automatique
      */
     toggleAutoCombat() {
+        // 🔓 Vérifier si l'auto-combat est débloqué
+        if (!window.game || !window.game.unlocks || !window.game.unlocks.auto_combat) {
+            this.addLog('⚠️ Auto-combat non débloqué ! Complétez les quêtes.');
+            if (window.game && window.game.ui) {
+                window.game.ui.showNotification('Auto-combat non débloqué. Complétez les quêtes !', 'warning');
+            }
+            return false;
+        }
+        
         this.autoCombatEnabled = !this.autoCombatEnabled;
         this.isFighting = this.autoCombatEnabled;
         
@@ -447,10 +524,17 @@ class Combat {
      * Démarre le combat automatique
      */
     startAutoCombat() {
+        // 🔓 Vérifier si l'auto-combat est débloqué
+        if (!window.game || !window.game.unlocks || !window.game.unlocks.auto_combat) {
+            this.addLog('⚠️ Auto-combat non débloqué !');
+            return false;
+        }
+        
         this.autoCombatEnabled = true;
         this.isActive = true;
         this.isFighting = true;
         this.addLog('⚔️ Combat automatique activé');
+        return true;
     }
 
     /**
@@ -472,6 +556,7 @@ class Combat {
 
     /**
      * Change de zone manuellement (avec flèches)
+     * 🛡️ FIX EXPLOIT : Ne plus re-roll le monstre si on revient sur une zone déjà visitée
      */
     changeZone(direction) {
         const newZone = direction === 'next' ? this.currentZone + 1 : this.currentZone - 1;
@@ -480,6 +565,12 @@ class Combat {
         if (direction === 'next' && newZone > 10) {
             // Vérifier si la région suivante est débloquée
             if (this.currentRegion < this.unlockedRegions) {
+                // 💾 Sauvegarder le monstre actuel avant de changer de zone
+                const currentZoneKey = `${this.currentRegion}_${this.currentZone}`;
+                if (this.currentMonster) {
+                    this.monstersByZone[currentZoneKey] = this.currentMonster;
+                }
+                
                 this.currentRegion++;
                 this.currentZone = 1;
                 this.bossKillsInRegion = 0; // Reset le compteur de boss
@@ -492,7 +583,10 @@ class Combat {
                 
                 const regionData = this.getCurrentRegionData();
                 const zoneData = this.getCurrentZoneData();
-                this.spawnMonster();
+                
+                // 🔄 Restaurer ou spawner nouveau monstre
+                this.restoreOrSpawnMonster();
+                
                 this.addLog(`🌍 Vous entrez dans ${regionData.name} !`);
                 this.addLog(`➡️ Zone : ${zoneData.name}`);
                 return true;
@@ -505,6 +599,12 @@ class Combat {
         // 🌍 Si on recule depuis la Zone 1, revenir à la région précédente
         if (direction === 'prev' && newZone < 1) {
             if (this.currentRegion > 1) {
+                // 💾 Sauvegarder le monstre actuel avant de changer de zone
+                const currentZoneKey = `${this.currentRegion}_${this.currentZone}`;
+                if (this.currentMonster) {
+                    this.monstersByZone[currentZoneKey] = this.currentMonster;
+                }
+                
                 this.currentRegion--;
                 this.currentZone = 10;
                 
@@ -515,7 +615,10 @@ class Combat {
                 
                 const regionData = this.getCurrentRegionData();
                 const zoneData = this.getCurrentZoneData();
-                this.spawnMonster();
+                
+                // 🔄 Restaurer ou spawner nouveau monstre
+                this.restoreOrSpawnMonster();
+                
                 this.addLog(`🌍 Retour en ${regionData.name}`);
                 this.addLog(`⬅️ Zone : ${zoneData.name}`);
                 return true;
@@ -536,6 +639,12 @@ class Combat {
             return false;
         }
         
+        // 💾 Sauvegarder le monstre actuel avant de changer de zone
+        const currentZoneKey = `${this.currentRegion}_${this.currentZone}`;
+        if (this.currentMonster) {
+            this.monstersByZone[currentZoneKey] = this.currentMonster;
+        }
+        
         // Changement de zone
         this.currentZone = newZone;
         
@@ -546,10 +655,31 @@ class Combat {
         }
         
         const zoneData = this.getCurrentZoneData();
-        this.spawnMonster();
+        
+        // 🔄 Restaurer ou spawner nouveau monstre
+        this.restoreOrSpawnMonster();
+        
         this.addLog(`➡️ Vous entrez dans ${zoneData.name}`);
         
         return true;
+    }
+
+    /**
+     * 🛡️ FIX EXPLOIT : Restaure le monstre sauvegardé OU spawn un nouveau
+     */
+    restoreOrSpawnMonster() {
+        const zoneKey = `${this.currentRegion}_${this.currentZone}`;
+        const savedMonster = this.monstersByZone[zoneKey];
+        
+        if (savedMonster && savedMonster.isAlive) {
+            // Restaurer le monstre existant AVEC PV AU MAXIMUM (pas d'exploit)
+            savedMonster.currentHp = savedMonster.maxHp; // 🛡️ Réinitialiser les PV
+            this.currentMonster = savedMonster;
+            this.addLog(`🔄 ${this.currentMonster.getName()} vous attend toujours... (PV restaurés)`);
+        } else {
+            // Spawner un nouveau monstre
+            this.spawnMonster();
+        }
     }
 
     /**
@@ -572,6 +702,14 @@ class Combat {
      * Exporte les données du combat pour la sauvegarde
      */
     toJSON() {
+        // Sérialiser le cache de monstres
+        const serializedMonstersByZone = {};
+        for (const [key, monster] of Object.entries(this.monstersByZone)) {
+            if (monster && monster.isAlive) {
+                serializedMonstersByZone[key] = monster.toJSON();
+            }
+        }
+        
         return {
             currentRegion: this.currentRegion,
             currentZone: this.currentZone,
@@ -580,6 +718,7 @@ class Combat {
             unlockedRegions: this.unlockedRegions,
             unlockedZones: this.unlockedZones,
             monstersKilledPerZone: this.monstersKilledPerZone,
+            monstersByZone: serializedMonstersByZone, // 🛡️ Sauvegarder le cache
             currentMonster: this.currentMonster ? this.currentMonster.toJSON() : null,
             isActive: this.isActive,
             isFighting: this.isFighting,
@@ -601,6 +740,14 @@ class Combat {
         this.isActive = data.isActive !== undefined ? data.isActive : true;
         this.isFighting = data.isFighting || false;
         this.autoCombatEnabled = data.autoCombatEnabled || false;
+        
+        // 🛡️ Restaurer le cache de monstres
+        this.monstersByZone = {};
+        if (data.monstersByZone) {
+            for (const [key, monsterData] of Object.entries(data.monstersByZone)) {
+                this.monstersByZone[key] = Monster.fromJSON(monsterData);
+            }
+        }
         
         if (data.currentMonster) {
             this.currentMonster = Monster.fromJSON(data.currentMonster);

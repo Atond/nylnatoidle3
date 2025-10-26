@@ -9,9 +9,12 @@ class ProfessionManager {
         this.inventory = new Map(); // Inventaire des ressources
         this.autoGatherState = {
             woodcutter: { enabled: false, unlocked: false },
-            miner: { enabled: false, unlocked: false }
+            miner: { enabled: false, unlocked: false },
+            herbalist: { enabled: false, unlocked: false },
+            fisher: { enabled: false, unlocked: false }
         };
-        this.autoGatherInterval = 5000; // 5 secondes entre chaque récolte auto
+        this.autoGatherInterval = 5000; // 5 secondes entre chaque récolte auto (sauf pêcheur)
+        this.fisherGatherInterval = 5000; // 5 secondes pour le pêcheur (plus lent)
         this.autoGatherIntervals = {}; // Stocke les intervalles pour chaque métier
         
         this.initProfessions();
@@ -37,6 +40,22 @@ class ProfessionManager {
             'Mineur',
             'ore',
             10 // XP par clic
+        ));
+
+        // Herboriste
+        this.professions.set('herbalist', new Profession(
+            'herbalist',
+            'Herboriste',
+            'plants',
+            10 // XP par clic
+        ));
+
+        // Pêcheur
+        this.professions.set('fisher', new Profession(
+            'fisher',
+            'Pêcheur',
+            'fish',
+            15 // XP par clic (plus lent donc plus d'XP)
         ));
 
         // ========== MÉTIERS DE FABRICATION ==========
@@ -65,10 +84,34 @@ class ProfessionManager {
             0
         ));
 
-        // Alchimiste (conversion ressources T1→T2→T3...)
-        this.professions.set('alchemy', new Profession(
-            'alchemy',
+        // Alchimiste (potions et buffs depuis plantes)
+        this.professions.set('alchemist', new Profession(
+            'alchemist',
             'Alchimiste',
+            null, // Pas de ressource directe (craft potions)
+            0 // XP gagné par craft
+        ));
+
+        // Poissonier (plats cuisinés depuis poissons)
+        this.professions.set('fishmonger', new Profession(
+            'fishmonger',
+            'Poissonier',
+            null, // Pas de ressource directe (craft plats)
+            0 // XP gagné par craft
+        ));
+
+        // Tailleur (vêtements et sacs depuis fibres)
+        this.professions.set('tailor', new Profession(
+            'tailor',
+            'Tailleur',
+            null, // Pas de ressource directe (craft équipements)
+            0 // XP gagné par craft
+        ));
+
+        // Transmutation (conversion ressources T1→T2→T3...) - Anciennement "Alchimie"
+        this.professions.set('transmutation', new Profession(
+            'transmutation',
+            'Transmutation',
             null, // Pas de ressource directe (conversions uniquement)
             0 // XP gagné par conversion
         ));
@@ -122,16 +165,24 @@ class ProfessionManager {
 
     /**
      * Tenter un drop de gemme (pour le mineur)
+     * NOUVELLE LOGIQUE : Vérifier unlockLevel + drop rates réduits
      */
     tryGemDrop() {
         const gems = window.ResourcesData.gems || [];
+        const minerProfession = this.professions.get('miner');
         
-        for (const gem of gems) {
+        if (!minerProfession) return;
+        
+        // Filtrer uniquement les gemmes débloquées selon le niveau de mineur
+        const availableGems = gems.filter(gem => gem.unlockLevel <= minerProfession.level);
+        
+        for (const gem of availableGems) {
             const roll = Math.random();
             if (roll <= gem.dropRate) {
                 this.addToInventory(gem.id, 1);
                 
                 if (GameConfig.DEBUG.enabled) {
+                    console.log(`💎 Gemme drop: ${gem.name} (${(gem.dropRate * 100).toFixed(2)}%)`);
                 }
                 
                 // Notification
@@ -149,10 +200,29 @@ class ProfessionManager {
     }
 
     /**
-     * Ajouter une ressource à l'inventaire
+     * Ajouter une ressource à l'inventaire (avec vérification des limites)
      */
     addToInventory(resourceId, amount = 1) {
+        if (amount <= 0) return 0;
+        
         const current = this.inventory.get(resourceId) || 0;
+        
+        // 🛡️ PROTECTION: Vérifier les limites de stockage
+        if (window.game && window.game.storageManager) {
+            const limit = window.game.storageManager.getLimit(resourceId);
+            const spaceAvailable = Math.max(0, limit - current);
+            
+            // Limiter la quantité ajoutée à l'espace disponible
+            amount = Math.min(amount, spaceAvailable);
+            
+            if (amount <= 0) {
+                if (GameConfig.DEBUG.enabled) {
+                    console.log(`⚠️ Stockage plein pour ${resourceId}, ajout bloqué`);
+                }
+                return 0;
+            }
+        }
+        
         this.inventory.set(resourceId, current + amount);
         
         // Mettre à jour les quêtes de collecte (si disponible)
@@ -207,6 +277,8 @@ class ProfessionManager {
     getResourceType(resourceId) {
         if (resourceId.startsWith('wood_')) return 'wood';
         if (resourceId.startsWith('ore_')) return 'ore';
+        if (resourceId.startsWith('plant_')) return 'plants'; // ✅ NOUVEAU
+        if (resourceId.startsWith('fish_')) return 'fish';   // ✅ NOUVEAU
         if (resourceId.startsWith('gem_')) return 'gems'; // Avec un S !
         if (resourceId.startsWith('loot_')) return 'loot';
         return 'unknown';
@@ -287,6 +359,9 @@ class ProfessionManager {
         // Arrêter l'ancien interval si existe
         this.stopAutoGather(professionId);
         
+        // Déterminer l'intervalle selon le métier
+        const interval = professionId === 'fisher' ? this.fisherGatherInterval : this.autoGatherInterval;
+        
         // Créer le nouvel interval
         this.autoGatherIntervals[professionId] = setInterval(() => {
             this.clickProfession(professionId);
@@ -294,7 +369,7 @@ class ProfessionManager {
                 window.game.ui.updateProfessions();
                 window.game.ui.updateInventory();
             }
-        }, this.autoGatherInterval);
+        }, interval);
         
 
     }
@@ -344,7 +419,14 @@ class ProfessionManager {
         }
 
         if (data.autoGatherState) {
-            this.autoGatherState = data.autoGatherState;
+            // 🛡️ PROTECTION: Fusionner avec l'état par défaut pour les nouvelles professions
+            // Cela garantit que herbalist et fisher existent même dans les anciennes sauvegardes
+            this.autoGatherState = {
+                woodcutter: data.autoGatherState.woodcutter || { enabled: false, unlocked: false },
+                miner: data.autoGatherState.miner || { enabled: false, unlocked: false },
+                herbalist: data.autoGatherState.herbalist || { enabled: false, unlocked: false },
+                fisher: data.autoGatherState.fisher || { enabled: false, unlocked: false }
+            };
             
             // Redémarrer les auto-récoltes actives
             for (const [profId, state] of Object.entries(this.autoGatherState)) {

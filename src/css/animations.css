@@ -222,3 +222,29 @@
 .hover-glow:hover {
     box-shadow: 0 0 15px var(--color-primary);
 }
+
+/* 🎉 TAB UNLOCK ANIMATION - Effet "surprise" quand onglet débloqué */
+@keyframes tabUnlock {
+    0% {
+        transform: scale(0.5) translateY(-20px);
+        opacity: 0;
+        box-shadow: 0 0 0px rgba(255, 215, 0, 0);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4);
+    }
+    70% {
+        transform: scale(0.95);
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 30px rgba(255, 215, 0, 0.3);
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+        box-shadow: none; /* ✅ Pas de glow à la fin */
+    }
+}
+
+.tab-unlock-animation {
+    animation: tabUnlock 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}

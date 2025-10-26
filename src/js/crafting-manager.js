@@ -18,20 +18,49 @@ class CraftingManager {
         };
         this.autoCraftInterval = 1000; // 1 seconde entre chaque craft auto
         
-        // 🛡️ FIX: Debounce pour éviter spam-click
-        this.lastCraftTime = 0;
-        this.craftCooldown = 100; // 100ms entre chaque craft manuel
+        // 🏗️ FIX: Système de cooldown renforcé avec détection d'abus
+        this._lastCraftTime = 0;
+        this._baseCooldown = 100; // 100ms entre chaque craft manuel
+        this._cooldownVariance = 20; // ±20ms de variabilité aléatoire
+        
+        // Historique des crafts pour détection de spam
+        this._craftHistory = [];
+        this._maxHistorySize = 20;
+        this._maxCraftsPerMinute = 100; // Limite raisonnable
+        
+        // Pénalité en cas d'abus détecté
+        this._penaltyEndTime = 0;
+        this._penaltyDuration = 5000; // 5 secondes de pénalité
     }
 
     /**
      * Récupère toutes les recettes disponibles
      */
     getAllRecipes() {
-        const recipes = window.CraftRecipesData || [];
-        if (GameConfig.DEBUG.enabled && recipes.length === 0) {
-            console.warn('⚠️ Aucune recette chargée ! Vérifiez que craft-recipes-data.js est inclus.');
+        // Fusion de toutes les sources de recettes
+        const baseRecipes = window.CraftRecipesData || [];
+        const weaponRecipes = window.CraftRecipesExtended || [];
+        const armorRecipes = window.CraftRecipesArmors || [];
+        const accessoryRecipes = window.CraftRecipesAccessories || [];
+        const consumableRecipes = window.CraftRecipesConsumables || [];
+        
+        const allRecipes = [
+            ...baseRecipes,
+            ...weaponRecipes,
+            ...armorRecipes,
+            ...accessoryRecipes,
+            ...consumableRecipes
+        ];
+        
+        if (GameConfig.DEBUG.enabled && allRecipes.length === 0) {
+            console.warn('⚠️ Aucune recette chargée ! Vérifiez que les fichiers craft-recipes-*.js sont inclus.');
         }
-        return recipes;
+        
+        if (GameConfig.DEBUG.enabled) {
+            console.log(`📋 Total recettes chargées: ${allRecipes.length} (Base: ${baseRecipes.length}, Armes: ${weaponRecipes.length}, Armures: ${armorRecipes.length}, Accessoires: ${accessoryRecipes.length}, Consommables: ${consumableRecipes.length})`);
+        }
+        
+        return allRecipes;
     }
 
     /**
@@ -79,10 +108,57 @@ class CraftingManager {
      * Démarre le craft d'une recette (instantané maintenant)
      */
     startCraft(recipeId, sellDirectly = false) {
-        // 🛡️ FIX: Debounce pour éviter spam-click
         const now = Date.now();
-        if (now - this.lastCraftTime < this.craftCooldown) {
+        
+        // 🏗️ FIX 1: Vérifier si une pénalité est active
+        if (now < this._penaltyEndTime) {
+            const remainingPenalty = Math.ceil((this._penaltyEndTime - now) / 1000);
+            console.warn(`🚫 Pénalité active ! Attendez encore ${remainingPenalty}s`);
+            
+            if (this.game.ui) {
+                this.game.ui.showNotification(
+                    `⚠️ Cooldown actif: ${remainingPenalty}s restantes`,
+                    'error'
+                );
+            }
+            return false;
+        }
+        
+        // 🏗️ FIX 2: Cooldown avec variabilité aléatoire
+        const cooldown = this._baseCooldown + (Math.random() * this._cooldownVariance * 2 - this._cooldownVariance);
+        
+        if (now - this._lastCraftTime < cooldown) {
             console.warn('⚠️ Craft trop rapide, veuillez patienter');
+            return false;
+        }
+        
+        // 🏗️ FIX 3: Détection de spam via historique
+        this._craftHistory.push(now);
+        if (this._craftHistory.length > this._maxHistorySize) {
+            this._craftHistory.shift();
+        }
+        
+        // Calculer le nombre de crafts sur la dernière minute
+        const oneMinuteAgo = now - 60000;
+        const recentCrafts = this._craftHistory.filter(time => time > oneMinuteAgo);
+        
+        if (recentCrafts.length > this._maxCraftsPerMinute) {
+            console.error('🚫 ABUS DÉTECTÉ ! Trop de crafts par minute.');
+            
+            // Appliquer une pénalité
+            this._penaltyEndTime = now + this._penaltyDuration;
+            
+            if (this.game.ui) {
+                this.game.ui.showNotification(
+                    `🚫 Spam détecté ! Cooldown de ${this._penaltyDuration / 1000}s appliqué.`,
+                    'error'
+                );
+            }
+            
+            if (GameConfig.DEBUG.enabled) {
+                console.trace('Stack trace de l\'abus détecté:');
+            }
+            
             return false;
         }
         
@@ -103,8 +179,8 @@ class CraftingManager {
         // Craft instantané : compléter immédiatement
         this.completeCraft(recipe, sellDirectly);
         
-        // 🛡️ FIX: Mettre à jour le dernier craft
-        this.lastCraftTime = now;
+        // 🏗️ FIX: Mettre à jour le dernier craft avec la propriété privée
+        this._lastCraftTime = now;
 
         return true;
     }
@@ -199,6 +275,11 @@ class CraftingManager {
         if (profession) {
             const xpGain = recipe.professionLevel * 10; // 10 XP par niveau de recette
             profession.gainXp(xpGain);
+        }
+        
+        // 🎯 MISE À JOUR DES QUÊTES DE TYPE 'CRAFT'
+        if (this.game.questManager) {
+            this.game.questManager.updateCraftQuest(recipe.id, 1);
         }
         
         // Notification avec qualité

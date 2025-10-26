@@ -25,8 +25,8 @@ const MonstersData = {
             type: "beast",
             
             baseStats: {
-                hp: 25,
-                attack: 4,
+                hp: 40,        // 25 → 40 (+60%)
+                attack: 6,     // 4 → 6 (+2)
                 defense: 2,
                 speed: 2500
             },
@@ -47,8 +47,8 @@ const MonstersData = {
             type: "beast",
             
             baseStats: {
-                hp: 35,
-                attack: 6,
+                hp: 55,        // 35 → 55 (+57%)
+                attack: 8,     // 6 → 8 (+2)
                 defense: 3,
                 speed: 3000
             },
@@ -69,8 +69,8 @@ const MonstersData = {
             type: "humanoid",
             
             baseStats: {
-                hp: 30,
-                attack: 5,
+                hp: 48,        // 30 → 48 (+60%)
+                attack: 7,     // 5 → 7 (+2)
                 defense: 2,
                 speed: 2000
             },
@@ -91,8 +91,8 @@ const MonstersData = {
             type: "beast",
             
             baseStats: {
-                hp: 15,
-                attack: 3,
+                hp: 25,        // 15 → 25 (+67%)
+                attack: 5,     // 3 → 5 (+2)
                 defense: 1,
                 speed: 1500
             },
@@ -261,6 +261,72 @@ const MonstersData = {
             },
             
             dropTable: ['champignon_commun', 'peau_epaisse']
+        },
+        
+        araignee_geante: {
+            id: 'araignee_geante',
+            name: "Araignée Géante",
+            description: "Araignée monstrueuse tissant des toiles mortelles",
+            icon: "🕷️",
+            type: "beast",
+            
+            baseStats: {
+                hp: 80,
+                attack: 13,
+                defense: 6,
+                speed: 2000
+            },
+            
+            rewards: {
+                xp: 36,
+                gold: 20
+            },
+            
+            dropTable: ['soie_araignee', 'dard_venimeux']
+        },
+        
+        loup_garou_jeune: {
+            id: 'loup_garou_jeune',
+            name: "Jeune Loup-Garou",
+            description: "Lycanthrope nouvellement transformé, encore sauvage",
+            icon: "🐺",
+            type: "monstrous",
+            
+            baseStats: {
+                hp: 90,
+                attack: 14,
+                defense: 7,
+                speed: 2100
+            },
+            
+            rewards: {
+                xp: 40,
+                gold: 24
+            },
+            
+            dropTable: ['croc_loup_garou', 'peau_epaisse']
+        },
+        
+        fantome_foret: {
+            id: 'fantome_foret',
+            name: "Fantôme de la Forêt",
+            description: "Esprit tourmenté errant dans les bois",
+            icon: "👻",
+            type: "undead",
+            
+            baseStats: {
+                hp: 65,
+                attack: 15,
+                defense: 5,
+                speed: 1900
+            },
+            
+            rewards: {
+                xp: 34,
+                gold: 18
+            },
+            
+            dropTable: ['essence_spectrale', 'plume_spectrale']
         },
         
         // === RÉGION 4 : LES TERRES BRÛLÉES ===
@@ -461,7 +527,7 @@ const MonstersData = {
             
             baseStats: {
                 hp: 80,
-                attack: 12,
+                attack: 6,          // RÉDUIT : 12 → 6 (battable sans armure)
                 defense: 8,
                 speed: 3500
             },
@@ -660,6 +726,29 @@ const MonstersData = {
             },
             
             dropTable: ['plume_spectrale', 'essence_sylvestre']
+        },
+        
+        sorciere_sylvestre: {
+            id: 'sorciere_sylvestre',
+            name: "Sorcière Sylvestre",
+            description: "Pratiquante de magie noire vivant recluse dans la forêt",
+            icon: "🧙‍♀️",
+            type: "humanoid",
+            spawnChance: 0.12,
+            
+            baseStats: {
+                hp: 95,
+                attack: 17,
+                defense: 9,
+                speed: 2600
+            },
+            
+            rewards: {
+                xp: 58,
+                gold: 42
+            },
+            
+            dropTable: ['grimoire_dechire', 'seve_corrompue']
         },
         
         // === RÉGION 4 : LES TERRES BRÛLÉES ===
@@ -954,6 +1043,75 @@ const MonstersData = {
             dropTable: ['arc_brise', 'essence_sylvestre']
         },
         
+        vampire_ancien: {
+            id: 'vampire_ancien',
+            name: "Vampire Ancien",
+            description: "Créature de la nuit aux pouvoirs surnaturels, assoiffée de sang",
+            icon: "🧛",
+            type: "undead",
+            spawnChance: 0.05,
+            
+            baseStats: {
+                hp: 180,
+                attack: 30,
+                defense: 16,
+                speed: 2400
+            },
+            
+            rewards: {
+                xp: 115,
+                gold: 90
+            },
+            
+            dropTable: ['sang_vampire', 'essence_sylvestre']
+        },
+        
+        liche_corrompue: {
+            id: 'liche_corrompue',
+            name: "Liche Corrompue",
+            description: "Nécromancien immortel, maître de la magie noire",
+            icon: "💀",
+            type: "undead",
+            spawnChance: 0.05,
+            
+            baseStats: {
+                hp: 200,
+                attack: 26,
+                defense: 18,
+                speed: 3000
+            },
+            
+            rewards: {
+                xp: 120,
+                gold: 95
+            },
+            
+            dropTable: ['phylactere_brise', 'essence_sylvestre']
+        },
+        
+        gardien_ancien: {
+            id: 'gardien_ancien',
+            name: "Gardien Ancien de la Forêt",
+            description: "Ancien protecteur de pierre corrompue par l'Ombre",
+            icon: "🗿",
+            type: "construct",
+            spawnChance: 0.05,
+            
+            baseStats: {
+                hp: 220,
+                attack: 24,
+                defense: 20,
+                speed: 3500
+            },
+            
+            rewards: {
+                xp: 110,
+                gold: 88
+            },
+            
+            dropTable: ['pierre_gardienne', 'ecorce_vivante']
+        },
+        
         // === RÉGION 4 : LES TERRES BRÛLÉES ===
         
         orc_berserker: {
@@ -1067,9 +1225,9 @@ const MonstersData = {
             rarity: "boss",
             
             baseStats: {
-                hp: 500,
-                attack: 30,
-                defense: 20,
+                hp: 300,       // 500 → 300 (-40%) - Plus accessible niveau 5-10
+                attack: 25,    // 30 → 25 (-5) - Moins de one-shot
+                defense: 15,   // 20 → 15 (-5) - Joueur fait plus de dégâts
                 speed: 3000
             },
             
@@ -1094,9 +1252,9 @@ const MonstersData = {
             rarity: "boss",
             
             baseStats: {
-                hp: 1200,
-                attack: 35,
-                defense: 25,
+                hp: 800,       // 1200 → 800 (-33%)
+                attack: 30,    // 35 → 30 (-5)
+                defense: 20,   // 25 → 20 (-5)
                 speed: 3000
             },
             
@@ -1121,9 +1279,9 @@ const MonstersData = {
             rarity: "boss",
             
             baseStats: {
-                hp: 1800,
-                attack: 40,
-                defense: 28,
+                hp: 1200,      // 1800 → 1200 (-33%)
+                attack: 35,    // 40 → 35 (-5)
+                defense: 23,   // 28 → 23 (-5)
                 speed: 2800
             },
             
@@ -1148,9 +1306,9 @@ const MonstersData = {
             rarity: "boss",
             
             baseStats: {
-                hp: 2500,
-                attack: 45,
-                defense: 32,
+                hp: 1600,      // 2500 → 1600 (-36%)
+                attack: 40,    // 45 → 40 (-5)
+                defense: 27,   // 32 → 27 (-5)
                 speed: 2600
             },
             
@@ -1175,9 +1333,9 @@ const MonstersData = {
             rarity: "boss",
             
             baseStats: {
-                hp: 3200,
-                attack: 50,
-                defense: 35,
+                hp: 2200,      // 3200 → 2200 (-31%)
+                attack: 45,    // 50 → 45 (-5)
+                defense: 30,   // 35 → 30 (-5)
                 speed: 2500
             },
             

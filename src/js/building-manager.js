@@ -79,6 +79,19 @@ class BuildingManager {
             }
         }
         
+        // 👥 Vérifier les exigences de population pour améliorer
+        const buildingData = window.BuildingsData[buildingId];
+        if (buildingData && buildingData.populationRequirements) {
+            const nextLevel = building.level + 1;
+            const requiredPopulation = buildingData.populationRequirements[nextLevel];
+            
+            if (requiredPopulation && this.game.cityManager) {
+                if (this.game.cityManager.population < requiredPopulation) {
+                    return false;
+                }
+            }
+        }
+        
         // Vérifier les coûts (or ET ressources)
         const cost = building.getUpgradeCost();
         
@@ -153,6 +166,12 @@ class BuildingManager {
                 continue; // Passer au bâtiment suivant
             }
             
+            // ========== TRAITEMENT SPÉCIAL FERME DE DRAGONS ==========
+            if (building.id === 'dragon_farm') {
+                this.processDragonFarmProduction(building, timePassed);
+                continue; // Passer au bâtiment suivant
+            }
+            
             // ========== PRODUCTION NORMALE ==========
             const production = building.getCurrentProduction();
             
@@ -182,6 +201,33 @@ class BuildingManager {
         }
         
         this.lastProductionTime = currentTime;
+    }
+
+    /**
+     * Traite la production de nourriture de la Ferme de Dragons
+     * @param {Building} farm - La ferme de dragons
+     * @param {number} timePassed - Temps écoulé en secondes
+     */
+    processDragonFarmProduction(farm, timePassed) {
+        if (!this.game.dragonManager) return;
+        
+        const production = farm.getCurrentProduction();
+        const foodPerMinute = production['dragon_food'] || 0;
+        
+        if (foodPerMinute <= 0) return;
+        
+        // Convertir en production par seconde
+        const foodPerSecond = foodPerMinute / 60;
+        const foodProduced = foodPerSecond * timePassed;
+        const finalAmount = Math.floor(foodProduced);
+        
+        if (finalAmount > 0) {
+            this.game.dragonManager.dragonFood += finalAmount;
+            
+            if (GameConfig.DEBUG.enabled) {
+                console.log(`🐲 Ferme: +${finalAmount} nourriture (total: ${this.game.dragonManager.dragonFood})`);
+            }
+        }
     }
 
     /**
@@ -244,14 +290,17 @@ class BuildingManager {
                     outputAmount
                 );
                 
-                // Gagner XP (réduit pour production passive, 25% de l'XP normale)
-                const xpGained = Math.floor(conversion.xpGain * conversionsToMake * 0.25);
+                // 🏗️ FIX: Utilisation de la config centralisée au lieu de valeur magique
+                const labXpMultiplier = window.ALCHEMY_PRODUCTION_CONFIG?.labPassiveXpMultiplier || 0.25;
+                
+                // Gagner XP (réduit pour production passive selon config)
+                const xpGained = Math.floor(conversion.xpGain * conversionsToMake * labXpMultiplier);
                 alchemy.gainXP(xpGained);
                 
                 conversionsRemaining -= conversionsToMake;
                 
                 if (GameConfig.DEBUG.enabled && conversionsToMake > 0) {
-                    console.log(`🧪 Labo: ${conversionsToMake}× ${conversion.name} (+${outputAmount} ${conversion.output.resourceId})`);
+                    console.log(`🧪 Labo: ${conversionsToMake}× ${conversion.name} (+${outputAmount} ${conversion.output.resourceId}) | XP: ${xpGained} (${labXpMultiplier * 100}%)`);
                 }
             }
         }

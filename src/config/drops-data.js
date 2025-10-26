@@ -410,6 +410,42 @@ const DropsData = {
         sellPrice: 8
     },
     
+    soie_araignee: {
+        id: 'soie_araignee',
+        name: "Soie d'Araignée",
+        description: "Fil résistant produit par les araignées géantes",
+        icon: "🕸️",
+        type: "resource",
+        rarity: "common",
+        dropChance: 0.40,
+        quantity: { min: 1, max: 3 },
+        sellPrice: 15
+    },
+    
+    croc_loup_garou: {
+        id: 'croc_loup_garou',
+        name: "Croc de Loup-Garou",
+        description: "Croc maudit d'un loup-garou, imprégné de magie noire",
+        icon: "🦷",
+        type: "resource",
+        rarity: "common",
+        dropChance: 0.35,
+        quantity: { min: 1, max: 2 },
+        sellPrice: 18
+    },
+    
+    essence_spectrale: {
+        id: 'essence_spectrale',
+        name: "Essence Spectrale",
+        description: "Énergie fantomatique capturée d'un spectre",
+        icon: "👻",
+        type: "resource",
+        rarity: "common",
+        dropChance: 0.30,
+        quantity: { min: 1, max: 1 },
+        sellPrice: 20
+    },
+    
     // Drops Uncommon Région 3
     bois_impregne: {
         id: 'bois_impregne',
@@ -447,6 +483,30 @@ const DropsData = {
         sellPrice: 32
     },
     
+    seve_corrompue: {
+        id: 'seve_corrompue',
+        name: "Sève Corrompue",
+        description: "Sève d'arbre corrompue par l'Ombre",
+        icon: "🌳",
+        type: "resource",
+        rarity: "uncommon",
+        dropChance: 0.35,
+        quantity: { min: 1, max: 1 },
+        sellPrice: 40
+    },
+    
+    grimoire_dechire: {
+        id: 'grimoire_dechire',
+        name: "Grimoire Déchiré",
+        description: "Pages de sortilèges anciennes, partiellement détruites",
+        icon: "📖",
+        type: "resource",
+        rarity: "uncommon",
+        dropChance: 0.32,
+        quantity: { min: 1, max: 1 },
+        sellPrice: 55
+    },
+    
     // Drops Rares Région 3
     ecorce_vivante: {
         id: 'ecorce_vivante',
@@ -482,6 +542,42 @@ const DropsData = {
         dropChance: 0.08,
         quantity: { min: 1, max: 1 },
         sellPrice: 100
+    },
+    
+    sang_vampire: {
+        id: 'sang_vampire',
+        name: "Sang de Vampire",
+        description: "Sang noir et épais d'un vampire ancien",
+        icon: "🩸",
+        type: "resource",
+        rarity: "rare",
+        dropChance: 0.45,
+        quantity: { min: 1, max: 1 },
+        sellPrice: 80
+    },
+    
+    phylactere_brise: {
+        id: 'phylactere_brise',
+        name: "Phylactère Brisé",
+        description: "Fragment d'un réceptacle d'âme de liche",
+        icon: "💀",
+        type: "resource",
+        rarity: "rare",
+        dropChance: 0.40,
+        quantity: { min: 1, max: 1 },
+        sellPrice: 100
+    },
+    
+    pierre_gardienne: {
+        id: 'pierre_gardienne',
+        name: "Pierre Gardienne",
+        description: "Pierre enchantée d'un gardien ancien de la forêt",
+        icon: "🗿",
+        type: "resource",
+        rarity: "rare",
+        dropChance: 0.50,
+        quantity: { min: 1, max: 1 },
+        sellPrice: 120
     },
     
     // Drops Légendaires Région 3

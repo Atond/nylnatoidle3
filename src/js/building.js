@@ -55,7 +55,9 @@ class Building {
         
         const production = {};
         for (const [resource, amount] of Object.entries(this.baseProduction)) {
-            production[resource] = Math.floor(amount * Math.pow(this.productionMultiplier, this.level - 1));
+            const value = amount * Math.pow(this.productionMultiplier, this.level - 1);
+            // Garder 1 décimale pour les valeurs < 1, sinon arrondir
+            production[resource] = value < 1 ? Math.round(value * 10) / 10 : Math.floor(value);
         }
         return production;
     }
@@ -82,7 +84,8 @@ class Building {
      */
     static fromJSON(data, buildingData) {
         const building = new Building(buildingData);
-        building.level = data.level || 0;
+        // 🛡️ FIX: Utiliser ?? au lieu de || pour permettre level = 0
+        building.level = data.level ?? 0;
         return building;
     }
 }

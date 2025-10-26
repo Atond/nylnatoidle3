@@ -51,6 +51,8 @@ class Profession {
             );
             
             // Rafraîchir l'onglet crafting pour afficher les nouvelles recettes débloquées
+            // 🛡️ FORCE REFRESH pour afficher les nouvelles recettes immédiatement
+            window.game.ui.updateCraftRecipes(true);
             window.game.ui.updateCraftingTab();
         }
     }

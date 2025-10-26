@@ -114,18 +114,18 @@ const GameConfig = {
     enableProfessions: true,
     enableTown: true,
     enableQuests: false, // Phase 2
-    enableDragons: false, // Phase 4
+    enableDragons: true, // 🐉 ACTIVÉ !
     enableGuild: false, // Phase 4
     enableSounds: false // À activer plus tard
   },
   
   // ========== DEBUG ==========
   DEBUG: {
-    enabled: true, // Mettre à false en production
-    showFPS: true,
-    logCombat: true, // Activé pour déboguer
-    logSaves: true,
-    cheatMode: true // Raccourcis pour tester rapidement
+    enabled: false, // ✅ PRODUCTION MODE
+    showFPS: false,
+    logCombat: false,
+    logSaves: false,
+    cheatMode: false
   }
 };
 

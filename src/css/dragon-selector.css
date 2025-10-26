@@ -1,0 +1,30 @@
+/* Modal pour la sélection de dragons (reproduction) */
+.dragon-selector-modal {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    padding: 25px;
+    max-width: 700px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    position: relative;
+    z-index: 1001;
+}
+
+/* Filtres par statistique */
+.breeding-filters .filter-btn {
+    transition: all 0.2s ease;
+}
+
+.breeding-filters .filter-btn:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.breeding-filters .filter-btn.active {
+    border-color: var(--accent-color);
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
+    color: white;
+    font-weight: bold;
+}

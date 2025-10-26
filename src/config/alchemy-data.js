@@ -273,12 +273,24 @@ export function getBonusOutputChance(alchemyLevel) {
     return chance;
 }
 
+/**
+ * Configuration de la production passive
+ * 🏗️ Ajout pour centraliser les valeurs magiques
+ */
+export const ALCHEMY_PRODUCTION_CONFIG = {
+    // Multiplicateur d'XP pour la production passive du Laboratoire d'Alchimie
+    // Valeur normale = 1.0 (100%), Valeur actuelle = 0.25 (25%)
+    labPassiveXpMultiplier: 0.25,
+    description: "Le Laboratoire d'Alchimie donne 25% de l'XP normale en production passive pour équilibrer l'auto-production"
+};
+
 // ═══════════════════════════════════════════════════════════
 // EXPORTS GLOBAUX (pour compatibilité avec le reste du code)
 // ═══════════════════════════════════════════════════════════
 
 window.ALCHEMY_CONVERSIONS = ALCHEMY_CONVERSIONS;
 window.ALCHEMY_CONFIG = ALCHEMY_CONFIG;
+window.ALCHEMY_PRODUCTION_CONFIG = ALCHEMY_PRODUCTION_CONFIG; // 🏗️ Nouvelle config
 window.getAvailableConversions = getAvailableConversions;
 window.getConversionsByCategory = getConversionsByCategory;
 window.calculateConversionTime = calculateConversionTime;

@@ -7,22 +7,30 @@ class Quest {
         this.id = data.id;
         this.title = data.title;
         this.description = data.description;
-        this.type = data.type; // 'kill', 'collect', 'level_up', 'craft'
+        this.type = data.type; // 'kill', 'collect', 'collect_drops', 'boss_kill', 'craft', 'level_up'
         this.target = data.target; // Objectif à atteindre
         this.progress = data.progress || 0; // Progression actuelle
         this.isCompleted = data.isCompleted || false;
         // Par défaut, seules les quêtes sans prérequis sont actives
         this.isActive = data.isActive !== undefined ? data.isActive : !data.requirements?.quest;
         
+        // Métadonnées (optionnelles)
+        this.chapter = data.chapter; // Numéro de chapitre
+        this.difficulty = data.difficulty; // 'tutorial', 'easy', 'medium', 'hard', etc.
+        this.isMainQuest = data.isMainQuest || false;
+        this.isRepeatable = data.isRepeatable || false;
+        
         // Récompenses
         this.rewards = {
             xp: data.rewards?.xp || 0,
             gold: data.rewards?.gold || 0,
-            unlocks: data.rewards?.unlocks || [] // Ex: ['professions', 'zone_2']
+            items: data.rewards?.items || [], // [{ id: 'iron_sword', amount: 1 }]
+            unlocks: data.rewards?.unlocks || [], // Ex: ['professions_tab', 'region_2']
+            message: data.rewards?.message || null // Message personnalisé
         };
         
         // Conditions de déblocage
-        this.requirements = data.requirements || {}; // Ex: { level: 5, quest: 'quest_1' }
+        this.requirements = data.requirements || {}; // Ex: { level: 5, quest: 'quest_1', bossId: 'boss_1', craftItem: 'iron_sword' }
     }
 
     /**

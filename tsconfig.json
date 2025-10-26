@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
@@ -16,6 +16,7 @@
   },
   "include": [
     "src/**/*",
+    "src/types/**/*.d.ts",
     "*.js",
     "*.json"
   ],

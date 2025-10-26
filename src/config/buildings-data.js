@@ -18,7 +18,19 @@ const BuildingsData = {
         costMultiplier: 1.8,  // Croissance exponentielle forte
         productionMultiplier: 2.0,  // Production double à chaque niveau
         profession: 'woodcutter',
-        professionLevelRequired: 5
+        professionLevelRequired: 5,
+        // 👥 Exigences de population pour améliorer
+        populationRequirements: {
+            2: 0,   // Niveau 2: pas d'exigence
+            3: 5,   // Niveau 3: 5 habitants
+            4: 10,  // Niveau 4: 10 habitants
+            5: 20,  // Niveau 5: 20 habitants
+            6: 35,  // Niveau 6: 35 habitants
+            7: 50,  // Niveau 7: 50 habitants
+            8: 75,  // Niveau 8: 75 habitants
+            9: 100, // Niveau 9: 100 habitants
+            10: 150 // Niveau 10: 150 habitants
+        }
     },
     
     mine: {
@@ -36,7 +48,19 @@ const BuildingsData = {
         costMultiplier: 1.8,  // Croissance exponentielle forte
         productionMultiplier: 2.0,  // Production double à chaque niveau
         profession: 'miner',
-        professionLevelRequired: 5
+        professionLevelRequired: 5,
+        // 👥 Exigences de population pour améliorer
+        populationRequirements: {
+            2: 0,   // Niveau 2: pas d'exigence
+            3: 5,   // Niveau 3: 5 habitants
+            4: 10,  // Niveau 4: 10 habitants
+            5: 20,  // Niveau 5: 20 habitants
+            6: 35,  // Niveau 6: 35 habitants
+            7: 50,  // Niveau 7: 50 habitants
+            8: 75,  // Niveau 8: 75 habitants
+            9: 100, // Niveau 9: 100 habitants
+            10: 150 // Niveau 10: 150 habitants
+        }
     },
     
     warehouse: {
@@ -103,6 +127,71 @@ const BuildingsData = {
             }
         },
         specialEffect: 'alchemy_passive_conversions'  // Effet spécial pour le système
+    },
+
+    farm: {
+        id: 'farm',
+        name: 'Ferme d\'Élevage',
+        icon: '🐑',
+        description: 'Élève des animaux et cultive des plantes pour produire des tissus',
+        baseProduction: {
+            'fabric_linen': 2,           // 2 Fibre de Lin/min
+            'fabric_raw_wool': 2,        // 2 Laine brute/min
+            'fabric_cotton': 1,          // 1 Coton/min
+            'fabric_coarse_silk': 0.5    // 0.5 Soie grossière/min
+        },
+        baseCost: {
+            gold: 500,
+            wood_oak: 200,
+            ore_iron: 100
+        },
+        costMultiplier: 2.0,  // Coût augmente fortement
+        productionMultiplier: 1.5,  // +50% de production par niveau
+        profession: null,  // Pas lié à une profession spécifique
+        professionLevelRequired: 0,
+        unlockConditions: {
+            playerLevel: 8,  // Se débloque au niveau 8 du joueur
+            professionLevel: {
+                herbalist: 3  // ET Herboriste niveau 3 (connaissance de l'agriculture)
+            }
+        },
+        // 👥 Exigences de population pour améliorer
+        populationRequirements: {
+            2: 0,   // Niveau 2: pas d'exigence
+            3: 5,   // Niveau 3: 5 habitants
+            4: 10,  // Niveau 4: 10 habitants
+            5: 20,  // Niveau 5: 20 habitants
+            6: 35,  // Niveau 6: 35 habitants
+            7: 50,  // Niveau 7: 50 habitants
+            8: 75,  // Niveau 8: 75 habitants
+            9: 100, // Niveau 9: 100 habitants
+            10: 150 // Niveau 10: 150 habitants
+        },
+        specialEffect: 'fabric_production'  // Effet spécial pour la production de tissus
+    },
+
+    dragon_farm: {
+        id: 'dragon_farm',
+        name: 'Ferme de Dragons',
+        icon: '🐲',
+        description: 'Produit de la nourriture pour dragons automatiquement',
+        baseProduction: {
+            'dragon_food': 10  // 10 nourriture/min au niveau 1
+        },
+        baseCost: {
+            gold: 2000,
+            wood_oak: 300,
+            ore_iron: 300
+        },
+        costMultiplier: 2.0,  // Coût augmente fortement
+        productionMultiplier: 1.5,  // +50% de production par niveau
+        profession: null,
+        professionLevelRequired: 0,
+        unlockConditions: {
+            playerLevel: 10,  // Se débloque au niveau 10 du joueur
+            hasCompletedQuest: 'builder'  // Après avoir complété la quête Bâtisseur
+        },
+        specialEffect: 'dragon_food_production'  // Effet spécial
     }
 };
 

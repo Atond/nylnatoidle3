@@ -11,6 +11,7 @@ const CraftRecipesData = [
         slot: 'weapon',
         icon: '⚔️',
         rarity: 'common',
+        archetype: 'tank', // Tank melee weapon
         profession: 'blacksmith', // Forgeron
         professionLevel: 1,
         materials: [
@@ -19,8 +20,8 @@ const CraftRecipesData = [
         ],
         craftTime: 2000, // 2 secondes
         stats: {
-            force: 5,
-            damage: 8
+            force: 3,
+            damage: 4
         },
         requiredLevel: 1,
         description: 'Une simple épée en fer forgé.'
@@ -33,16 +34,17 @@ const CraftRecipesData = [
         slot: 'weapon',
         icon: '⚔️',
         rarity: 'uncommon',
+        archetype: 'tank', // Tank melee weapon
         profession: 'blacksmith',
         professionLevel: 5,
         materials: [
             { resourceId: 'ore_copper', amount: 15 },
-            { resourceId: 'wood_birch', amount: 8 }
+            { resourceId: 'wood_oak', amount: 8 } // Changé: birch (unlock 10) → oak (unlock 1)
         ],
         craftTime: 3000,
         stats: {
-            force: 10,
-            damage: 15,
+            force: 7,
+            damage: 9,
             agility: 3
         },
         requiredLevel: 5,
@@ -64,8 +66,8 @@ const CraftRecipesData = [
         ],
         craftTime: 2000,
         stats: {
-            defense: 5,
-            endurance: 3
+            defense: 3,
+            endurance: 2
         },
         requiredLevel: 1,
         description: 'Une armure légère en cuir souple.'
@@ -86,9 +88,9 @@ const CraftRecipesData = [
         ],
         craftTime: 3000,
         stats: {
-            defense: 12,
-            endurance: 8,
-            force: 2
+            defense: 9,
+            endurance: 6,
+            force: 1
         },
         requiredLevel: 3,
         description: 'Un plastron solide en fer battu.'
@@ -101,21 +103,22 @@ const CraftRecipesData = [
         slot: 'chest',
         icon: '👔',
         rarity: 'rare',
+        archetype: 'tank',
         profession: 'armorsmith',
         professionLevel: 7,
         materials: [
             { resourceId: 'ore_copper', amount: 25 },
-            { resourceId: 'ore_silver', amount: 10 },
-            { resourceId: 'wood_birch', amount: 8 }
+            { resourceId: 'ore_tin', amount: 10 }, // Changé: silver (unlock 12) → tin (unlock 8)
+            { resourceId: 'wood_maple', amount: 8 } // Changé: birch (unlock 10) → maple (unlock 8)
         ],
         craftTime: 4000,
         stats: {
-            defense: 20,
-            endurance: 15,
-            force: 5,
+            defense: 15,
+            endurance: 12,
+            force: 3,
             agility: 3
         },
-        requiredLevel: 7,
+        requiredLevel: 8, // Augmenté: 7 → 8 (cohérence avec tin/maple)
         description: 'Un plastron d\'acier de haute qualité.'
     },
 
@@ -134,8 +137,8 @@ const CraftRecipesData = [
         ],
         craftTime: 1500,
         stats: {
-            defense: 3,
-            endurance: 2
+            defense: 2,
+            endurance: 1
         },
         requiredLevel: 1,
         description: 'Une simple capuche en cuir.'
@@ -156,8 +159,8 @@ const CraftRecipesData = [
         ],
         craftTime: 2500,
         stats: {
-            defense: 8,
-            endurance: 5,
+            defense: 6,
+            endurance: 4,
             intelligence: 2
         },
         requiredLevel: 4,
@@ -179,8 +182,8 @@ const CraftRecipesData = [
         ],
         craftTime: 2000,
         stats: {
-            defense: 4,
-            endurance: 3,
+            defense: 3,
+            endurance: 2,
             agility: 2
         },
         requiredLevel: 2,
@@ -217,10 +220,11 @@ const CraftRecipesData = [
         slot: 'amulet',
         icon: '📿',
         rarity: 'uncommon',
+        archetype: 'universal',
         profession: 'jeweler',
-        professionLevel: 3,
+        professionLevel: 5, // Augmenté: 3 → 5
         materials: [
-            { resourceId: 'ore_silver', amount: 8 },
+            { resourceId: 'ore_tin', amount: 8 }, // Changé: silver (unlock 12) → tin (unlock 8)
             { resourceId: 'gem_amethyst', amount: 2 }
         ],
         craftTime: 2500,
@@ -229,8 +233,8 @@ const CraftRecipesData = [
             wisdom: 5,
             professionXP: 10
         },
-        requiredLevel: 3,
-        description: 'Une amulette mystique en argent.'
+        requiredLevel: 8, // Augmenté: 3 → 8 (cohérence avec tin)
+        description: 'Une amulette mystique en étain serti d\'améthystes.'
     },
 
     // ========== GANTS ==========
@@ -270,12 +274,296 @@ const CraftRecipesData = [
         ],
         craftTime: 1500,
         stats: {
-            defense: 3,
+            defense: 2,
             agility: 5,
-            endurance: 2
+            endurance: 1
         },
         requiredLevel: 2,
         description: 'Des bottes légères pour se déplacer rapidement.'
+    },
+
+    // ========== ALCHIMISTE - POTIONS ==========
+    {
+        id: 'potion_health_small',
+        name: 'Petite Potion de Vie',
+        type: 'potion',
+        slot: 'consumable',
+        icon: '🧪',
+        rarity: 'common',
+        profession: 'alchemist',
+        professionLevel: 1,
+        materials: [
+            { resourceId: 'plant_dandelion', amount: 5 },
+            { resourceId: 'plant_medicinal_herb', amount: 3 }
+        ],
+        craftTime: 1500,
+        stats: {
+            hpRestore: 50
+        },
+        requiredLevel: 1,
+        description: 'Restaure 50 HP. Brassée avec des herbes médicinales.'
+    },
+
+    {
+        id: 'potion_health_medium',
+        name: 'Potion de Vie',
+        type: 'potion',
+        slot: 'consumable',
+        icon: '🧪',
+        rarity: 'uncommon',
+        profession: 'alchemist',
+        professionLevel: 3,
+        materials: [
+            { resourceId: 'plant_sage', amount: 5 },
+            { resourceId: 'plant_lavender', amount: 3 }
+        ],
+        craftTime: 2000,
+        stats: {
+            hpRestore: 150
+        },
+        requiredLevel: 3,
+        description: 'Restaure 150 HP. Infusion de sauge et lavande.'
+    },
+
+    {
+        id: 'potion_strength',
+        name: 'Potion de Force',
+        type: 'potion',
+        slot: 'consumable',
+        icon: '💪',
+        rarity: 'uncommon',
+        archetype: 'universal',
+        profession: 'alchemist',
+        professionLevel: 8, // Augmenté: 5 → 8
+        materials: [
+            { resourceId: 'plant_sage', amount: 4 }, // Changé: rosemary (unlock 12) → sage (unlock 8)
+            { resourceId: 'plant_nettle', amount: 6 }
+        ],
+        craftTime: 2500,
+        stats: {
+            force: 3,
+            duration: 300
+        },
+        requiredLevel: 8, // Augmenté: 5 → 8 (cohérence avec sage)
+        description: 'Augmente la Force de 5 pendant 5 minutes.'
+    },
+
+    {
+        id: 'potion_agility',
+        name: 'Potion d\'Agilité',
+        type: 'potion',
+        slot: 'consumable',
+        icon: '⚡',
+        rarity: 'rare',
+        archetype: 'universal',
+        profession: 'alchemist',
+        professionLevel: 10, // Augmenté: 7 → 10
+        materials: [
+            { resourceId: 'plant_lavender', amount: 4 }, // Changé: wild_mint (unlock 18) → lavender (unlock 10)
+            { resourceId: 'plant_sage', amount: 3 } // Changé: wood_mushroom (unlock 15) → sage (unlock 8)
+        ],
+        craftTime: 3000,
+        stats: {
+            agility: 5,
+            duration: 300
+        },
+        requiredLevel: 10, // Augmenté: 7 → 10 (cohérence avec lavender)
+        description: 'Augmente l\'Agilité de 5 pendant 5 minutes.'
+    },
+
+    // ========== POISSONNIER - PLATS ==========
+    {
+        id: 'grilled_fish',
+        name: 'Poisson Grillé',
+        type: 'food',
+        slot: 'consumable',
+        icon: '🐟',
+        rarity: 'common',
+        profession: 'fishmonger',
+        professionLevel: 1,
+        materials: [
+            { resourceId: 'fish_stream', amount: 3 }
+        ],
+        craftTime: 1000,
+        stats: {
+            hpRestore: 40,
+            endurance: 1,
+            duration: 180
+        },
+        requiredLevel: 1,
+        description: 'Restaure 40 HP et augmente l\'Endurance de 2 pendant 3 minutes.'
+    },
+
+    {
+        id: 'fish_soup',
+        name: 'Soupe de Poisson',
+        type: 'food',
+        slot: 'consumable',
+        icon: '🍲',
+        rarity: 'uncommon',
+        profession: 'fishmonger',
+        professionLevel: 3,
+        materials: [
+            { resourceId: 'fish_silver_trout', amount: 2 },
+            { resourceId: 'fish_herring', amount: 2 },
+            { resourceId: 'plant_medicinal_herb', amount: 3 }
+        ],
+        craftTime: 2000,
+        stats: {
+            hpRestore: 120,
+            defense: 2,
+            duration: 300
+        },
+        requiredLevel: 3,
+        description: 'Restaure 120 HP et augmente la Défense de 3 pendant 5 minutes.'
+    },
+
+    {
+        id: 'sushi_quality',
+        name: 'Sushi de Qualité',
+        type: 'food',
+        slot: 'consumable',
+        icon: '🍣',
+        rarity: 'rare',
+        profession: 'fishmonger',
+        professionLevel: 5,
+        materials: [
+            { resourceId: 'fish_wild_salmon', amount: 2 },
+            { resourceId: 'fish_golden_perch', amount: 1 }
+        ],
+        craftTime: 2500,
+        stats: {
+            hpRestore: 200,
+            agility: 4,
+            intelligence: 2,
+            duration: 300
+        },
+        requiredLevel: 5,
+        description: 'Restaure 200 HP et augmente Agilité +4, Intelligence +2 pendant 5 minutes.'
+    },
+
+    {
+        id: 'seafood_feast',
+        name: 'Festin de la Mer',
+        type: 'food',
+        slot: 'consumable',
+        icon: '🦞',
+        rarity: 'epic',
+        archetype: 'universal',
+        profession: 'fishmonger',
+        professionLevel: 12, // Augmenté: 10 → 12
+        materials: [
+            { resourceId: 'fish_striped_bass', amount: 2 }, // Changé: blue_tuna (unlock 20) → striped_bass (unlock 18)
+            { resourceId: 'fish_lunar_carp', amount: 1 }, // Changé: swordfish (unlock 22) → lunar_carp (unlock 12)
+            { resourceId: 'plant_rosemary', amount: 5 } // Changé: sage (unlock 8) → rosemary (unlock 12)
+        ],
+        craftTime: 4000,
+        stats: {
+            hpRestore: 300,
+            force: 2,
+            defense: 2,
+            agility: 3,
+            duration: 600
+        },
+        requiredLevel: 18, // Augmenté: 10 → 18 (cohérence avec striped_bass)
+        description: 'Restaure 300 HP et augmente toutes les stats de 3 pendant 10 minutes.'
+    },
+
+    // ========== TAILLEUR - VÊTEMENTS ==========
+    {
+        id: 'linen_tunic',
+        name: 'Tunique de Lin',
+        type: 'cloth',
+        slot: 'chest',
+        icon: '👕',
+        rarity: 'common',
+        archetype: 'universal',
+        profession: 'tailor',
+        professionLevel: 1,
+        materials: [
+            { resourceId: 'fabric_linen', amount: 10 },
+            { resourceId: 'fabric_hemp', amount: 5 }
+        ],
+        craftTime: 2000,
+        stats: {
+            defense: 2,
+            agility: 2,
+            endurance: 1
+        },
+        requiredLevel: 1,
+        description: 'Une tunique légère en lin. Confortable et résistante.'
+    },
+
+    {
+        id: 'wool_robe',
+        name: 'Robe de Laine',
+        type: 'cloth',
+        slot: 'chest',
+        icon: '👗',
+        rarity: 'uncommon',
+        profession: 'tailor',
+        professionLevel: 3,
+        materials: [
+            { resourceId: 'fabric_raw_wool', amount: 15 },
+            { resourceId: 'fabric_cotton', amount: 8 }
+        ],
+        craftTime: 2500,
+        stats: {
+            defense: 4,
+            intelligence: 3,
+            wisdom: 2,
+            endurance: 2
+        },
+        requiredLevel: 3,
+        description: 'Une robe chaude en laine de qualité.'
+    },
+
+    {
+        id: 'silk_cloak',
+        name: 'Cape de Soie',
+        type: 'cloth',
+        slot: 'back',
+        icon: '🧥',
+        rarity: 'rare',
+        profession: 'tailor',
+        professionLevel: 5,
+        materials: [
+            { resourceId: 'fabric_linen', amount: 10 },
+            { resourceId: 'fabric_hemp', amount: 5 }
+        ],
+        craftTime: 3000,
+        stats: {
+            defense: 6,
+            agility: 5,
+            intelligence: 3
+        },
+        requiredLevel: 5,
+        description: 'Une cape élégante en soie fine. Augmente l\'agilité.'
+    },
+
+    {
+        id: 'enchanted_gloves',
+        name: 'Gants Enchantés',
+        type: 'cloth',
+        slot: 'gloves',
+        icon: '🧤',
+        rarity: 'epic',
+        profession: 'tailor',
+        professionLevel: 8,
+        materials: [
+            { resourceId: 'fabric_refined_silk', amount: 12 },
+            { resourceId: 'fabric_velvet', amount: 8 },
+            { resourceId: 'gem_sapphire', amount: 2 }
+        ],
+        craftTime: 4000,
+        stats: {
+            defense: 3,
+            intelligence: 6,
+            wisdom: 4,
+            professionXP: 10
+        },
+        requiredLevel: 8,
+        description: 'Des gants tissés avec de la magie. Augmentent l\'XP des métiers de 10%.'
     }
 ];
 

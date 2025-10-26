@@ -466,7 +466,7 @@ const RegionsData = {
                     icon: "✨",
                     levelRange: { min: 21, max: 21 },
                     monsters: {
-                        common: ['loup_bois', 'gobelin_forestier'],
+                        common: ['loup_bois', 'gobelin_forestier', 'fantome_foret'],
                         rare: [],
                         elite: []
                     }
@@ -478,7 +478,7 @@ const RegionsData = {
                     icon: "🌳",
                     levelRange: { min: 21, max: 22 },
                     monsters: {
-                        common: ['loup_bois', 'serpent_sylvestre', 'gobelin_forestier'],
+                        common: ['loup_bois', 'serpent_sylvestre', 'gobelin_forestier', 'araignee_geante'],
                         rare: [],
                         elite: []
                     }
@@ -490,7 +490,7 @@ const RegionsData = {
                     icon: "🦌",
                     levelRange: { min: 22, max: 23 },
                     monsters: {
-                        common: ['loup_bois', 'sanglier_racines'],
+                        common: ['loup_bois', 'sanglier_racines', 'loup_garou_jeune'],
                         rare: ['dryade_pervertie'],
                         elite: []
                     }
@@ -502,8 +502,8 @@ const RegionsData = {
                     icon: "🌲",
                     levelRange: { min: 23, max: 24 },
                     monsters: {
-                        common: ['serpent_sylvestre', 'gobelin_forestier'],
-                        rare: ['champignon_geant'],
+                        common: ['serpent_sylvestre', 'gobelin_forestier', 'araignee_geante', 'fantome_foret'],
+                        rare: ['champignon_geant', 'sorciere_sylvestre'],
                         elite: []
                     }
                 },
@@ -514,7 +514,7 @@ const RegionsData = {
                     icon: "🌿",
                     levelRange: { min: 24, max: 25 },
                     monsters: {
-                        common: ['sanglier_racines', 'loup_bois'],
+                        common: ['sanglier_racines', 'loup_bois', 'loup_garou_jeune'],
                         rare: ['dryade_pervertie', 'champignon_geant'],
                         elite: []
                     }
@@ -526,8 +526,8 @@ const RegionsData = {
                     icon: "💧",
                     levelRange: { min: 25, max: 26 },
                     monsters: {
-                        common: ['serpent_sylvestre', 'gobelin_forestier'],
-                        rare: ['corbeau_spectral'],
+                        common: ['serpent_sylvestre', 'gobelin_forestier', 'fantome_foret'],
+                        rare: ['corbeau_spectral', 'sorciere_sylvestre'],
                         elite: []
                     }
                 },
@@ -538,9 +538,9 @@ const RegionsData = {
                     icon: "🔥",
                     levelRange: { min: 26, max: 27 },
                     monsters: {
-                        common: ['sanglier_racines', 'serpent_sylvestre'],
-                        rare: ['corbeau_spectral', 'champignon_geant'],
-                        elite: ['ent_colerique']
+                        common: ['sanglier_racines', 'serpent_sylvestre', 'araignee_geante'],
+                        rare: ['corbeau_spectral', 'champignon_geant', 'sorciere_sylvestre'],
+                        elite: ['ent_colerique', 'vampire_ancien']
                     }
                 },
                 {
@@ -550,9 +550,9 @@ const RegionsData = {
                     icon: "🧚",
                     levelRange: { min: 27, max: 28 },
                     monsters: {
-                        common: ['loup_bois', 'gobelin_forestier'],
+                        common: ['loup_bois', 'gobelin_forestier', 'loup_garou_jeune'],
                         rare: ['dryade_pervertie'],
-                        elite: ['ent_colerique', 'elfe_corrompu']
+                        elite: ['ent_colerique', 'elfe_corrompu', 'liche_corrompue']
                     }
                 },
                 {
@@ -562,9 +562,9 @@ const RegionsData = {
                     icon: "🌑",
                     levelRange: { min: 28, max: 29 },
                     monsters: {
-                        common: ['serpent_sylvestre', 'sanglier_racines'],
+                        common: ['serpent_sylvestre', 'sanglier_racines', 'fantome_foret'],
                         rare: ['corbeau_spectral'],
-                        elite: ['elfe_corrompu']
+                        elite: ['elfe_corrompu', 'vampire_ancien', 'gardien_ancien']
                     }
                 },
                 {
@@ -574,9 +574,9 @@ const RegionsData = {
                     icon: "⛩️",
                     levelRange: { min: 29, max: 30 },
                     monsters: {
-                        common: ['loup_bois', 'gobelin_forestier', 'serpent_sylvestre'],
-                        rare: ['dryade_pervertie', 'champignon_geant'],
-                        elite: ['ent_colerique', 'elfe_corrompu']
+                        common: ['loup_bois', 'gobelin_forestier', 'serpent_sylvestre', 'araignee_geante', 'loup_garou_jeune'],
+                        rare: ['dryade_pervertie', 'champignon_geant', 'sorciere_sylvestre'],
+                        elite: ['ent_colerique', 'elfe_corrompu', 'vampire_ancien', 'liche_corrompue', 'gardien_ancien']
                     },
                     isBossZone: true,
                     bossSpawnLogic: "9_normal_then_boss"

@@ -106,6 +106,146 @@ class QuestManager {
         
         return questCompleted;
     }
+    
+    /**
+     * Met à jour la progression d'une quête de type 'collect_drops'
+     */
+    updateCollectDropsQuest(amount = 1) {
+        let questCompleted = false;
+        
+        this.activeQuests.forEach(quest => {
+            if (quest.type === 'collect_drops' && !quest.isCompleted) {
+                const completed = quest.updateProgress(amount);
+                
+                if (completed) {
+                    this.onQuestComplete(quest);
+                    questCompleted = true;
+                }
+            }
+        });
+        
+        return questCompleted;
+    }
+    
+    /**
+     * Met à jour la progression d'une quête de type 'boss_kill'
+     */
+    updateBossKillQuest(bossId) {
+        let questCompleted = false;
+        
+        this.activeQuests.forEach(quest => {
+            if (quest.type === 'boss_kill' && !quest.isCompleted) {
+                // Vérifier si c'est le bon boss
+                if (quest.requirements?.bossId === bossId) {
+                    const completed = quest.updateProgress(1);
+                    
+                    if (completed) {
+                        this.onQuestComplete(quest);
+                        questCompleted = true;
+                    }
+                }
+            }
+        });
+        
+        return questCompleted;
+    }
+    
+    /**
+     * Met à jour la progression d'une quête de type 'create_alt'
+     */
+    updateCreateAltQuest(altId) {
+        let questCompleted = false;
+        
+        this.activeQuests.forEach(quest => {
+            if (quest.type === 'create_alt' && !quest.isCompleted) {
+                const completed = quest.updateProgress(1);
+                
+                if (completed) {
+                    this.onQuestComplete(quest);
+                    questCompleted = true;
+                }
+            }
+        });
+        
+        return questCompleted;
+    }
+    
+    /**
+     * Met à jour la progression d'une quête de type 'complete_dungeon'
+     */
+    updateCompleteDungeonQuest(dungeonId) {
+        let questCompleted = false;
+        
+        this.activeQuests.forEach(quest => {
+            if (quest.type === 'complete_dungeon' && !quest.isCompleted) {
+                // Vérifier si c'est le bon donjon (si spécifié)
+                if (quest.requirements?.dungeonId && quest.requirements.dungeonId !== dungeonId) {
+                    return; // Pas le bon donjon
+                }
+                
+                // Vérifier si Trinity requis
+                if (quest.requirements?.hasTrinity && window.game?.dungeonManager) {
+                    // Cette vérification sera faite avant d'entrer dans le donjon
+                }
+                
+                const completed = quest.updateProgress(1);
+                
+                if (completed) {
+                    this.onQuestComplete(quest);
+                    questCompleted = true;
+                }
+            }
+        });
+        
+        return questCompleted;
+    }
+
+    /**
+     * Met à jour la progression d'une quête de type 'craft'
+     */
+    updateCraftQuest(itemId, amount = 1) {
+        let questCompleted = false;
+        
+        this.activeQuests.forEach(quest => {
+            if (quest.type === 'craft' && !quest.isCompleted) {
+                // Vérifier si c'est le bon item
+                if (quest.requirements?.craftItem === itemId) {
+                    const completed = quest.updateProgress(amount);
+                    
+                    if (completed) {
+                        this.onQuestComplete(quest);
+                        questCompleted = true;
+                    }
+                }
+            }
+        });
+        
+        return questCompleted;
+    }
+    
+    /**
+     * Met à jour la progression d'une quête de type 'level_up'
+     */
+    updateLevelUpQuest(newLevel) {
+        let questCompleted = false;
+        
+        this.activeQuests.forEach(quest => {
+            if (quest.type === 'level_up' && !quest.isCompleted) {
+                // Vérifier si le niveau cible est atteint
+                if (newLevel >= quest.target) {
+                    quest.progress = quest.target;
+                    const completed = quest.complete();
+                    
+                    if (completed !== false) {
+                        this.onQuestComplete(quest);
+                        questCompleted = true;
+                    }
+                }
+            }
+        });
+        
+        return questCompleted;
+    }
 
     /**
      * Vérifie si les conditions de la quête sont remplies
@@ -196,11 +336,27 @@ class QuestManager {
             this.player.resources.gold += quest.rewards.gold;
         }
         
+        // Items
+        if (quest.rewards.items && quest.rewards.items.length > 0) {
+            quest.rewards.items.forEach(itemReward => {
+                // Ajouter l'item à l'inventaire du joueur
+                if (window.game && window.game.player) {
+                    // TODO: Implémenter l'ajout d'items à l'inventaire
+                    console.log(`📦 Item reçu: ${itemReward.id} x${itemReward.amount}`);
+                }
+            });
+        }
+        
         // Déblocages
         if (quest.rewards.unlocks && quest.rewards.unlocks.length > 0) {
             quest.rewards.unlocks.forEach(unlock => {
                 this.handleUnlock(unlock);
             });
+        }
+        
+        // Message personnalisé
+        if (quest.rewards.message && window.game && window.game.ui) {
+            window.game.ui.showNotification(quest.rewards.message, 'success');
         }
     }
 
@@ -212,38 +368,168 @@ class QuestManager {
             console.log(`🔓 Déblocage: ${unlockType}`);
         }
         
+        // ✅ Activer le déblocage dans Game.unlocks
+        if (window.game && window.game.unlocks && window.game.unlocks.hasOwnProperty(unlockType)) {
+            window.game.unlocks[unlockType] = true;
+        }
+        
+        // 🎨 Mettre à jour l'UI selon le type de déblocage
+        if (!window.game || !window.game.ui) return;
+        
         switch (unlockType) {
-            case 'gathering':
-                // Débloquer l'onglet Récolte
-                if (window.game && window.game.ui) {
-                    window.game.ui.unlockProfessionsTab();
-                }
+            // ⚡ AUTO-FEATURES
+            case 'auto_combat':
+                window.game.ui.showNotification('⚡ AUTO-COMBAT DÉBLOQUÉ !', 'legendary');
+                window.game.ui.updateAutoCombatButton(false); // Montrer le bouton
                 break;
             
-            case 'town':
-                // Débloquer l'onglet Ville
-                if (window.game && window.game.ui) {
-                    window.game.ui.unlockTownTab();
-                }
+            case 'auto_gather_wood':
+                window.game.ui.showNotification('🪵 AUTO-RÉCOLTE BOIS DÉBLOQUÉE !', 'epic');
+                window.game.ui.updateAutoGatherButtons();
                 break;
             
-            case 'dragons':
-                // Débloquer l'onglet Dragons
-                if (window.game && window.game.ui) {
-                    window.game.ui.unlockDragonsTab();
-                }
+            case 'auto_gather_ore':
+                window.game.ui.showNotification('⛏️ AUTO-RÉCOLTE MINERAI DÉBLOQUÉE !', 'epic');
+                window.game.ui.updateAutoGatherButtons();
                 break;
             
-            case 'guild':
-                // Débloquer l'onglet Guilde
-                if (window.game && window.game.ui) {
-                    window.game.ui.unlockGuildTab();
-                }
+            case 'auto_fishing':
+                window.game.ui.showNotification('🎣 AUTO-PÊCHE DÉBLOQUÉE !', 'epic');
+                window.game.ui.updateAutoGatherButtons();
                 break;
             
-            case 'zone_2':
-                // Débloquer la zone 2
-                // À implémenter plus tard
+            case 'auto_herbalism':
+                window.game.ui.showNotification('🌿 AUTO-HERBORISTERIE DÉBLOQUÉE !', 'epic');
+                window.game.ui.updateAutoGatherButtons();
+                break;
+            
+            // 📑 ONGLETS UI
+            case 'combat_log':
+                // Déjà visible par défaut
+                break;
+            
+            case 'equipment_tab':
+                window.game.ui.showNotification('🎒 Onglet Équipement débloqué !', 'success');
+                window.game.ui.updateTabVisibility();
+                break;
+            
+            case 'gathering_tab':
+            case 'gathering': // Compatibilité anciennes sauvegardes
+                window.game.ui.showNotification('🌲 Onglet Récolte débloqué !', 'epic');
+                window.game.ui.unlockProfessionsTab();
+                window.game.ui.updateTabVisibility();
+                break;
+            
+            case 'crafting_tab':
+                window.game.ui.showNotification('🔨 Onglet Fabrication débloqué !', 'epic');
+                window.game.ui.updateTabVisibility();
+                break;
+            
+            case 'alchemy_tab':
+                window.game.ui.showNotification('⚗️ Onglet Transmutation débloqué !', 'epic');
+                window.game.ui.updateTabVisibility();
+                break;
+            
+            case 'inventory_tab':
+                window.game.ui.showNotification('🎒 Inventaire débloqué !', 'success');
+                window.game.ui.updateTabVisibility();
+                break;
+            
+            case 'professions_tab':
+                window.game.ui.showNotification('🔨 Onglet Métiers débloqué !', 'epic');
+                window.game.ui.updateTabVisibility();
+                break;
+            
+            case 'town_tab':
+            case 'town': // Compatibilité anciennes sauvegardes
+                window.game.ui.showNotification('🏙️ Onglet Ville débloqué !', 'legendary');
+                window.game.ui.unlockTownTab();
+                window.game.ui.updateTabVisibility();
+                break;
+            
+            case 'dragons_tab':
+            case 'dragons': // Compatibilité anciennes sauvegardes
+                window.game.ui.showNotification('🐉 Onglet Dragons débloqué !', 'legendary');
+                window.game.ui.unlockDragonsTab();
+                window.game.ui.updateTabVisibility();
+                break;
+            
+            case 'guild_tab':
+            case 'guild': // Compatibilité anciennes sauvegardes
+                window.game.ui.showNotification('⚔️ Onglet Guilde débloqué !', 'legendary');
+                window.game.ui.unlockGuildTab();
+                window.game.ui.updateTabVisibility();
+                break;
+            
+            // 🗺️ RÉGIONS
+            case 'region_2':
+                window.game.ui.showNotification('🏔️ RÉGION 2 DÉBLOQUÉE : Montagnes Grises !', 'legendary');
+                break;
+            
+            case 'region_3':
+                window.game.ui.showNotification('🌳 RÉGION 3 DÉBLOQUÉE : Forêt Ancestrale !', 'legendary');
+                break;
+            
+            case 'region_4':
+                window.game.ui.showNotification('🔥 RÉGION 4 DÉBLOQUÉE : Terres Brûlées !', 'legendary');
+                break;
+            
+            case 'region_5':
+                window.game.ui.showNotification('❄️ RÉGION 5 DÉBLOQUÉE : Nord Gelé !', 'legendary');
+                break;
+            
+            // 🛠️ MÉTIERS
+            case 'profession_woodcutting':
+                window.game.ui.showNotification('🪵 Vous êtes maintenant Bûcheron !', 'success');
+                break;
+            
+            case 'profession_mining':
+                window.game.ui.showNotification('⛏️ Vous êtes maintenant Mineur !', 'success');
+                break;
+            
+            case 'profession_blacksmith':
+                window.game.ui.showNotification('🔨 Vous êtes maintenant Forgeron !', 'success');
+                break;
+            
+            case 'profession_armorsmith':
+                window.game.ui.showNotification('🛡️ Vous êtes maintenant Armurier !', 'success');
+                break;
+            
+            case 'profession_herbalism':
+                window.game.ui.showNotification('🌿 Vous êtes maintenant Herboriste !', 'success');
+                break;
+            
+            case 'profession_fishing':
+                window.game.ui.showNotification('🎣 Vous êtes maintenant Pêcheur !', 'success');
+                break;
+            
+            case 'profession_jeweler':
+                window.game.ui.showNotification('💍 Vous êtes maintenant Bijoutier !', 'success');
+                break;
+            
+            case 'profession_alchemist':
+                window.game.ui.showNotification('🧪 Vous êtes maintenant Alchimiste !', 'success');
+                break;
+            
+            case 'profession_tailor':
+                window.game.ui.showNotification('👗 Vous êtes maintenant Tailleur !', 'success');
+                break;
+            
+            case 'profession_transmutation':
+                window.game.ui.showNotification('⚗️ Vous êtes maintenant Transmutateur !', 'success');
+                break;
+            
+            // 🎮 SYSTÈMES
+            case 'storage_system':
+                window.game.ui.showNotification('📦 Système de stockage débloqué !', 'success');
+                break;
+            
+            case 'dragon_capture':
+                window.game.ui.showNotification('🐉 Vous pouvez maintenant capturer des dragons !', 'legendary');
+                break;
+            
+            case 'dragon_breeding':
+                window.game.ui.showNotification('🥚 Reproduction de dragons débloquée !', 'legendary');
                 break;
             
             default:
@@ -272,6 +558,19 @@ class QuestManager {
         
         if (GameConfig.DEBUG.enabled) {
             console.log(`✅ Quête activée: ${quest.title}`);
+        }
+        
+        // 🎯 VÉRIFICATION IMMÉDIATE : Si la quête est de type 'level_up' et que le niveau est déjà atteint
+        if (quest.type === 'level_up' && this.player.level >= quest.target) {
+            quest.progress = quest.target;
+            const completed = quest.complete();
+            
+            if (completed !== false) {
+                this.onQuestComplete(quest);
+                if (GameConfig.DEBUG.enabled) {
+                    console.log(`✅ Quête ${quest.title} complétée immédiatement (niveau déjà atteint)`);
+                }
+            }
         }
         
         return true;
@@ -315,6 +614,21 @@ class QuestManager {
                 this.activeQuests.push(quest);
             } else if (quest.isCompleted) {
                 this.completedQuests.push(quest);
+            }
+        });
+        
+        // 🎯 VÉRIFICATION POST-CHARGEMENT : Valider les quêtes level_up déjà remplies
+        this.activeQuests.forEach(quest => {
+            if (quest.type === 'level_up' && !quest.isCompleted && this.player.level >= quest.target) {
+                quest.progress = quest.target;
+                const completed = quest.complete();
+                
+                if (completed !== false) {
+                    this.onQuestComplete(quest);
+                    if (GameConfig.DEBUG.enabled) {
+                        console.log(`✅ Quête ${quest.title} auto-validée au chargement (niveau déjà atteint)`);
+                    }
+                }
             }
         });
         

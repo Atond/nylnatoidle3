@@ -15,6 +15,61 @@ class Game {
         this.storageManager = null;
         this.characterCreation = null;
         this.alchemyManager = null; // 🧪 Système de conversion alchimique
+        this.dragonManager = null; // 🐉 Système de dragons
+        this.altCharacterManager = null; // 🎭 Système de personnages alternatifs
+        this.dungeonManager = null; // 🏰 Système de donjons Trinity
+        
+        // 🔓 Système de déblocages progressifs (Quêtes)
+        this.unlocks = {
+            // Auto-features
+            auto_combat: false,
+            auto_gather_wood: false,
+            auto_gather_ore: false,
+            auto_fishing: false,
+            auto_herbalism: false,
+            
+            // Onglets UI
+            combat_log: false,
+            equipment_tab: false,      // 🎒 Équipement (M01)
+            gathering_tab: false,      // ⛏️ Récolte (M04)
+            crafting_tab: false,       // 🔨 Fabrication (M06)
+            alchemy_tab: false,        // ⚗️ Transmutation (M08)
+            inventory_tab: false,      // Ancien nom (compatibilité)
+            professions_tab: false,    // Ancien nom (compatibilité)
+            town_tab: false,           // 🏘️ Ville (M10)
+            dragons_tab: false,        // 🐉 Dragons (futur)
+            guild_tab: false,          // 👥 Guilde (futur)
+            
+            // Régions
+            region_2: false,
+            region_3: false,
+            region_4: false,
+            region_5: false,
+            
+            // Métiers
+            profession_woodcutting: false,
+            profession_mining: false,
+            profession_herbalism: false,
+            profession_fishing: false,
+            profession_blacksmith: false,
+            profession_armorsmith: false,
+            profession_jeweler: false,
+            profession_alchemist: false,
+            profession_tailor: false,
+            profession_transmutation: false,
+            
+            // Systèmes
+            storage_system: false,
+            dragon_capture: false,
+            dragon_breeding: false,
+            
+            // Alt Characters & Donjons
+            alt_characters: false,
+            shared_storage: false,
+            characters_tab: false,
+            dungeons_tab: false,
+            raid_system: false
+        };
         
         // Boucle de jeu
         this.lastUpdateTime = 0;
@@ -48,14 +103,31 @@ class Game {
             console.log('🔄 Import de sauvegarde détecté - Auto-save désactivé');
         }
         
-        // Création des instances
-        this.player = new Player();
+        // 🏗️ FIX: Injection de dépendances - créer equipmentManager d'abord
+        this.equipmentManager = new EquipmentManager(this);
+        
+        // 🐉 Créer dragonManager avant player (pour injection)
+        this.dragonManager = new DragonManager(null); // Player sera défini après
+        
+        // 🎭 Créer altCharacterManager avant player
+        this.altCharacterManager = new AltCharacterManager(this);
+        
+        // 🏰 Créer dungeonManager
+        this.dungeonManager = new DungeonManager(this);
+        this.dungeonManager.initialize();
+        
+        // Création des instances avec injection de dépendances
+        this.player = new Player(this.equipmentManager, this.dragonManager);
+        
+        // 🐉 Lier le player au dragonManager
+        this.dragonManager.player = this.player;
+        
         this.combat = new Combat(this.player);
         this.questManager = new QuestManager(this.player);
         this.professionManager = new ProfessionManager();
-        this.equipmentManager = new EquipmentManager(this);
         this.craftingManager = new CraftingManager(this);
         this.buildingManager = new BuildingManager(this);
+        this.cityManager = new CityManager(this); // 🏘️ Gestion de la ville
         this.alchemyManager = new AlchemyManager(this); // 🧪 Alchimie
         this.storageManager = new StorageManager(this);
         this.ui = new UI(this);
@@ -83,6 +155,9 @@ class Game {
         this.ui.updateInventory();
         this.ui.updateAutoGatherButtons();
         this.ui.checkEquipmentUnlock(); // Vérifier si l'équipement doit être débloqué
+        
+        // 🔧 FIX: Restaurer l'état du bouton auto-combat après chargement
+        this.ui.updateAutoCombatButton(this.combat.autoCombatEnabled);
         
         // Afficher la création de personnage si nécessaire
         if (this.characterCreation.shouldShow()) {
@@ -165,11 +240,21 @@ class Game {
             this.buildingManager.update(deltaTime);
         }
         
+        // 🏘️ Met à jour la ville (population, nourriture, taxes)
+        if (this.cityManager) {
+            this.cityManager.update(deltaTime);
+        }
+        
         // 🧪 Met à jour l'alchimie (conversions en cours)
         if (this.alchemyManager) {
             this.alchemyManager.update(deltaTime);
             // Vérifier déblocage alchimie
             this.alchemyManager.checkUnlock(this.player.level);
+        }
+        
+        // 🐉 Met à jour les dragons (durée de vie, faim)
+        if (this.dragonManager && GameConfig.FEATURES.enableDragons) {
+            this.dragonManager.update(deltaTime);
         }
         
         // ⚡ OPTIMISATION: Throttle UI updates (pas besoin de refresh constant)
@@ -240,6 +325,7 @@ class Game {
             const saveData = {
                 version: GameConfig.GAME_VERSION,
                 timestamp: Date.now(),
+                unlocks: this.unlocks, // 🔓 Déblocages progressifs
                 player: this.player.toJSON(),
                 combat: this.combat.toJSON(),
                 quests: this.questManager.toJSON(),
@@ -247,8 +333,12 @@ class Game {
                 equipment: this.equipmentManager.toJSON(),
                 crafting: this.craftingManager.toJSON(),
                 buildings: this.buildingManager.toJSON(),
+                city: this.cityManager.toJSON(), // 🏘️ Ville
                 alchemy: this.alchemyManager.save(), // 🧪 Alchimie
+                dragons: this.dragonManager.toJSON(), // 🐉 Dragons
                 storage: this.storageManager.getSaveData(),
+                altCharacters: this.altCharacterManager.save(), // 🎭 Alt Characters
+                dungeons: this.dungeonManager.save(), // 🏰 Donjons
                 ui: this.ui.toJSON()
             };
             
@@ -291,6 +381,11 @@ class Game {
             }
             
             // Restaure les données
+            // 🔓 Restaurer les déblocages
+            if (saveData.unlocks) {
+                this.unlocks = { ...this.unlocks, ...saveData.unlocks };
+            }
+            
             this.player.fromJSON(saveData.player);
             this.combat.fromJSON(saveData.combat);
             if (saveData.quests) {
@@ -308,11 +403,23 @@ class Game {
             if (saveData.buildings) {
                 this.buildingManager.fromJSON(saveData.buildings);
             }
+            if (saveData.city) { // 🏘️ Charger ville
+                this.cityManager.fromJSON(saveData.city);
+            }
             if (saveData.alchemy) { // 🧪 Charger alchimie
                 this.alchemyManager.load(saveData.alchemy);
             }
+            if (saveData.dragons) { // 🐉 Charger dragons
+                this.dragonManager.fromJSON(saveData.dragons);
+            }
             if (saveData.storage) {
                 this.storageManager.loadSaveData(saveData.storage);
+            }
+            if (saveData.altCharacters) { // 🎭 Charger Alt Characters
+                this.altCharacterManager.load(saveData.altCharacters);
+            }
+            if (saveData.dungeons) { // 🏰 Charger Donjons
+                this.dungeonManager.load(saveData.dungeons);
             }
             if (saveData.ui) {
                 this.ui.fromJSON(saveData.ui);
@@ -330,6 +437,7 @@ class Game {
                 this.ui.updateProfessions();
                 this.ui.updateInventory();
                 this.ui.updateAutoGatherButtons();
+                this.ui.updateTabVisibility(); // 🎉 Restaurer visibilité onglets débloqués
             }
             
             if (GameConfig.DEBUG.logSaves) {
@@ -517,8 +625,9 @@ class Game {
 
     /**
      * Exporte la sauvegarde en Base64 (pour partage/backup)
+     * @returns {string|null} Sauvegarde encodée en Base64
      */
-    exportSave() {
+    exportSaveAsBase64() {
         this.save(); // Sauvegarde d'abord
         
         const saveString = localStorage.getItem(GameConfig.SAVE.SAVE_KEY);
@@ -604,15 +713,30 @@ class Game {
                     }
                     
                     if (amountProduced > 0) {
-                        // Ajouter à l'inventaire
-                        this.professionManager.addToInventory(resourceId, amountProduced);
+                        // 📦 FIX: Vérifier les limites de stockage avant d'ajouter
+                        const currentAmount = this.professionManager.getInventoryAmount(resourceId);
+                        const storageLimit = this.storageManager.getLimit(resourceId);
+                        const spaceAvailable = storageLimit - currentAmount;
                         
-                        // Comptabiliser pour le récapitulatif
-                        if (!productions[resourceId]) {
-                            productions[resourceId] = 0;
+                        // Limiter la quantité ajoutée à l'espace disponible
+                        const actualAmountToAdd = Math.min(amountProduced, spaceAvailable);
+                        
+                        if (actualAmountToAdd > 0) {
+                            // Ajouter à l'inventaire (avec limite de stockage)
+                            this.professionManager.addToInventory(resourceId, actualAmountToAdd);
+                            
+                            // Comptabiliser pour le récapitulatif
+                            if (!productions[resourceId]) {
+                                productions[resourceId] = 0;
+                            }
+                            productions[resourceId] += actualAmountToAdd;
+                            totalProductionValue += actualAmountToAdd;
+                            
+                            // Avertir si on a atteint la limite
+                            if (actualAmountToAdd < amountProduced) {
+                                console.warn(`⚠️ Stockage plein pour ${resourceId}: ${actualAmountToAdd}/${amountProduced} ajouté`);
+                            }
                         }
-                        productions[resourceId] += amountProduced;
-                        totalProductionValue += amountProduced;
                     }
                 }
             }

@@ -1,0 +1,651 @@
+/**
+ * Données des Monstres - Région 1 : Les Plaines Verdoyantes
+ * 
+ * Types : Communs, Rares, Élites, Boss
+ * Stats : HP, Attaque, Défense, Vitesse (ms entre attaques)
+ * Récompenses : XP, Or
+ */
+
+const MonstersData = {
+    
+    // ========== MONSTRES COMMUNS ==========
+    common: {
+        
+        loup_gris: {
+            id: 'loup_gris',
+            name: "Loup Gris",
+            description: "Un loup ordinaire des plaines",
+            icon: "🐺",
+            type: "beast",
+            
+            baseStats: {
+                hp: 25,
+                attack: 4,
+                defense: 2,
+                speed: 2500 // Attaque toutes les 2.5 secondes
+            },
+            
+            rewards: {
+                xp: 12,
+                gold: 5
+            },
+            
+            // Référence vers drops-data.js
+            dropTable: ['peau_animale', 'griffes_usees']
+        },
+        
+        sanglier_sauvage: {
+            id: 'sanglier_sauvage',
+            name: "Sanglier Sauvage",
+            description: "Un sanglier agressif",
+            icon: "🐗",
+            type: "beast",
+            
+            baseStats: {
+                hp: 35,
+                attack: 6,
+                defense: 3,
+                speed: 3000
+            },
+            
+            rewards: {
+                xp: 15,
+                gold: 8
+            },
+            
+            dropTable: ['peau_animale', 'griffes_usees']
+        },
+        
+        bandit_routes: {
+            id: 'bandit_routes',
+            name: "Bandit des Routes",
+            description: "Un brigand qui détroussait les voyageurs",
+            icon: "🗡️",
+            type: "humanoid",
+            
+            baseStats: {
+                hp: 30,
+                attack: 5,
+                defense: 2,
+                speed: 2000
+            },
+            
+            rewards: {
+                xp: 18,
+                gold: 15
+            },
+            
+            dropTable: ['petit_sac_bandit', 'peau_animale']
+        },
+        
+        corbeau_noir: {
+            id: 'corbeau_noir',
+            name: "Corbeau Noir",
+            description: "Un corbeau particulièrement agressif",
+            icon: "🦅",
+            type: "beast",
+            
+            baseStats: {
+                hp: 15,
+                attack: 3,
+                defense: 1,
+                speed: 1500 // Rapide !
+            },
+            
+            rewards: {
+                xp: 8,
+                gold: 3
+            },
+            
+            dropTable: ['plumes_sombres']
+        },
+        
+        // ========== RÉGION 2 : LES MONTAGNES GRISES ==========
+        
+        bat1: {
+            id: 'bat1',
+            name: "Chauve-souris de Roche",
+            description: "Chauve-souris vivant dans les grottes montagneuses",
+            icon: "🦇",
+            type: "beast",
+            
+            baseStats: {
+                hp: 40,
+                attack: 8,
+                defense: 3,
+                speed: 1800 // Rapide
+            },
+            
+            rewards: {
+                xp: 25,
+                gold: 10
+            },
+            
+            dropTable: ['aile_chauve_souris', 'croc_acere']
+        },
+        
+        wolf1: {
+            id: 'wolf1',
+            name: "Loup de Roche",
+            description: "Loup robuste adapté au terrain montagneux",
+            icon: "🐺",
+            type: "beast",
+            
+            baseStats: {
+                hp: 55,
+                attack: 10,
+                defense: 5,
+                speed: 2300
+            },
+            
+            rewards: {
+                xp: 30,
+                gold: 15
+            },
+            
+            dropTable: ['fourrure_epaisse', 'croc_acere']
+        },
+        
+        goat1: {
+            id: 'goat1',
+            name: "Bouc Sauvage",
+            description: "Bouc des montagnes au tempérament agressif",
+            icon: "🐐",
+            type: "beast",
+            
+            baseStats: {
+                hp: 60,
+                attack: 9,
+                defense: 6,
+                speed: 2600
+            },
+            
+            rewards: {
+                xp: 28,
+                gold: 12
+            },
+            
+            dropTable: ['corne_bouc', 'fourrure_epaisse']
+        },
+        
+        golem1: {
+            id: 'golem1',
+            name: "Golem Fissuré",
+            description: "Ancien gardien de pierre partiellement brisé",
+            icon: "🗿",
+            type: "construct",
+            
+            baseStats: {
+                hp: 80,
+                attack: 12,
+                defense: 10,
+                speed: 3500 // Lent mais puissant
+            },
+            
+            rewards: {
+                xp: 40,
+                gold: 20
+            },
+            
+            dropTable: ['fragment_golem', 'cristal_montagne']
+        },
+        
+        harpy1: {
+            id: 'harpy1',
+            name: "Harpie des Pics",
+            description: "Créature ailée mi-femme mi-oiseau, hostile aux intrus",
+            icon: "🦅",
+            type: "monstrous",
+            
+            baseStats: {
+                hp: 45,
+                attack: 11,
+                defense: 4,
+                speed: 2000 // Rapide
+            },
+            
+            rewards: {
+                xp: 35,
+                gold: 18
+            },
+            
+            dropTable: ['plume_harpie', 'serre_acier']
+        },
+        
+        vulture1: {
+            id: 'vulture1',
+            name: "Vautour Géant",
+            description: "Énorme charognard des hautes altitudes",
+            icon: "🦅",
+            type: "beast",
+            
+            baseStats: {
+                hp: 50,
+                attack: 10,
+                defense: 4,
+                speed: 2200
+            },
+            
+            rewards: {
+                xp: 32,
+                gold: 16
+            },
+            
+            dropTable: ['plume_noire', 'bec_recourbe']
+        },
+        
+        giant1: {
+            id: 'giant1',
+            name: "Géant de Pierre",
+            description: "Colosse ancestral errant dans les montagnes",
+            icon: "👹",
+            type: "giant",
+            
+            baseStats: {
+                hp: 100,
+                attack: 15,
+                defense: 8,
+                speed: 4000 // Très lent
+            },
+            
+            rewards: {
+                xp: 50,
+                gold: 30
+            },
+            
+            dropTable: ['peau_geant', 'os_massif']
+        },
+        
+        dwarf1: {
+            id: 'dwarf1',
+            name: "Nain Corrompu",
+            description: "Nain sous l'emprise de Forgemort, l'esprit brisé",
+            icon: "🧔",
+            type: "humanoid",
+            
+            baseStats: {
+                hp: 70,
+                attack: 13,
+                defense: 9,
+                speed: 2500
+            },
+            
+            rewards: {
+                xp: 45,
+                gold: 25
+            },
+            
+            dropTable: ['armure_naine', 'hachette_runique']
+        }
+    },
+    
+    // ========== MONSTRES RARES ==========
+    rare: {
+        
+        ours_brun: {
+            id: 'ours_brun',
+            name: "Ours Brun",
+            description: "Un ours puissant et territorial",
+            icon: "🐻",
+            type: "beast",
+            rarity: "rare",
+            spawnChance: 0.08, // 8% de chance d'apparaître
+            
+            baseStats: {
+                hp: 80,
+                attack: 12,
+                defense: 6,
+                speed: 3500
+            },
+            
+            rewards: {
+                xp: 40,
+                gold: 30
+            },
+            
+            dropTable: ['cuir_robuste', 'griffes_usees', 'peau_animale']
+        },
+        
+        serpent_venimeux: {
+            id: 'serpent_venimeux',
+            name: "Serpent Venimeux",
+            description: "Un serpent au venin mortel",
+            icon: "🐍",
+            type: "beast",
+            rarity: "rare",
+            spawnChance: 0.06, // 6% de chance
+            
+            baseStats: {
+                hp: 40,
+                attack: 15,
+                defense: 2,
+                speed: 2000
+            },
+            
+            rewards: {
+                xp: 35,
+                gold: 25
+            },
+            
+            dropTable: ['crocs_venimeux', 'peau_animale']
+        },
+        
+        epouvantail_anime: {
+            id: 'epouvantail_anime',
+            name: "Épouvantail Animé",
+            description: "Un épouvantail possédé par une force sombre",
+            icon: "🎃",
+            type: "construct",
+            rarity: "rare",
+            spawnChance: 0.05, // 5% de chance
+            
+            baseStats: {
+                hp: 60,
+                attack: 10,
+                defense: 8,
+                speed: 4000
+            },
+            
+            rewards: {
+                xp: 45,
+                gold: 35
+            },
+            
+            dropTable: ['essence_vegetale_instable', 'plumes_sombres']
+        }
+    },
+    
+    // ========== MONSTRES ÉLITES ==========
+    elite: {
+        
+        troll_collines: {
+            id: 'troll_collines',
+            name: "Troll des Collines",
+            description: "Une créature massive qui terrorise les voyageurs",
+            icon: "👹",
+            type: "giant",
+            rarity: "elite",
+            spawnChance: 0.02, // 2% de chance
+            
+            baseStats: {
+                hp: 150,
+                attack: 20,
+                defense: 10,
+                speed: 4000
+            },
+            
+            rewards: {
+                xp: 80,
+                gold: 60
+            },
+            
+            dropTable: ['os_massif', 'sang_concentre', 'cuir_robuste']
+        },
+        
+        chevalier_renegat: {
+            id: 'chevalier_renegat',
+            name: "Chevalier Renégat",
+            description: "Un ancien garde corrompu par l'Ombre",
+            icon: "⚔️",
+            type: "humanoid",
+            rarity: "elite",
+            spawnChance: 0.015, // 1.5% de chance
+            
+            baseStats: {
+                hp: 120,
+                attack: 25,
+                defense: 15,
+                speed: 2500
+            },
+            
+            rewards: {
+                xp: 100,
+                gold: 80
+            },
+            
+            dropTable: ['armure_cabossee', 'sang_concentre', 'os_massif']
+        }
+    },
+    
+    // ========== BOSS ==========
+    boss: {
+        
+        bete_prairies: {
+            id: 'bete_prairies',
+            name: "La Bête des Prairies",
+            description: "Un énorme cerf corrompu aux yeux flamboyants, corrompue par l'Ombre",
+            icon: "🦌",
+            type: "boss",
+            rarity: "boss",
+            
+            baseStats: {
+                hp: 500,
+                attack: 30,
+                defense: 20,
+                speed: 3000
+            },
+            
+            rewards: {
+                xp: 500,
+                gold: 1000
+            },
+            
+            // Drops garantis du boss
+            dropTable: ['corne_ancienne', 'cuir_legendaire', 'essence_vie_sauvage'],
+            guaranteedDrops: true // Tous les drops sont garantis
+        },
+        
+        forgemort_boss: {
+            id: 'forgemort_boss',
+        name: "Bouc Sauvage",
+        description: "Bouc des montagnes au tempérament agressif",
+        icon: "🐐",
+        type: "beast",
+        
+        baseStats: {
+            hp: 60,
+            attack: 9,
+            defense: 6,
+            speed: 2600
+        },
+        
+        rewards: {
+            xp: 28,
+            gold: 12
+        },
+        
+        dropTable: ['corne_bouc', 'fourrure_epaisse']
+    },
+    
+    golem1: {
+        id: 'golem1',
+        name: "Golem Fissuré",
+        description: "Ancien gardien de pierre partiellement brisé",
+        icon: "🗿",
+        type: "construct",
+        
+        baseStats: {
+            hp: 80,
+            attack: 12,
+            defense: 10,
+            speed: 3500 // Lent mais puissant
+        },
+        
+        rewards: {
+            xp: 40,
+            gold: 20
+        },
+        
+        dropTable: ['fragment_golem', 'cristal_montagne']
+    },
+    
+    harpy1: {
+        id: 'harpy1',
+        name: "Harpie des Pics",
+        description: "Créature ailée mi-femme mi-oiseau, hostile aux intrus",
+        icon: "🦅",
+        type: "monstrous",
+        
+        baseStats: {
+            hp: 45,
+            attack: 11,
+            defense: 4,
+            speed: 2000 // Rapide
+        },
+        
+        rewards: {
+            xp: 35,
+            gold: 18
+        },
+        
+        dropTable: ['plume_harpie', 'serre_acier']
+    },
+    
+    vulture1: {
+        id: 'vulture1',
+        name: "Vautour Géant",
+        description: "Énorme charognard des hautes altitudes",
+        icon: "🦅",
+        type: "beast",
+        
+        baseStats: {
+            hp: 50,
+            attack: 10,
+            defense: 4,
+            speed: 2200
+        },
+        
+        rewards: {
+            xp: 32,
+            gold: 16
+        },
+        
+        dropTable: ['plume_noire', 'bec_recourbe']
+    },
+    
+    giant1: {
+        id: 'giant1',
+        name: "Géant de Pierre",
+        description: "Colosse ancestral errant dans les montagnes",
+        icon: "👹",
+        type: "giant",
+        
+        baseStats: {
+            hp: 100,
+            attack: 15,
+            defense: 8,
+            speed: 4000 // Très lent
+        },
+        
+        rewards: {
+            xp: 50,
+            gold: 30
+        },
+        
+        dropTable: ['peau_geant', 'os_massif']
+    },
+    
+    dwarf1: {
+        id: 'dwarf1',
+        name: "Nain Corrompu",
+        description: "Nain sous l'emprise de Forgemort, l'esprit brisé",
+        icon: "🧔",
+        type: "humanoid",
+        
+        baseStats: {
+            hp: 70,
+            attack: 13,
+            defense: 9,
+            speed: 2500
+        },
+        
+        rewards: {
+            xp: 45,
+            gold: 25
+        },
+        
+        dropTable: ['armure_naine', 'hachette_runique']
+    },
+    
+    // Boss Région 2
+    forgemort_boss: {
+        id: 'forgemort_boss',
+        name: "Forgemort",
+        description: "Seigneur de forge nain corrompu par la soif de pouvoir",
+        icon: "⚒️",
+        type: "boss",
+        isBoss: true,
+        
+        baseStats: {
+            hp: 1200,
+            attack: 25,
+            defense: 15,
+            speed: 3000
+        },
+        
+        rewards: {
+            xp: 1000,
+            gold: 2000
+        },
+        
+        // Drops garantis du boss
+        dropTable: ['marteau_forgemort', 'armure_forge_eternelle', 'coeur_montagne'],
+        guaranteedDrops: true
+    },
+    
+    /**
+     * Obtenir les données d'un monstre par ID
+     */
+    getMonster(monsterId) {
+        // Chercher dans tous les types
+        for (const category of ['common', 'rare', 'elite', 'boss']) {
+            if (this[category][monsterId]) {
+                return this[category][monsterId];
+            }
+        }
+        return null;
+    },
+    
+    /**
+     * Obtenir un monstre aléatoire selon les probabilités de spawn
+     */
+    getRandomMonster(monsterIds) {
+        if (!monsterIds || monsterIds.length === 0) return null;
+        
+        // Calculer les probabilités
+        const monsters = monsterIds.map(id => this.getMonster(id)).filter(m => m);
+        
+        // Séparer communs et spéciaux
+        const commonMonsters = monsters.filter(m => !m.spawnChance);
+        const specialMonsters = monsters.filter(m => m.spawnChance);
+        
+        // D'abord, tenter de spawn un monstre spécial
+        for (const monster of specialMonsters) {
+            if (Math.random() < monster.spawnChance) {
+                return monster;
+            }
+        }
+        
+        // Sinon, spawn un monstre commun aléatoire
+        return commonMonsters[Math.floor(Math.random() * commonMonsters.length)];
+    },
+    
+    /**
+     * Calculer les stats avec scaling de niveau
+     */
+    calculateStats(monsterData, level = 1) {
+        const levelMultiplier = 1 + (level - 1) * 0.3; // +30% par niveau
+        
+        return {
+            hp: Math.floor(monsterData.baseStats.hp * levelMultiplier),
+            attack: Math.floor(monsterData.baseStats.attack * levelMultiplier),
+            defense: Math.floor(monsterData.baseStats.defense * levelMultiplier),
+            speed: monsterData.baseStats.speed
+        };
+    }
+};
+
+// Export pour utilisation dans le jeu
+if (typeof window !== 'undefined') {
+    window.MonstersData = MonstersData;
+}

@@ -22,6 +22,8 @@ class StorageManager {
         const gatheringResources = [
             ...window.ResourcesData.wood,
             ...window.ResourcesData.ore,
+            ...(window.ResourcesData.plants || []),  // ✅ NOUVEAU
+            ...(window.ResourcesData.fish || []),    // ✅ NOUVEAU
             ...window.ResourcesData.gems
         ];
         
@@ -135,7 +137,7 @@ class StorageManager {
      */
     upgradeLimit(resourceId, amount) {
         if (!this.limits[resourceId]) {
-            this.limits[resourceId] = this.baseLimit;
+            this.limits[resourceId] = this.baseLimitResources;
         }
         this.limits[resourceId] += amount;
     }
@@ -154,7 +156,8 @@ class StorageManager {
      */
     getSaveData() {
         return {
-            baseLimit: this.baseLimit,
+            baseLimitResources: this.baseLimitResources,
+            baseLimitLoot: this.baseLimitLoot,
             limits: this.limits
         };
     }
@@ -163,8 +166,11 @@ class StorageManager {
      * Charge les données de sauvegarde
      */
     loadSaveData(data) {
-        if (data.baseLimit) {
-            this.baseLimit = data.baseLimit;
+        if (data.baseLimitResources) {
+            this.baseLimitResources = data.baseLimitResources;
+        }
+        if (data.baseLimitLoot) {
+            this.baseLimitLoot = data.baseLimitLoot;
         }
         if (data.limits) {
             this.limits = { ...data.limits };
