@@ -423,11 +423,6 @@ class Combat {
         // Compteur par zone (pour déblocage)
         this.monstersKilledPerZone[zoneKey] = (this.monstersKilledPerZone[zoneKey] || 0) + 1;
         
-        // Mettre à jour les quêtes de type 'kill'
-        if (window.game && window.game.questManager) {
-            const questCompleted = window.game.questManager.updateKillQuest(monsterName, this.currentZone);
-        }
-        
         // Vérifier si on débloque la zone suivante
         if (this.monstersKilledPerZone[zoneKey] >= GameConfig.ZONES.MONSTERS_TO_UNLOCK) {
             const maxZoneInRegion = this.unlockedZones[this.currentRegion] || 1;

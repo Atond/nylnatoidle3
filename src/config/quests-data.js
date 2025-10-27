@@ -72,7 +72,7 @@ const QuestsData = [
             items: [
                 { id: 'iron_sword', amount: 1 }
             ],
-            message: 'Vous êtes devenu Bûcheron et Mineur ! Onglet Récolte débloqué !'
+            message: '🌲 Onglet Récolte débloqué !'
         }
     },
     

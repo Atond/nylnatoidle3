@@ -196,7 +196,7 @@ export const ALCHEMY_CONFIG = {
     },
     
     // Configuration déblocage
-    unlockLevel: 10,                // Déblocage alchimie au niveau joueur 10
+    unlockLevel: 5,                // Déblocage Transmutation au niveau joueur 5 (M08)
     
     // Multiplicateurs vitesse
     speedMultipliers: {

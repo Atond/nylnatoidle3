@@ -304,6 +304,7 @@ class UI {
         this.updateCombatLog();
         this.updateZoneInfo();
         this.updateQuests();
+        this.updateBuffDisplay(); // 💫 Mettre à jour l'affichage des buffs
 
         // Mettre à jour les barres XP des professions de craft
         this.updateCraftingProfessions();
@@ -650,6 +651,14 @@ class UI {
      */
     updateAutoCombatButton(isActive) {
         const btn = this.elements.autoCombatBtn;
+        if (!btn) return;
+
+        // Afficher le bouton quand l'auto-combat est débloqué
+        if (window.game && window.game.unlocks && window.game.unlocks.auto_combat) {
+            btn.style.display = '';
+        } else {
+            btn.style.display = 'none';
+        }
 
         if (isActive) {
             btn.textContent = '⚙️ Auto-Combat : ON';
@@ -960,7 +969,27 @@ class UI {
      * Débloque l'onglet Récolte
      */
     unlockProfessionsTab() {
-        this.unlockTab('gathering', '⛏️ Récolte débloquée ! Explorez les ressources');
+        const tab = document.querySelector(`[data-tab="gathering"]`);
+        if (!tab) return;
+
+        // Si déjà débloqué, ne rien faire
+        if (!tab.classList.contains('disabled')) {
+            return;
+        }
+
+        // Débloquer l'onglet sans notification (le message de quête suffit)
+        tab.classList.remove('disabled');
+
+        // Ajouter aux tabs débloqués
+        if (!this.unlockedTabs.includes('gathering')) {
+            this.unlockedTabs.push('gathering');
+        }
+
+        // Effet visuel de déblocage
+        tab.style.animation = 'tabUnlock 0.8s ease-out';
+        setTimeout(() => {
+            tab.style.animation = '';
+        }, 800);
     }
 
     /**
@@ -1312,6 +1341,48 @@ class UI {
     }
 
     /**
+     * Met à jour l'affichage des buffs actifs
+     */
+    updateBuffDisplay() {
+        const buffsPanel = document.getElementById('buffsPanel');
+        const buffsGrid = document.getElementById('buffsGrid');
+        
+        if (!buffsPanel || !buffsGrid) return;
+
+        const activeBuffs = this.game.buffManager.getActiveBuffs();
+
+        if (activeBuffs.length === 0) {
+            buffsPanel.style.display = 'none';
+            return;
+        }
+
+        buffsPanel.style.display = 'block';
+
+        buffsGrid.innerHTML = activeBuffs.map(buff => {
+            const remainingMinutes = Math.floor(buff.remainingTime / 60);
+            const remainingSeconds = Math.floor(buff.remainingTime % 60);
+            const timeStr = remainingMinutes > 0 
+                ? `${remainingMinutes}m ${remainingSeconds}s`
+                : `${remainingSeconds}s`;
+
+            const progress = (buff.remainingTime / buff.totalDuration) * 100;
+
+            return `
+                <div class="buff-item" title="${buff.effects.description || 'Buff actif'}">
+                    <div class="buff-icon">${buff.icon}</div>
+                    <div class="buff-info">
+                        <div class="buff-name">${buff.name}${buff.stacks > 1 ? ` (x${buff.stacks})` : ''}</div>
+                        <div class="buff-timer">${timeStr}</div>
+                        <div class="buff-progress-bar">
+                            <div class="buff-progress-fill" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    /**
      * Met à jour l'inventaire de butin de combat (sidebar)
      */
     updateCombatInventory() {
@@ -1629,9 +1700,15 @@ class UI {
                     ${equipment.getStatsDisplay().map(stat => `<span>${stat}</span>`).join('')}
                     <span style="color: #FFD700;">💰 ${window.NumberFormatter.format(sellPrice)} or</span>
                 </div>
-                <button class="btn-equip" data-id="${equipment.id}" ${!canEquip ? 'disabled' : ''}>
-                    ${!canEquip ? '🔒 Niveau insuffisant' : 'Équiper'}
-                </button>
+                ${equipment.type === 'consumable' ? `
+                    <button class="btn-consume" data-id="${equipment.id}" ${!canEquip ? 'disabled' : ''}>
+                        ${!canEquip ? '🔒 Niveau insuffisant' : '🍽️ Consommer'}
+                    </button>
+                ` : `
+                    <button class="btn-equip" data-id="${equipment.id}" ${!canEquip ? 'disabled' : ''}>
+                        ${!canEquip ? '🔒 Niveau insuffisant' : 'Équiper'}
+                    </button>
+                `}
             </div>
         `;
         }).join('');
@@ -1649,6 +1726,18 @@ class UI {
             });
         });
 
+        // Ajouter les événements de clic sur les boutons Consommer
+        container.querySelectorAll('.btn-consume').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const equipmentId = btn.dataset.id;
+                const equipment = inventory.find(e => e.id === equipmentId);
+                if (equipment) {
+                    this.consumeItem(equipment);
+                }
+            });
+        });
+
         // Ajouter les événements de clic sur les boutons Verrouiller
         container.querySelectorAll('.btn-lock').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -1658,6 +1747,37 @@ class UI {
                 this.updateEquipmentInventory();
             });
         });
+    }
+
+    /**
+     * Consomme un consommable (potion, nourriture)
+     */
+    consumeItem(consumable) {
+        if (!consumable || consumable.type !== 'consumable') {
+            this.showNotification('❌ Cet objet ne peut pas être consommé', 'error');
+            return;
+        }
+
+        // Retirer l'objet de l'inventaire
+        const index = this.game.equipmentManager.inventory.findIndex(e => e.id === consumable.id);
+        if (index === -1) {
+            this.showNotification('❌ Objet introuvable', 'error');
+            return;
+        }
+
+        this.game.equipmentManager.inventory.splice(index, 1);
+
+        // Appliquer le buff via BuffManager
+        const recipe = this.game.craftingManager.getAllRecipes().find(r => r.id === consumable.recipeId || r.produces.resourceId === consumable.id);
+        
+        if (recipe && recipe.effects) {
+            this.game.buffManager.applyBuff(recipe, 1);
+        } else {
+            this.showNotification('⚠️ Effets du consommable introuvables', 'warning');
+        }
+
+        // Mettre à jour l'inventaire
+        this.updateEquipmentInventory();
     }
 
     /**
@@ -1873,8 +1993,8 @@ class UI {
             
             <div class="detail-info">
                 <div style="color: var(--color-success);">⚡ INSTANTANÉ</div>
-                <div>🔧 Niveau requis: ${recipe.professionLevel}</div>
-                <div>🎭 Niveau équipement: ${recipe.requiredLevel}</div>
+                <div>🎭 Niveau joueur requis: ${recipe.requiredLevel}</div>
+                <div>🔧 Niveau profession requis: ${recipe.professionLevel}</div>
                 <div>💰 Prix de vente: ${NumberFormatter.format(sellPrice)} or</div>
                 <div style="color: var(--color-success); font-weight: bold;">💸 Profit: ~${NumberFormatter.format(profitPerMin)} or/min</div>
             </div>
@@ -2839,10 +2959,10 @@ class UI {
         document.body.appendChild(popup);
     }
 
-    // ========== ALCHIMIE ==========
+    // ========== TRANSMUTATION ==========
 
     /**
-     * Met à jour l'onglet Alchimie
+     * Met à jour l'onglet Transmutation
      */
     updateAlchemy() {
         if (!this.game.alchemyManager) return;
@@ -2878,7 +2998,7 @@ class UI {
 
         // Débloquer onglet si nécessaire
         if (alchemy.unlocked) {
-            this.unlockTab('alchemy', 'Alchimie débloquée ! Transformez vos ressources en versions supérieures 🧪');
+            this.unlockTab('alchemy', 'Transmutation débloquée ! Transformez vos ressources en versions supérieures 🧪');
         }
     }
 
@@ -3319,7 +3439,7 @@ class UI {
     }
 
     /**
-     * Met à jour les bonus d'alchimie
+     * Met à jour les bonus de Transmutation
      */
     updateAlchemyBonuses() {
         const alchemy = this.game.alchemyManager;
@@ -4830,7 +4950,7 @@ class UI {
                     <li>7 tiers de gemmes : Quartz (T1) → Divine (T7)</li>
                     <li>Chaque gemme se débloque à un niveau de Mineur spécifique</li>
                     <li>Plus la gemme est rare, plus le taux de drop est faible</li>
-                    <li>Utilisez les gemmes pour l'Alchimie et la Joaillerie</li>
+                    <li>Utilisez les gemmes pour la Transmutation et la Joaillerie</li>
                 </ul>
             </div>
 
@@ -4895,11 +5015,11 @@ class UI {
             </div>
 
             <div style="margin-bottom: 20px; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
-                <h3 style="color: var(--accent-color); margin-top: 0;">⚗️ Transmutation (Alchimie)</h3>
-                <p>L'Alchimie est spéciale : elle transforme les ressources de tier inférieur en tier supérieur !</p>
+                <h3 style="color: var(--accent-color); margin-top: 0;">⚗️ Transmutation</h3>
+                <p>La Transmutation transforme les ressources de tier inférieur en tier supérieur !</p>
                 <ul style="margin: 10px 0; padding-left: 20px;">
                     <li>Par exemple : 5 Bois de Chêne (T1) → 1 Bois de Frêne (T2)</li>
-                    <li>Montez de niveau en Alchimie pour débloquer T2, T3, etc.</li>
+                    <li>Montez de niveau en Transmutation pour débloquer T2, T3, etc.</li>
                     <li>Essentiel pour obtenir les ressources rares nécessaires aux recettes de haut niveau</li>
                 </ul>
             </div>

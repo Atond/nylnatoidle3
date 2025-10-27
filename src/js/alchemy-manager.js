@@ -19,14 +19,14 @@ class AlchemyManager {
     }
 
     /**
-     * Vérifie si l'alchimie est débloquée
+     * Vérifie si la Transmutation est débloquée
      */
     checkUnlock(playerLevel) {
         if (!this.unlocked && playerLevel >= ALCHEMY_CONFIG.unlockLevel) {
             this.unlocked = true;
             // La notification est gérée par unlockTab() dans UI
             if (GameConfig.DEBUG.enabled) {
-                console.log('🧪 Alchimie débloquée au niveau', playerLevel);
+                console.log('🧪 Transmutation débloquée au niveau', playerLevel);
             }
             return true;
         }
@@ -43,7 +43,7 @@ class AlchemyManager {
         // Vérifications
         if (!this.unlocked) {
             if (this.game.ui) {
-                this.game.ui.showNotification('❌ Alchimie non débloquée (requis niveau 10)', 'error');
+                this.game.ui.showNotification('❌ Transmutation non débloquée (requis niveau 5)', 'error');
             }
             return false;
         }
@@ -65,7 +65,7 @@ class AlchemyManager {
         if (this.level < conversion.levelRequired) {
             if (this.game.ui) {
                 this.game.ui.showNotification(
-                    `❌ Alchimie niveau ${conversion.levelRequired} requis`,
+                    `❌ Transmutation niveau ${conversion.levelRequired} requis`,
                     'error'
                 );
             }
@@ -229,7 +229,7 @@ class AlchemyManager {
     }
 
     /**
-     * Gagner de l'XP en alchimie
+     * Gagner de l'XP en Transmutation
      * @param {number} amount - Montant XP
      */
     gainXP(amount) {
@@ -247,21 +247,21 @@ class AlchemyManager {
             if (bonus) {
                 if (this.game.ui) {
                     this.game.ui.showNotification(
-                        `🎉 Alchimie niveau ${this.level} ! ${bonus.description}`,
+                        `🎉 Transmutation niveau ${this.level} ! ${bonus.description}`,
                         'success'
                     );
                 }
             } else {
                 if (this.game.ui) {
                     this.game.ui.showNotification(
-                        `🎉 Alchimie niveau ${this.level} !`,
+                        `🎉 Transmutation niveau ${this.level} !`,
                         'success'
                     );
                 }
             }
 
             if (GameConfig.DEBUG.enabled) {
-                console.log(`🧪 Alchimie niveau ${this.level} !`);
+                console.log(`🧪 Transmutation niveau ${this.level} !`);
             }
         }
 

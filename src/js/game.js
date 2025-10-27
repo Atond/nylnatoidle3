@@ -106,7 +106,10 @@ class Game {
         // 🏗️ FIX: Injection de dépendances - créer equipmentManager d'abord
         this.equipmentManager = new EquipmentManager(this);
         
-        // 🐉 Créer dragonManager avant player (pour injection)
+        // � Créer BuffManager pour les consommables
+        this.buffManager = new BuffManager(this);
+        
+        // �🐉 Créer dragonManager avant player (pour injection)
         this.dragonManager = new DragonManager(null); // Player sera défini après
         
         // 🎭 Créer altCharacterManager avant player
@@ -252,7 +255,12 @@ class Game {
             this.alchemyManager.checkUnlock(this.player.level);
         }
         
-        // 🐉 Met à jour les dragons (durée de vie, faim)
+        // � Met à jour les buffs actifs (consommables)
+        if (this.buffManager) {
+            this.buffManager.update(deltaTime / 1000); // Convertir ms en secondes
+        }
+        
+        // �🐉 Met à jour les dragons (durée de vie, faim)
         if (this.dragonManager && GameConfig.FEATURES.enableDragons) {
             this.dragonManager.update(deltaTime);
         }
@@ -438,6 +446,9 @@ class Game {
                 this.ui.updateInventory();
                 this.ui.updateAutoGatherButtons();
                 this.ui.updateTabVisibility(); // 🎉 Restaurer visibilité onglets débloqués
+                this.ui.updateEquipment(); // 🛡️ FIX: Restaurer affichage équipement
+                this.ui.updateEquipmentInventory(); // 🛡️ FIX: Restaurer inventaire équipement
+                this.ui.updateQuests(); // 🎯 FIX: Restaurer affichage des quêtes avec progression correcte
             }
             
             if (GameConfig.DEBUG.logSaves) {

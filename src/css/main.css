@@ -1436,7 +1436,7 @@ main {
     background: rgba(0, 0, 0, 0.3);
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius);
-    padding: 20px;
+    padding: 12px;
     text-align: center;
     transition: all 0.3s ease;
     position: relative;
@@ -1450,14 +1450,14 @@ main {
 }
 
 .crafting-profession-card .profession-icon {
-    font-size: 3rem;
-    margin-bottom: 10px;
+    font-size: 2rem;
+    margin-bottom: 6px;
 }
 
 .crafting-profession-card h4 {
     color: var(--text-primary);
-    font-size: 1.3rem;
-    margin-bottom: 8px;
+    font-size: 1.1rem;
+    margin-bottom: 6px;
 }
 
 .crafting-profession-card .profession-level {

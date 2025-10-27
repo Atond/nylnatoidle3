@@ -1,0 +1,155 @@
+/**
+ * Styles pour le système de buffs
+ * Affichage des buffs actifs avec timers et barres de progression
+ */
+
+/* Panneau de buffs */
+.buffs-panel {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.buffs-panel h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: var(--accent-color);
+    font-size: 1.1rem;
+}
+
+/* Grille de buffs */
+.buffs-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Item de buff individual */
+.buff-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 8px 12px;
+    transition: all 0.3s ease;
+}
+
+.buff-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateX(2px);
+}
+
+/* Icône du buff */
+.buff-icon {
+    font-size: 1.8rem;
+    min-width: 32px;
+    text-align: center;
+}
+
+/* Informations du buff */
+.buff-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.buff-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.buff-timer {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+/* Barre de progression du buff */
+.buff-progress-bar {
+    height: 4px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.buff-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, 
+        var(--color-success) 0%, 
+        var(--color-warning) 50%, 
+        var(--color-danger) 100%
+    );
+    transition: width 1s linear;
+    border-radius: 2px;
+}
+
+/* Animation de pulsation pour les buffs proches de l'expiration */
+@keyframes buff-expire-pulse {
+    0%, 100% {
+        border-color: rgba(255, 215, 0, 0.3);
+    }
+    50% {
+        border-color: rgba(255, 215, 0, 0.7);
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+}
+
+.buff-item.expiring {
+    animation: buff-expire-pulse 1s ease-in-out infinite;
+}
+
+/* Bouton Consommer pour les consommables */
+.btn-consume {
+    width: 100%;
+    padding: 8px;
+    background: linear-gradient(135deg, var(--color-success), #27ae60);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-consume:hover {
+    background: linear-gradient(135deg, #27ae60, var(--color-success));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-consume:disabled {
+    background: #555;
+    color: #888;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Responsive - Buffs compacts sur petits écrans */
+@media (max-width: 768px) {
+    .buff-item {
+        padding: 6px 10px;
+        gap: 8px;
+    }
+
+    .buff-icon {
+        font-size: 1.5rem;
+        min-width: 28px;
+    }
+
+    .buff-name {
+        font-size: 0.85rem;
+    }
+
+    .buff-timer {
+        font-size: 0.75rem;
+    }
+}

@@ -415,7 +415,7 @@ class QuestManager {
             
             case 'gathering_tab':
             case 'gathering': // Compatibilité anciennes sauvegardes
-                window.game.ui.showNotification('🌲 Onglet Récolte débloqué !', 'epic');
+                // Notification retirée - le message de la quête est suffisant
                 window.game.ui.unlockProfessionsTab();
                 window.game.ui.updateTabVisibility();
                 break;
@@ -480,19 +480,19 @@ class QuestManager {
             
             // 🛠️ MÉTIERS
             case 'profession_woodcutting':
-                window.game.ui.showNotification('🪵 Vous êtes maintenant Bûcheron !', 'success');
+                // Notification retirée - laisse juste "Récolte débloquée"
                 break;
             
             case 'profession_mining':
-                window.game.ui.showNotification('⛏️ Vous êtes maintenant Mineur !', 'success');
+                // Notification retirée - laisse juste "Récolte débloquée"
                 break;
             
             case 'profession_blacksmith':
-                window.game.ui.showNotification('🔨 Vous êtes maintenant Forgeron !', 'success');
+                // Notification retirée - le message de la quête est suffisant
                 break;
             
             case 'profession_armorsmith':
-                window.game.ui.showNotification('🛡️ Vous êtes maintenant Armurier !', 'success');
+                // Notification retirée - le message de la quête est suffisant
                 break;
             
             case 'profession_herbalism':
@@ -564,15 +564,19 @@ class QuestManager {
             console.log(`✅ Quête activée: ${quest.title}`);
         }
         
-        // 🎯 VÉRIFICATION IMMÉDIATE : Si la quête est de type 'level_up' et que le niveau est déjà atteint
-        if (quest.type === 'level_up' && this.player.level >= quest.target) {
-            quest.progress = quest.target;
-            const completed = quest.complete();
+        // 🎯 INITIALISATION : Pour les quêtes 'level_up', définir la progression au niveau actuel
+        if (quest.type === 'level_up') {
+            quest.progress = Math.min(this.player.level, quest.target);
             
-            if (completed !== false) {
-                this.onQuestComplete(quest);
-                if (GameConfig.DEBUG.enabled) {
-                    console.log(`✅ Quête ${quest.title} complétée immédiatement (niveau déjà atteint)`);
+            // Si le niveau est déjà atteint, compléter immédiatement
+            if (this.player.level >= quest.target) {
+                const completed = quest.complete();
+                
+                if (completed !== false) {
+                    this.onQuestComplete(quest);
+                    if (GameConfig.DEBUG.enabled) {
+                        console.log(`✅ Quête ${quest.title} complétée immédiatement (niveau déjà atteint)`);
+                    }
                 }
             }
         }
@@ -621,16 +625,21 @@ class QuestManager {
             }
         });
         
-        // 🎯 VÉRIFICATION POST-CHARGEMENT : Valider les quêtes level_up déjà remplies
+        // 🎯 VÉRIFICATION POST-CHARGEMENT : Mettre à jour les quêtes level_up
         this.activeQuests.forEach(quest => {
-            if (quest.type === 'level_up' && !quest.isCompleted && this.player.level >= quest.target) {
-                quest.progress = quest.target;
-                const completed = quest.complete();
+            if (quest.type === 'level_up' && !quest.isCompleted) {
+                // Mettre à jour la progression au niveau actuel (même si pas encore complétée)
+                quest.progress = Math.min(this.player.level, quest.target);
                 
-                if (completed !== false) {
-                    this.onQuestComplete(quest);
-                    if (GameConfig.DEBUG.enabled) {
-                        console.log(`✅ Quête ${quest.title} auto-validée au chargement (niveau déjà atteint)`);
+                // Si le niveau est déjà atteint, compléter la quête
+                if (this.player.level >= quest.target) {
+                    const completed = quest.complete();
+                    
+                    if (completed !== false) {
+                        this.onQuestComplete(quest);
+                        if (GameConfig.DEBUG.enabled) {
+                            console.log(`✅ Quête ${quest.title} auto-validée au chargement (niveau déjà atteint)`);
+                        }
                     }
                 }
             }

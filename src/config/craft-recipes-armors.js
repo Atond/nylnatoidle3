@@ -44,7 +44,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'iron_chestplate',
-    name: 'Iron Chestplate',
+    name: 'Plastron de Fer',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',

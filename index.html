@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="src/css/dragons.css">
     <link rel="stylesheet" href="src/css/dragon-selector.css">
     <link rel="stylesheet" href="src/css/stats-tooltips.css">
+    <link rel="stylesheet" href="src/css/buffs.css"> <!-- 💫 Système de buffs consommables -->
 </head>
 
 <body>
@@ -162,6 +163,14 @@
                         </div>
                     </div>
 
+                    <!-- 💫 Buffs Actifs -->
+                    <div class="panel buffs-panel" id="buffsPanel" style="display: none;">
+                        <h3>💫 Buffs Actifs</h3>
+                        <div class="buffs-grid" id="buffsGrid">
+                            <!-- Les buffs seront ajoutés dynamiquement ici -->
+                        </div>
+                    </div>
+
                     <div class="panel xp-panel">
                         <h3>📈 Expérience</h3>
                         <div class="xp-bar">
@@ -232,7 +241,7 @@
                         <button class="btn btn-attack" id="attackBtn">
                             ⚔️ Attaquer (Clic)
                         </button>
-                        <button class="btn btn-toggle" id="autoCombatBtn">
+                        <button class="btn btn-toggle" id="autoCombatBtn" style="display: none;">
                             ⚙️ Auto-Combat : OFF
                         </button>
                     </div>
@@ -1199,6 +1208,7 @@
     <script src="src/js/profession-manager.js"></script>
     <script src="src/js/equipment.js"></script>
     <script src="src/js/equipment-manager.js"></script>
+    <script src="src/js/buff-manager.js"></script> <!-- 💫 Système de buffs consommables -->
     <script src="src/js/character.js"></script> <!-- 🎭 Character class -->
     <script src="src/js/shared-storage.js"></script> <!-- 📦 Coffre partagé -->
     <script src="src/js/alt-character-manager.js"></script> <!-- 🎭 Alt Characters -->
