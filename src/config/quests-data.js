@@ -44,7 +44,7 @@ const QuestsData = [
         rewards: {
             xp: 50,
             gold: 20,
-            unlocks: ['combat_log', 'equipment_tab'], // 🎒 DÉBLOCAGE ONGLET ÉQUIPEMENT
+            unlocks: ['combat_log'], // 🎒 DÉBLOCAGE JOURNAL DE COMBAT
             message: 'Vous avez appris les bases du combat !'
         }
     },
@@ -92,10 +92,9 @@ const QuestsData = [
         },
         
         rewards: {
-            xp: 80,
-            gold: 30,
-            unlocks: ['storage_system'],
-            message: 'Vous pouvez maintenant stocker vos ressources !'
+            xp: 100,
+            gold: 50,
+            message: 'Vous apprenez à récupérer les butins des monstres !'
         }
     },
     
@@ -107,6 +106,7 @@ const QuestsData = [
         type: 'collect',
         target: 20,
         requirements: {
+            quest: 'main_002', // 🔧 FIX: Apparaît juste après M02 qui débloque la récolte
             resourceType: 'wood',
             resourceName: 'Bois de Chêne'
         },
@@ -129,6 +129,7 @@ const QuestsData = [
         type: 'collect',
         target: 20,
         requirements: {
+            quest: 'main_002', // 🔧 FIX: Apparaît juste après M02 qui débloque la récolte
             resourceType: 'ore',
             resourceName: 'Fer'
         },
@@ -162,8 +163,8 @@ const QuestsData = [
         rewards: {
             xp: 200,
             gold: 80,
-            unlocks: ['profession_blacksmith'], // RETIRÉ : crafting_tab (déjà unlock en M05)
-            message: 'Vous êtes maintenant Forgeron !'
+            unlocks: ['profession_blacksmith', 'equipment_tab'], // 🎒 DÉBLOCAGE FORGERON + ONGLET ÉQUIPEMENT
+            message: 'Vous êtes maintenant Forgeron ! Équipez votre épée pour devenir plus fort.'
         }
     },
     
@@ -171,12 +172,12 @@ const QuestsData = [
     {
         id: 'main_007',
         title: '🛡️ Se Protéger',
-        description: 'Craftez une Tunique de Cuir pour survivre aux combats.',
+        description: 'Craftez des Brassards de Fer pour vous protéger au combat.',
         type: 'craft',
         target: 1,
         requirements: {
             quest: 'main_006',
-            craftItem: 'leather_chest'
+            craftItem: 'iron_bracers' // CORRIGÉ: iron_bracers (Armurier niv 1) au lieu de leather_chest (Tanneur niv 2)
         },
         chapter: 1,
         difficulty: 'easy',
@@ -185,7 +186,7 @@ const QuestsData = [
         rewards: {
             xp: 180,
             gold: 60,
-            unlocks: ['profession_armorsmith'],
+            unlocks: ['profession_armorsmith'], // 🎒 DÉBLOCAGE ARMURIER (equipment_tab déjà unlock en M06)
             message: 'Vous êtes maintenant Armurier !'
         }
     },
@@ -208,11 +209,10 @@ const QuestsData = [
         rewards: {
             xp: 300,
             gold: 100,
-            unlocks: ['alchemy_tab'], // ⚗️ DÉBLOCAGE ONGLET TRANSMUTATION
             items: [
                 { id: 'health_potion_minor', amount: 5 }
             ],
-            message: 'Vous devenez plus puissant ! Transmutation débloquée !'
+            message: 'Vous devenez plus puissant !'
         }
     },
     
@@ -265,6 +265,62 @@ const QuestsData = [
                 { id: 'cuir_legendaire', amount: 1 }
             ],
             message: '🏔️ RÉGION 2 DÉBLOQUÉE ! Les Montagnes Grises vous attendent. Onglet Ville débloqué !'
+        }
+    },
+    
+    // M10b : Laboratoire de Recherche (DÉBLOQUER RECHERCHES)
+    {
+        id: 'main_010b',
+        title: '🔬 Laboratoire de Recherche',
+        description: 'Atteignez le niveau 15 et construisez une Scierie niveau 5 pour débloquer les Recherches.',
+        type: 'building_level',
+        building: 'sawmill',
+        target: 5,
+        chapter: 1,
+        difficulty: 'medium',
+        isMainQuest: true,
+        
+        requirements: {
+            quest: 'main_010',
+            level: 15
+        },
+        
+        rewards: {
+            xp: 2500,
+            gold: 1500,
+            unlocks: ['research_tab'],
+            items: [
+                { id: 'gems_sapphire', amount: 5 },
+                { id: 'gems_ruby', amount: 5 }
+            ],
+            message: '🔬 RECHERCHES DÉBLOQUÉES ! Investissez dans des améliorations permanentes pour votre empire.'
+        }
+    },
+    
+    // M10c : Alchimie Avancée (DÉBLOQUER TRANSMUTATION)
+    {
+        id: 'main_010c',
+        title: '⚗️ Alchimie Avancée',
+        description: 'Atteignez le niveau 20 pour débloquer la Transmutation et transformer vos ressources.',
+        type: 'level_up',
+        target: 20,
+        chapter: 1,
+        difficulty: 'hard',
+        isMainQuest: true,
+        
+        requirements: {
+            quest: 'main_010b'
+        },
+        
+        rewards: {
+            xp: 3000,
+            gold: 2000,
+            unlocks: ['alchemy_tab'],
+            items: [
+                { id: 'gems_sapphire', amount: 10 },
+                { id: 'gems_ruby', amount: 10 }
+            ],
+            message: '⚗️ TRANSMUTATION DÉBLOQUÉE ! Transformez vos ressources en versions supérieures.'
         }
     },
     
@@ -457,26 +513,29 @@ const QuestsData = [
     // M17 : Pêcheur et Herboriste
     {
         id: 'main_017',
-        title: '🎣 Métiers de la Nature',
-        description: 'Débloquez la Pêche et l\'Herboristerie pour diversifier vos ressources.',
-        type: 'unlock_professions',
-        target: 2,
+        title: '🎣 Maître des Métiers de la Nature',
+        description: 'Atteignez le niveau 10 en Pêche ET en Herboristerie pour maîtriser ces métiers.',
+        type: 'profession_level',
+        target: 2, // 2 professions à niveau 10
         requirements: {
             quest: 'main_016',
             level: 10,
-            professions: ['fishing', 'herbalism']
+            professions: ['fisher', 'herbalist'], // ✅ IDs corrects
+            professionLevel: 10 // Niveau requis pour chaque profession
         },
         chapter: 3,
-        difficulty: 'easy',
+        difficulty: 'medium',
         isMainQuest: true,
         
         rewards: {
-            xp: 600,
-            gold: 300,
-            unlocks: ['profession_fishing', 'profession_herbalism'],
-            message: '🌿 Pêche et Herboristerie débloquées ! Explorez les rivières et les prairies.'
+            xp: 1200,
+            gold: 600,
+            unlocks: [],
+            message: '🌿 Vous maîtrisez maintenant la Pêche et l\'Herboristerie ! Les ressources rares vous attendent.'
         }
     },
+    
+    // M17b : NOUVELLE QUÊTE - Spécialisation des Métiers (SUPPRIMÉE - Déplacée niveau 20)
     
     // M18 : Transmutation Basique
     {
@@ -557,6 +616,69 @@ const QuestsData = [
                 { id: 'dragon_egg_novice', amount: 1 }
             ],
             message: '🐉 DRAGONS DÉBLOQUÉS ! Capturez et élevez des dragons légendaires.'
+        }
+    },
+    
+    // M20b : QUÊTE SPÉCIALISATION - Maîtrise des Métiers de Récolte
+    {
+        id: 'main_020b',
+        title: '🎯 Maître Artisan des Ressources',
+        description: 'Vous avez atteint un niveau de maîtrise exceptionnel. Il est temps de choisir votre spécialisation pour chaque métier de récolte. Chaque choix vous accordera +25% de drop rate sur UNE ressource spécifique.',
+        type: 'choose_specialization',
+        target: 4, // 4 métiers de récolte (Bûcheron, Mineur, Herboriste, Pêcheur)
+        requirements: {
+            quest: 'main_020',
+            level: 20,
+            professions: ['woodcutter', 'miner', 'herbalist', 'fisher'],
+            professionLevel: 20 // Tous les métiers de récolte niveau 20
+        },
+        chapter: 4,
+        difficulty: 'hard',
+        isMainQuest: true,
+        
+        // Choix disponibles pour chaque profession
+        choices: {
+            woodcutter: [
+                { resourceId: 'wood_oak', name: 'Spécialiste Chêne', bonus: 0.25, description: '+25% drop Bois de Chêne' },
+                { resourceId: 'wood_ash', name: 'Spécialiste Frêne', bonus: 0.25, description: '+25% drop Bois de Frêne' },
+                { resourceId: 'wood_maple', name: 'Spécialiste Érable', bonus: 0.25, description: '+25% drop Bois d\'Érable' },
+                { resourceId: 'wood_birch', name: 'Spécialiste Bouleau', bonus: 0.25, description: '+25% drop Bois de Bouleau' },
+                { resourceId: 'wood_walnut', name: 'Spécialiste Noyer', bonus: 0.25, description: '+25% drop Bois de Noyer' }
+            ],
+            miner: [
+                { resourceId: 'ore_iron', name: 'Spécialiste Fer', bonus: 0.25, description: '+25% drop Fer' },
+                { resourceId: 'ore_copper', name: 'Spécialiste Cuivre', bonus: 0.25, description: '+25% drop Cuivre' },
+                { resourceId: 'ore_tin', name: 'Spécialiste Étain', bonus: 0.25, description: '+25% drop Étain' },
+                { resourceId: 'ore_bronze', name: 'Spécialiste Bronze', bonus: 0.25, description: '+25% drop Bronze' },
+                { resourceId: 'ore_silver', name: 'Spécialiste Argent', bonus: 0.25, description: '+25% drop Argent' }
+            ],
+            herbalist: [
+                { resourceId: 'plant_dandelion', name: 'Spécialiste Pissenlit', bonus: 0.25, description: '+25% drop Pissenlit' },
+                { resourceId: 'plant_herb', name: 'Spécialiste Herbe médicinale', bonus: 0.25, description: '+25% drop Herbe médicinale' },
+                { resourceId: 'plant_nettle', name: 'Spécialiste Ortie', bonus: 0.25, description: '+25% drop Ortie' },
+                { resourceId: 'plant_lavender', name: 'Spécialiste Lavande', bonus: 0.25, description: '+25% drop Lavande' },
+                { resourceId: 'plant_thyme', name: 'Spécialiste Thym', bonus: 0.25, description: '+25% drop Thym' }
+            ],
+            fisher: [
+                { resourceId: 'fish_stream', name: 'Spécialiste Ruisseau', bonus: 0.25, description: '+25% drop Poisson de ruisseau' },
+                { resourceId: 'fish_bass', name: 'Spécialiste Achigan', bonus: 0.25, description: '+25% drop Achigan' },
+                { resourceId: 'fish_silver_trout', name: 'Spécialiste Truite', bonus: 0.25, description: '+25% drop Truite argentée' },
+                { resourceId: 'fish_golden_perch', name: 'Spécialiste Perche dorée', bonus: 0.25, description: '+25% drop Perche dorée' },
+                { resourceId: 'fish_red_snapper', name: 'Spécialiste Vivaneau', bonus: 0.25, description: '+25% drop Vivaneau rouge' }
+            ]
+        },
+        
+        rewards: {
+            xp: 5000,
+            gold: 2500,
+            unlocks: ['resource_specialization'],
+            items: [
+                { id: 'wood_cedar', amount: 100 },
+                { id: 'ore_gold', amount: 100 },
+                { id: 'plant_rosemary', amount: 100 },
+                { id: 'fish_lunar_carp', amount: 100 }
+            ],
+            message: '🎯 SPÉCIALISATIONS ACTIVES ! Vos choix augmentent vos drops de ressources ciblées de +25%. Vous êtes maintenant un Maître Artisan !'
         }
     },
     

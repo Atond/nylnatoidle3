@@ -1237,7 +1237,14 @@ const MonstersData = {
             },
             
             dropTable: ['corne_ancienne', 'cuir_legendaire', 'essence_vie_sauvage'],
-            guaranteedDrops: true
+            guaranteedDrops: true,
+            
+            // 🔒 SYSTÈME ANTI-FARMING
+            respawnTime: 3600000,  // 1 heure (en millisecondes)
+            maxLegendaryDropsPerDay: 3,  // Maximum 3 drops légendaires/jour
+            lastKilledTime: null,  // Timestamp du dernier kill
+            legendaryDropsToday: 0,  // Compteur journalier
+            lastResetDate: null  // Date du dernier reset quotidien
         },
         
         // === RÉGION 2 : LES MONTAGNES GRISES ===
@@ -1264,7 +1271,14 @@ const MonstersData = {
             },
             
             dropTable: ['marteau_forgemort', 'armure_forge_eternelle', 'coeur_forge'],
-            guaranteedDrops: true
+            guaranteedDrops: true,
+            
+            // 🔒 SYSTÈME ANTI-FARMING
+            respawnTime: 3600000,
+            maxLegendaryDropsPerDay: 3,
+            lastKilledTime: null,
+            legendaryDropsToday: 0,
+            lastResetDate: null
         },
         
         // === RÉGION 3 : LA FORÊT ANCESTRALE ===
@@ -1291,7 +1305,14 @@ const MonstersData = {
             },
             
             dropTable: ['larmes_dryade', 'fleur_corrompue', 'essence_nature_dechue'],
-            guaranteedDrops: true
+            guaranteedDrops: true,
+            
+            // 🔒 SYSTÈME ANTI-FARMING
+            respawnTime: 3600000,
+            maxLegendaryDropsPerDay: 3,
+            lastKilledTime: null,
+            legendaryDropsToday: 0,
+            lastResetDate: null
         },
         
         // === RÉGION 4 : LES TERRES BRÛLÉES ===
@@ -1318,7 +1339,14 @@ const MonstersData = {
             },
             
             dropTable: ['cendres_eternelles', 'baton_runique_calcine', 'essence_feu_obscur'],
-            guaranteedDrops: true
+            guaranteedDrops: true,
+            
+            // 🔒 SYSTÈME ANTI-FARMING
+            respawnTime: 3600000,
+            maxLegendaryDropsPerDay: 3,
+            lastKilledTime: null,
+            legendaryDropsToday: 0,
+            lastResetDate: null
         },
         
         // === RÉGION 5 : LE NORD GELÉ ===
@@ -1345,7 +1373,14 @@ const MonstersData = {
             },
             
             dropTable: ['cape_blizzard', 'cor_guerre_brise', 'essence_froid_eternel'],
-            guaranteedDrops: true
+            guaranteedDrops: true,
+            
+            // 🔒 SYSTÈME ANTI-FARMING
+            respawnTime: 3600000,
+            maxLegendaryDropsPerDay: 3,
+            lastKilledTime: null,
+            legendaryDropsToday: 0,
+            lastResetDate: null
         }
     },
     

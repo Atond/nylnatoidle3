@@ -14,12 +14,14 @@
     <link rel="stylesheet" href="src/css/enhancements.css">
     <link rel="stylesheet" href="src/css/quality-system.css">
     <link rel="stylesheet" href="src/css/character-creation.css">
-    <link rel="stylesheet" href="src/css/alchemy.css">
+    <link rel="stylesheet" href="src/css/transmutation.css">
     <link rel="stylesheet" href="src/css/conversion-modal.css">
     <link rel="stylesheet" href="src/css/dragons.css">
     <link rel="stylesheet" href="src/css/dragon-selector.css">
     <link rel="stylesheet" href="src/css/stats-tooltips.css">
     <link rel="stylesheet" href="src/css/buffs.css"> <!-- 💫 Système de buffs consommables -->
+    <link rel="stylesheet" href="src/css/specialization-modal.css"> <!-- 🎯 Modal spécialisation ressources -->
+    <link rel="stylesheet" href="src/css/map.css"> <!-- 🗺️ Onglet Carte interactive -->
 </head>
 
 <body>
@@ -98,6 +100,27 @@
         </div>
     </div>
 
+    <!-- ========== MODAL SPÉCIALISATION RESSOURCES ========== -->
+    <div class="modal-overlay" id="specializationModal" style="display: none;">
+        <div class="specialization-modal">
+            <h2>🎯 Spécialisation des Métiers de Récolte</h2>
+            <p class="specialization-subtitle">Choisissez UNE ressource par métier pour recevoir +25% de drop rate.</p>
+            <p class="specialization-warning">⚠️ Ce choix est permanent ! Choisissez avec sagesse.</p>
+
+            <!-- Container pour les 4 métiers -->
+            <div class="specializations-container" id="specializationsContainer">
+                <!-- Sera rempli dynamiquement par JavaScript -->
+            </div>
+
+            <!-- Bouton de confirmation (désactivé tant que tous les choix ne sont pas faits) -->
+            <div class="specialization-actions">
+                <button class="btn btn-success btn-lg" id="btnConfirmSpecializations" disabled>
+                    ✨ Confirmer mes spécialisations
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ========== HEADER ========== -->
     <header class="game-header">
         <h1>🗡️ Nyln'ato Idle</h1>
@@ -113,11 +136,13 @@
     <!-- ========== NAVIGATION TABS ========== -->
     <nav class="tabs-nav">
         <button class="tab-btn active" data-tab="combat">⚔️ Combat</button>
+        <button class="tab-btn" data-tab="map">🗺️ Carte</button>
         <button class="tab-btn disabled" data-tab="gathering" style="display: none;">⛏️ Récolte</button>
         <button class="tab-btn disabled" data-tab="crafting" style="display: none;">🔨 Fabrication</button>
         <button class="tab-btn disabled" data-tab="alchemy" style="display: none;">⚗️ Transmutation</button>
         <button class="tab-btn disabled" data-tab="equipment" style="display: none;">🎒 Équipement</button>
         <button class="tab-btn disabled" data-tab="town" style="display: none;">🏘️ Ville</button>
+        <button class="tab-btn disabled" data-tab="research" style="display: none;">🔬 Recherches</button>
         <button class="tab-btn disabled" data-tab="characters" style="display: none;">🎭 Personnages</button>
         <button class="tab-btn disabled" data-tab="dungeons" style="display: none;">🏰 Donjons</button>
         <button class="tab-btn disabled" data-tab="dragons" style="display: none;">🐉 Dragons</button>
@@ -180,6 +205,14 @@
                             <span id="currentXp">0</span> / <span id="requiredXp">100</span> XP
                         </div>
                     </div>
+
+                    <!-- 🎒 BUTIN RÉCENT -->
+                    <div class="panel combat-inventory-panel-large">
+                        <h3>🎒 Butin Récent</h3>
+                        <div class="combat-inventory-grid-large" id="combatInventoryGrid">
+                            <p class="text-muted">Aucun butin pour le moment...</p>
+                        </div>
+                    </div>
                 </aside>
 
                 <!-- Zone de combat centrale -->
@@ -239,11 +272,18 @@
                     <!-- Action Buttons -->
                     <div class="combat-actions">
                         <button class="btn btn-attack" id="attackBtn">
-                            ⚔️ Attaquer (Clic)
+                            <span id="attackBtnText">⚔️ Attaquer</span>
+                            <span id="comboDisplay" style="display: none; font-size: 0.9em; color: #ff6b35; font-weight: bold;"></span>
                         </button>
                         <button class="btn btn-toggle" id="autoCombatBtn" style="display: none;">
                             ⚙️ Auto-Combat : OFF
                         </button>
+                    </div>                    <!-- 🧪 Potions Rapides -->
+                    <div class="combat-potions" id="combatPotionsPanel" style="display: none;">
+                        <div class="potions-title">🧪 Potions Rapides</div>
+                        <div class="potions-hotbar" id="potionsHotbar">
+                            <!-- Les potions seront ajoutées dynamiquement ici -->
+                        </div>
                     </div>
 
                     <!-- Combat Log -->
@@ -265,40 +305,131 @@
                         </div>
                     </div>
 
-                    <!-- 🗺️ INFO ZONE (15% hauteur) -->
-                    <div class="panel info-panel">
-                        <h3>🗺️ Zone actuelle</h3>
-                        <div class="zone-info">
-                            <p><strong>Région :</strong> <span id="currentRegionName">Les Plaines Verdoyantes</span></p>
-                            <p><strong>Zone :</strong> <span id="currentZoneNum">1</span></p>
-                            <p><strong>Monstre :</strong> <span id="monsterType">Loup gris</span></p>
-                        </div>
-                    </div>
-
-                    <!-- 🗺️ MINIMAP COMPACTE (20% hauteur) -->
-                    <div class="panel minimap-panel">
-                        <div class="minimap-container minimap-compact" id="minimapContainer">
-                            <div class="minimap-header">
-                                <div class="minimap-title">�️ Carte</div>
-                                <div class="minimap-progress">
-                                    <span id="minimapGlobalProgress">0/50</span>
+                    <!-- � PROGRESSION COMPACTE (20% hauteur) -->
+                    <div class="panel progression-panel">
+                        <h3>� Progression</h3>
+                        <div class="progression-compact">
+                            <div class="region-progress">
+                                <div class="region-name-row">
+                                    <span class="region-icon">🌿</span>
+                                    <span class="region-name" id="progressRegionName">Plaines Verdoyantes</span>
+                                </div>
+                                <div class="zones-dots" id="progressZoneDots">
+                                    ⭕⭕⭕⭕⭕⭕⭕⭕⭕⭕
+                                </div>
+                                <div class="progress-stats">
+                                    <span class="progress-text">Zone <span id="progressCurrentZone">1</span>/<span id="progressTotalZones">10</span></span>
+                                    <span class="kills-text"><span id="progressKills">0</span> victoires</span>
                                 </div>
                             </div>
-                            <div class="minimap-regions" id="minimapRegions">
-                                <!-- Les régions seront générées ici -->
+                            <button class="btn btn-secondary btn-sm" onclick="window.game.ui.switchTab('map')">
+                                🗺️ Voir la carte complète
+                            </button>
+                        </div>
+                    </div>
+
+                </aside>
+
+            </div>
+        </section>
+
+        <!-- ===== ONGLET CARTE ===== -->
+        <section class="tab-content" id="tab-map">
+            <div class="map-container">
+                <h2>🗺️ Carte du Monde</h2>
+                
+                <!-- Sélection de région (tabs) -->
+                <div class="region-tabs" id="regionTabs">
+                    <!-- Sera généré dynamiquement -->
+                </div>
+
+                <!-- Carte de la région -->
+                <div class="map-region-container">
+                    <!-- Info région actuelle -->
+                    <div class="map-region-header" id="mapRegionHeader">
+                        <div class="map-region-info">
+                            <h3 id="mapRegionName">🌿 Les Plaines Verdoyantes</h3>
+                            <p id="mapRegionDescription">Une région paisible pour les aventuriers débutants</p>
+                        </div>
+                        <div class="map-region-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Zones complétées :</span>
+                                <span class="stat-value" id="mapRegionProgress">0/10</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Boss vaincu :</span>
+                                <span class="stat-value" id="mapRegionBoss">❌</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 🎒 BUTIN RÉCENT (5% hauteur) -->
-                    <div class="panel combat-inventory-panel">
-                        <h3>🎒 Butin</h3>
-                        <div class="combat-inventory-grid" id="combatInventoryGrid">
-                            <p class="text-muted">Aucun butin...</p>
+                    <!-- Grid des zones (2×5) -->
+                    <div class="map-zones-grid" id="mapZonesGrid">
+                        <!-- Sera généré dynamiquement -->
+                    </div>
+                </div>
+
+                <!-- Détails de la zone sélectionnée -->
+                <div class="map-zone-details" id="mapZoneDetails" style="display: none;">
+                    <h3 id="zoneDetailsName">Zone 1</h3>
+                    <div class="zone-details-content">
+                        <div class="zone-details-left">
+                            <div id="zoneMonstersList" style="display:none; margin:10px 0 0 0;"></div>
+                            <div id="zoneDropsList" style="display:none; margin:10px 0 0 0;"></div>
+                            <p id="zoneDetailsDescription">Description de la zone</p>
+                            <div class="zone-missions-block" id="zoneMissionsBlock" style="margin-bottom:12px;">
+                                <div class="zone-mission-title" style="font-weight:bold; color:#ffe082; margin-bottom:4px;">🎯 Missions de Zone</div>
+                                <div class="zone-mission-list">
+                                    <!-- Mission 1 : Tuer 100 ennemis -->
+                                    <div class="zone-mission-item" id="zoneMission1">
+                                        <span class="zone-mission-emoji">⚔️</span>
+                                        <span class="zone-mission-desc">Tuer <span id="zoneMission1Goal">100</span> ennemis</span>
+                                        <progress id="zoneMission1ProgressBar" value="0" max="100" style="width:70px;height:10px;vertical-align:middle;"></progress>
+                                        <span id="zoneMission1ProgressText" style="margin-left:6px; color:#ffe082; font-size:0.95rem;">0/100</span>
+                                        <span id="zoneMission1Reward" style="margin-left:10px; color:#8fff8f; font-size:0.93rem; display:none;">Monstres révélés</span>
+                                    </div>
+                                    <!-- Mission 2 : Combo de victoires -->
+                                    <div class="zone-mission-item" id="zoneMission2">
+                                        <span class="zone-mission-emoji">🔥</span>
+                                        <span class="zone-mission-desc">Réaliser <span id="zoneMission2Goal">20</span> victoires d'affilée</span>
+                                        <progress id="zoneMission2ProgressBar" value="0" max="20" style="width:70px;height:10px;vertical-align:middle;"></progress>
+                                        <span id="zoneMission2ProgressText" style="margin-left:6px; color:#ffe082; font-size:0.95rem;">0/20</span>
+                                        <span id="zoneMission2Reward" style="margin-left:10px; color:#8fff8f; font-size:0.93rem; display:none;">Drops révélés</span>
+                                    </div>
+                                    <!-- Mission 3 : Vaincre le boss -->
+                                    <div class="zone-mission-item" id="zoneMission3">
+                                        <span class="zone-mission-emoji">👑</span>
+                                        <span class="zone-mission-desc">Vaincre le boss de la zone</span>
+                                        <span id="zoneMission3Status" style="margin-left:8px; color:#ffe082; font-size:0.95rem;">❌</span>
+                                        <span id="zoneMission3Reward" style="margin-left:10px; color:#8fff8f; font-size:0.93rem; display:none;">Bonus spécial</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="zone-stats-grid">
+                                <div class="zone-stat">
+                                    <span class="zone-stat-icon">⚔️</span>
+                                    <span class="zone-stat-label">Monstres tués :</span>
+                                    <span class="zone-stat-value" id="zoneDetailskills">0</span>
+                                </div>
+                                <div class="zone-stat">
+                                    <span class="zone-stat-icon"></span>
+                                    <span class="zone-stat-label">Or gagné :</span>
+                                    <span class="zone-stat-value" id="zoneDetailsGold">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="zone-details-right">
+                            <div class="zone-actions">
+                                <button class="btn btn-primary btn-lg" id="btnTravelToZone" onclick="window.game.ui.travelToZone()">
+                                    🚀 Voyager vers cette zone
+                                </button>
+                                <button class="btn btn-secondary" onclick="window.game.ui.closeZoneDetails()">
+                                    ← Retour
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </aside>
-
+                </div>
             </div>
         </section>
 
@@ -934,6 +1065,44 @@
                     </div>
                 </div>
 
+                <!-- 🆕 AUTO-SELL PANEL -->
+                <div class="auto-sell-panel" style="margin-top: 20px; padding: 20px; background: linear-gradient(135deg, rgba(40, 40, 60, 0.4), rgba(60, 40, 80, 0.4)); border: 2px solid rgba(150, 100, 200, 0.3); border-radius: 12px;">
+                    <h3 style="margin-top: 0; display: flex; align-items: center; gap: 10px;">
+                        <span>💰</span>
+                        <span>Vente Automatique</span>
+                    </h3>
+                    <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 15px;">
+                        Vend automatiquement les ressources quand le stockage dépasse 80% de sa capacité
+                    </p>
+                    
+                    <div class="auto-sell-toggles" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                        <button class="btn btn-toggle" id="toggle-autosell-wood" data-category="wood">
+                            <span class="toggle-icon">🪵</span>
+                            <span>Bois</span>
+                            <span class="toggle-status">OFF</span>
+                        </button>
+                        <button class="btn btn-toggle" id="toggle-autosell-ore" data-category="ore">
+                            <span class="toggle-icon">⛏️</span>
+                            <span>Minerais</span>
+                            <span class="toggle-status">OFF</span>
+                        </button>
+                        <button class="btn btn-toggle" id="toggle-autosell-plants" data-category="plants">
+                            <span class="toggle-icon">🌿</span>
+                            <span>Plantes</span>
+                            <span class="toggle-status">OFF</span>
+                        </button>
+                        <button class="btn btn-toggle" id="toggle-autosell-fish" data-category="fish">
+                            <span class="toggle-icon">🐟</span>
+                            <span>Poissons</span>
+                            <span class="toggle-status">OFF</span>
+                        </button>
+                    </div>
+                    
+                    <div style="margin-top: 15px; padding: 10px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; font-size: 0.85rem; opacity: 0.7;">
+                        ℹ️ <strong>Fonctionnement :</strong> Vend au prix de base × 0.9 (10% taxe). Vérifie toutes les 60 secondes.
+                    </div>
+                </div>
+
                 <!-- SÉPARATEUR VISUEL -->
                 <hr style="margin: 2rem 0; border: 1px solid var(--border-color);">
 
@@ -947,6 +1116,55 @@
                 <!-- Liste des bâtiments -->
                 <div class="buildings-grid" id="buildingsGrid">
                     <!-- Les bâtiments seront générés ici -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== ONGLET RECHERCHES ===== -->
+        <section class="tab-content" id="tab-research">
+            <div class="research-container">
+                <div class="research-header">
+                    <h2>🔬 Recherches Technologiques</h2>
+                    <div class="research-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Progression:</span>
+                            <span class="stat-value" id="research-progress">0/52</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Complété:</span>
+                            <span class="stat-value" id="research-percentage">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="research-categories">
+                    <!-- Navigation catégories -->
+                    <div class="research-category-tabs">
+                        <button class="research-category-btn active" data-category="production">🛠️ Production</button>
+                        <button class="research-category-btn" data-category="combat">⚔️ Combat</button>
+                        <button class="research-category-btn" data-category="progression">💎 Progression</button>
+                        <button class="research-category-btn" data-category="town">🏛️ Ville</button>
+                        <button class="research-category-btn" data-category="endgame">🔮 Endgame</button>
+                    </div>
+
+                    <!-- Grilles de recherches par catégorie -->
+                    <div class="research-grid-container">
+                        <div class="research-grid active" data-category="production" id="research-grid-production">
+                            <!-- Rempli dynamiquement -->
+                        </div>
+                        <div class="research-grid" data-category="combat" id="research-grid-combat">
+                            <!-- Rempli dynamiquement -->
+                        </div>
+                        <div class="research-grid" data-category="progression" id="research-grid-progression">
+                            <!-- Rempli dynamiquement -->
+                        </div>
+                        <div class="research-grid" data-category="town" id="research-grid-town">
+                            <!-- Rempli dynamiquement -->
+                        </div>
+                        <div class="research-grid" data-category="endgame" id="research-grid-endgame">
+                            <!-- Rempli dynamiquement -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1178,13 +1396,13 @@
     <script src="src/config/game-config.js"></script>
     <script src="src/config/quests-data.js"></script>
     <script src="src/config/resources-data.js"></script>
-    <script src="src/config/craft-recipes-data.js"></script>
+    <script src="src/config/dragons-config.js"></script> <!-- 🐉 Configuration Dragons -->
+    <script src="src/config/craft-recipes-data.js"></script> <!-- ✅ Réactivé pour iron_sword niveau 1 -->
     <script src="src/config/craft-recipes-extended.js"></script> <!-- Armes archétypes -->
     <script src="src/config/craft-recipes-armors.js"></script> <!-- Armures archétypes -->
     <script src="src/config/craft-recipes-accessories.js"></script> <!-- Accessoires archétypes -->
     <script src="src/config/craft-recipes-consumables.js"></script> <!-- Consommables -->
     <script src="src/config/craft-recipes-tanner.js"></script> <!-- Tanneur (traitement cuir) -->
-    <script src="src/config/dragons-data.js"></script>
     <script src="src/config/dungeons-data.js"></script> <!-- 🏰 Donjons -->
     <script src="src/config/endgame-config.js"></script> <!-- Systèmes endgame -->
 
@@ -1224,8 +1442,10 @@
     <script src="src/js/dragon.js"></script>
     <script src="src/js/dragon-manager.js"></script>
     <script src="src/js/dragon-test-helper.js"></script>
-    <script type="module" src="src/config/alchemy-data.js"></script>
-    <script type="module" src="src/js/alchemy-manager.js"></script>
+    <script type="module" src="src/config/transmutation-data.js"></script>
+    <script type="module" src="src/js/transmutation-manager.js"></script>
+    <script src="src/config/research-data.js"></script> <!-- 🔬 Données recherches -->
+    <script src="src/js/research-manager.js"></script> <!-- 🔬 Gestionnaire recherches -->
     <script src="src/js/character-creation.js"></script>
     <script src="src/js/ui.js"></script>
     <script src="src/js/game.js"></script>

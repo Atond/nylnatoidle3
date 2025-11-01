@@ -16,7 +16,7 @@ window.CraftRecipesAccessories = [
   // TANK RINGS
   {
     id: 'iron_ring_defense',
-    name: 'Iron Ring of Defense',
+    name: 'Anneau de Fer de Défense',
     archetype: 'tank',
     category: 'accessory',
     profession: 'jeweler',
@@ -43,7 +43,7 @@ window.CraftRecipesAccessories = [
   },
   {
     id: 'steel_ring_fortitude',
-    name: 'Steel Ring of Fortitude',
+    name: 'Anneau d\'Acier de Robustesse',
     archetype: 'tank',
     category: 'accessory',
     profession: 'jeweler',
@@ -72,7 +72,7 @@ window.CraftRecipesAccessories = [
   },
   {
     id: 'adamantite_ring_titan',
-    name: 'Adamantite Ring of the Titan',
+    name: 'Anneau d\'Adamantite du Titan',
     archetype: 'tank',
     category: 'accessory',
     profession: 'jeweler',
@@ -105,7 +105,7 @@ window.CraftRecipesAccessories = [
   // ARCHER RINGS
   {
     id: 'copper_ring_precision',
-    name: 'Copper Ring of Precision',
+    name: 'Anneau de Cuivre de Précision',
     archetype: 'archer',
     category: 'accessory',
     profession: 'jeweler',
@@ -131,7 +131,7 @@ window.CraftRecipesAccessories = [
   },
   {
     id: 'silver_ring_swiftness',
-    name: 'Silver Ring of Swiftness',
+    name: 'Anneau d\'Argent de Rapidité',
     archetype: 'archer',
     category: 'accessory',
     profession: 'jeweler',
@@ -158,7 +158,7 @@ window.CraftRecipesAccessories = [
   },
   {
     id: 'runite_ring_marksman',
-    name: 'Runite Ring of the Marksman',
+    name: 'Anneau de Runite du Tireur d\'Élite',
     archetype: 'archer',
     category: 'accessory',
     profession: 'jeweler',
@@ -189,7 +189,7 @@ window.CraftRecipesAccessories = [
   // MAGE RINGS
   {
     id: 'copper_ring_intelligence',
-    name: 'Copper Ring of Intelligence',
+    name: 'Anneau de Cuivre d\'Intelligence',
     archetype: 'mage',
     category: 'accessory',
     profession: 'jeweler',
@@ -215,7 +215,7 @@ window.CraftRecipesAccessories = [
   },
   {
     id: 'silver_ring_arcana',
-    name: 'Silver Ring of Arcana',
+    name: 'Anneau d\'Argent de l\'Arcane',
     archetype: 'mage',
     category: 'accessory',
     profession: 'jeweler',
@@ -242,7 +242,7 @@ window.CraftRecipesAccessories = [
   },
   {
     id: 'runite_ring_archmage',
-    name: 'Runite Ring of the Archmage',
+    name: 'Anneau de Runite de l\'Archimage',
     archetype: 'mage',
     category: 'accessory',
     profession: 'jeweler',
@@ -272,7 +272,7 @@ window.CraftRecipesAccessories = [
   // HEALER RING
   {
     id: 'silver_ring_restoration',
-    name: 'Silver Ring of Restoration',
+    name: 'Anneau d\'Argent de Restauration',
     archetype: 'healer',
     category: 'accessory',
     profession: 'jeweler',
@@ -306,7 +306,7 @@ window.CraftRecipesAccessories = [
   // TANK AMULETS
   {
     id: 'iron_amulet_guardian',
-    name: 'Iron Amulet of the Guardian',
+    name: 'Amulette de Fer du Gardien',
     archetype: 'tank',
     category: 'accessory',
     profession: 'jeweler',
@@ -336,7 +336,7 @@ window.CraftRecipesAccessories = [
   },
   {
     id: 'mithril_amulet_bulwark',
-    name: 'Mithril Amulet of the Bulwark',
+    name: 'Amulette de Mithril du Rempart',
     archetype: 'tank',
     category: 'accessory',
     profession: 'jeweler',
@@ -369,7 +369,7 @@ window.CraftRecipesAccessories = [
   },
   {
     id: 'adamantite_amulet_colossus',
-    name: 'Adamantite Amulet of the Colossus',
+    name: 'Amulette d\'Adamantite du Colosse',
     archetype: 'tank',
     category: 'accessory',
     profession: 'jeweler',
@@ -405,7 +405,7 @@ window.CraftRecipesAccessories = [
   // ARCHER AMULETS
   {
     id: 'copper_amulet_hunter',
-    name: 'Copper Amulet of the Hunter',
+    name: 'Amulette de Cuivre du Chasseur',
     archetype: 'archer',
     category: 'accessory',
     profession: 'jeweler',
@@ -435,7 +435,7 @@ window.CraftRecipesAccessories = [
   },
   {
     id: 'mithril_amulet_ranger',
-    name: 'Mithril Amulet of the Ranger',
+    name: 'Amulette de Mithril du Rôdeur',
     archetype: 'archer',
     category: 'accessory',
     profession: 'jeweler',
@@ -467,7 +467,7 @@ window.CraftRecipesAccessories = [
   },
   {
     id: 'runite_amulet_sniper',
-    name: 'Runite Amulet of the Sniper',
+    name: 'Amulette de Runite du Sniper',
     archetype: 'archer',
     category: 'accessory',
     profession: 'jeweler',
@@ -502,7 +502,7 @@ window.CraftRecipesAccessories = [
   // MAGE AMULETS
   {
     id: 'copper_amulet_scholar',
-    name: 'Copper Amulet of the Scholar',
+    name: 'Amulette de Cuivre de l\'Érudit',
     archetype: 'mage',
     category: 'accessory',
     profession: 'jeweler',
@@ -530,7 +530,7 @@ window.CraftRecipesAccessories = [
   },
   {
     id: 'mithril_amulet_sorcerer',
-    name: 'Mithril Amulet of the Sorcerer',
+    name: 'Amulette de Mithril du Sorcier',
     archetype: 'mage',
     category: 'accessory',
     profession: 'jeweler',
@@ -560,7 +560,7 @@ window.CraftRecipesAccessories = [
   },
   {
     id: 'runite_amulet_archmage',
-    name: 'Runite Amulet of the Archmage',
+    name: 'Amulette de Runite de l\'Archimage',
     archetype: 'mage',
     category: 'accessory',
     profession: 'jeweler',
@@ -592,7 +592,7 @@ window.CraftRecipesAccessories = [
   // HEALER AMULETS
   {
     id: 'silver_amulet_cleric',
-    name: 'Silver Amulet of the Cleric',
+    name: 'Amulette d\'Argent du Clerc',
     archetype: 'healer',
     category: 'accessory',
     profession: 'jeweler',
@@ -622,7 +622,7 @@ window.CraftRecipesAccessories = [
   },
   {
     id: 'runite_amulet_oracle',
-    name: 'Runite Amulet of the Oracle',
+    name: 'Amulette de Runite de l\'Oracle',
     archetype: 'healer',
     category: 'accessory',
     profession: 'jeweler',
@@ -660,7 +660,7 @@ window.CraftRecipesAccessories = [
 
   {
     id: 'talisman_berserker',
-    name: 'Talisman of the Berserker',
+    name: 'Talisman du Berserker',
     archetype: 'tank',
     category: 'accessory',
     profession: 'jeweler',
@@ -691,7 +691,7 @@ window.CraftRecipesAccessories = [
   },
   {
     id: 'talisman_shadowdancer',
-    name: 'Talisman of the Shadowdancer',
+    name: 'Talisman du Danseur d\'Ombre',
     archetype: 'archer',
     category: 'accessory',
     profession: 'jeweler',
@@ -722,7 +722,7 @@ window.CraftRecipesAccessories = [
   },
   {
     id: 'talisman_elementalist',
-    name: 'Talisman of the Elementalist',
+    name: 'Talisman de l\'Élémentaliste',
     archetype: 'mage',
     category: 'accessory',
     profession: 'jeweler',
@@ -752,7 +752,7 @@ window.CraftRecipesAccessories = [
   },
   {
     id: 'talisman_lifebinder',
-    name: 'Talisman of the Lifebinder',
+    name: 'Talisman du Lieur de Vie',
     archetype: 'healer',
     category: 'accessory',
     profession: 'jeweler',
@@ -783,7 +783,7 @@ window.CraftRecipesAccessories = [
   },
   {
     id: 'talisman_eternal_champion',
-    name: 'Talisman of the Eternal Champion',
+    name: 'Talisman du Champion Éternel',
     archetype: 'tank',
     category: 'accessory',
     profession: 'jeweler',

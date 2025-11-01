@@ -4,6 +4,7 @@
 class Equipment {
     constructor(data) {
         this.id = data.id;
+        this.recipeId = data.recipeId || null; // 🧪 ID de la recette source (pour potions/consommables)
         this.name = data.name;
         this.type = data.type; // weapon, helmet, chest, legs, boots, gloves, amulet, ring, offhand
         this.slot = data.slot; // weapon, helmet, chest, legs, boots, gloves, amulet, ring1, ring2, offhand
@@ -27,13 +28,19 @@ class Equipment {
             damage: data.stats?.damage || 0,
             defense: data.stats?.defense || 0,
             professionXP: data.stats?.professionXP || 0, // Bonus % XP métiers
-            dropRate: data.stats?.dropRate || 0 // Bonus % drop rate
+            dropRate: data.stats?.dropRate || 0, // Bonus % drop rate
+            hpRestore: data.stats?.hpRestore || 0 // 🧪 Heal pour potions
         };
         
         // Appliquer le multiplicateur de qualité
         this.stats = {};
         for (const [stat, value] of Object.entries(baseStats)) {
-            this.stats[stat] = Math.floor(value * this.qualityMultiplier);
+            // Ne pas multiplier hpRestore par la qualité (potions heal toujours le même montant)
+            if (stat === 'hpRestore') {
+                this.stats[stat] = value;
+            } else {
+                this.stats[stat] = Math.floor(value * this.qualityMultiplier);
+            }
         }
         
         // Niveau requis pour équiper

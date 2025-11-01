@@ -4,7 +4,7 @@
  * Intégration complète des loots de monstres
  */
 
-const CraftRecipesExtended = [
+window.CraftRecipesExtended = [
     
     // ========================================
     // FORGERON - ARMES
@@ -598,14 +598,395 @@ const CraftRecipesExtended = [
         },
         requiredLevel: 22,
         description: 'Le bâton ultime des grands prêtres. Peut ramener les morts à la vie.'
+    },
+    
+    // ========================================
+    // NOUVELLES RECETTES UTILISANT MONSTER DROPS
+    // ========================================
+    
+    // ALCHIMISTE - Potions avec drops monstres
+    {
+        id: 'poison_vial',
+        name: 'Fiole de Poison',
+        type: 'consumable',
+        slot: 'consumable',
+        icon: '🧪',
+        rarity: 'uncommon',
+        archetype: 'universal',
+        profession: 'alchemist',
+        professionLevel: 5,
+        materials: [
+            { resourceId: 'crocs_venimeux', amount: 3 },
+            { resourceId: 'plumes_sombres', amount: 5 },
+            { resourceId: 'plant_nightshade', amount: 4 }
+        ],
+        craftTime: 3000,
+        stats: {
+            poisonDamage: 50,
+            poisonDuration: 10 // 10 secondes
+        },
+        requiredLevel: 8,
+        description: 'Poison mortel créé à partir de crocs venimeux. Inflige des dégâts continus.'
+    },
+    
+    {
+        id: 'elixir_ferocity',
+        name: 'Élixir de Férocité',
+        type: 'consumable',
+        slot: 'consumable',
+        icon: '🍷',
+        rarity: 'rare',
+        archetype: 'tank',
+        profession: 'alchemist',
+        professionLevel: 12,
+        materials: [
+            { resourceId: 'sang_concentre', amount: 3 },
+            { resourceId: 'griffes_usees', amount: 8 },
+            { resourceId: 'plant_dragonroot', amount: 5 }
+        ],
+        craftTime: 4000,
+        stats: {
+            forceBuff: 25,
+            critBonus: 15,
+            duration: 300 // 5 minutes
+        },
+        requiredLevel: 18,
+        description: 'Élixir puissant augmentant force et taux de critique.'
+    },
+    
+    {
+        id: 'shadow_essence_potion',
+        name: 'Potion d\'Essence d\'Ombre',
+        type: 'consumable',
+        slot: 'consumable',
+        icon: '🌑',
+        rarity: 'epic',
+        archetype: 'mage',
+        profession: 'alchemist',
+        professionLevel: 18,
+        materials: [
+            { resourceId: 'essence_vegetale_instable', amount: 5 },
+            { resourceId: 'aile_chauve_souris', amount: 6 },
+            { resourceId: 'plant_deathcap', amount: 4 }
+        ],
+        craftTime: 5000,
+        stats: {
+            intelligenceBuff: 30,
+            spellPower: 40,
+            shadowDamage: 25,
+            duration: 600 // 10 minutes
+        },
+        requiredLevel: 28,
+        description: 'Potion mystique canalisant les énergies de l\'ombre.'
+    },
+    
+    // BIJOUTIER - Accessoires avec drops rares
+    {
+        id: 'fang_necklace',
+        name: 'Collier de Crocs',
+        type: 'accessory',
+        slot: 'amulet',
+        icon: '📿',
+        rarity: 'uncommon',
+        archetype: 'universal',
+        profession: 'jeweler',
+        professionLevel: 8,
+        materials: [
+            { resourceId: 'croc_acere', amount: 5 },
+            { resourceId: 'ore_silver', amount: 8 },
+            { resourceId: 'fabric_linen', amount: 4 }
+        ],
+        craftTime: 3500,
+        stats: {
+            force: 8,
+            critChance: 5,
+            lifesteal: 3 // 3% vol de vie
+        },
+        requiredLevel: 12,
+        description: 'Collier fait de crocs acérés. Absorbe la vie des ennemis.'
+    },
+    
+    {
+        id: 'crystal_ring',
+        name: 'Anneau de Cristal',
+        type: 'accessory',
+        slot: 'ring1',
+        icon: '💍',
+        rarity: 'rare',
+        archetype: 'mage',
+        profession: 'jeweler',
+        professionLevel: 15,
+        materials: [
+            { resourceId: 'cristal_montagne', amount: 3 },
+            { resourceId: 'gem_sapphire', amount: 2 },
+            { resourceId: 'ore_mithril', amount: 10 }
+        ],
+        craftTime: 4500,
+        stats: {
+            intelligence: 18,
+            manaRegen: 12,
+            spellCrit: 8
+        },
+        requiredLevel: 22,
+        description: 'Anneau serti d\'un cristal de montagne magique.'
+    },
+    
+    {
+        id: 'horn_amulet',
+        name: 'Amulette de Corne Ancienne',
+        type: 'accessory',
+        slot: 'amulet',
+        icon: '🦌',
+        rarity: 'legendary',
+        archetype: 'healer',
+        profession: 'jeweler',
+        professionLevel: 25,
+        materials: [
+            { resourceId: 'corne_ancienne', amount: 2 },
+            { resourceId: 'gem_diamond', amount: 3 },
+            { resourceId: 'ore_adamantite', amount: 12 }
+        ],
+        craftTime: 6000,
+        stats: {
+            wisdom: 35,
+            healing: 60,
+            hpRegen: 15,
+            manaRegen: 20,
+            resurrect: 1
+        },
+        requiredLevel: 38,
+        description: 'Amulette légendaire conférant des pouvoirs de résurrection.'
+    },
+    
+    // FORGERON - Armes avec drops
+    {
+        id: 'bone_war_axe',
+        name: 'Hache de Guerre en Os',
+        type: 'weapon',
+        slot: 'weapon',
+        icon: '🪓',
+        rarity: 'uncommon',
+        archetype: 'tank',
+        profession: 'blacksmith',
+        professionLevel: 10,
+        materials: [
+            { resourceId: 'os_massif', amount: 8 },
+            { resourceId: 'ore_iron', amount: 15 },
+            { resourceId: 'wood_ash', amount: 10 }
+        ],
+        craftTime: 3500,
+        stats: {
+            force: 22,
+            damage: 28,
+            critChance: 10
+        },
+        requiredLevel: 16,
+        description: 'Hache forgée avec des os de créatures massives.'
+    },
+    
+    {
+        id: 'feathered_bow',
+        name: 'Arc à Plumes Noires',
+        type: 'weapon',
+        slot: 'weapon',
+        icon: '🏹',
+        rarity: 'rare',
+        archetype: 'archer',
+        profession: 'blacksmith',
+        professionLevel: 14,
+        materials: [
+            { resourceId: 'plume_harpie', amount: 12 },
+            { resourceId: 'wood_yew', amount: 15 },
+            { resourceId: 'fabric_spider_silk', amount: 6 }
+        ],
+        craftTime: 4000,
+        stats: {
+            agility: 28,
+            damage: 35,
+            critChance: 18,
+            attackSpeed: 15
+        },
+        requiredLevel: 24,
+        description: 'Arc légendaire fait de plumes de harpies. Tir ultra-rapide.'
+    },
+    
+    {
+        id: 'golem_hammer',
+        name: 'Marteau de Golem',
+        type: 'weapon',
+        slot: 'weapon',
+        icon: '🔨',
+        rarity: 'epic',
+        archetype: 'tank',
+        profession: 'blacksmith',
+        professionLevel: 20,
+        materials: [
+            { resourceId: 'fragment_golem', amount: 10 },
+            { resourceId: 'ore_runite', amount: 20 },
+            { resourceId: 'coeur_montagne', amount: 3 }
+        ],
+        craftTime: 5500,
+        stats: {
+            force: 45,
+            damage: 60,
+            endurance: 25,
+            stunChance: 30
+        },
+        requiredLevel: 32,
+        description: 'Marteau massif forgé à partir de fragments de golem de pierre.'
+    },
+    
+    // ARMURIER - Armures avec drops
+    {
+        id: 'thick_hide_vest',
+        name: 'Gilet en Fourrure Épaisse',
+        type: 'armor',
+        slot: 'chest',
+        icon: '🧥',
+        rarity: 'uncommon',
+        archetype: 'archer',
+        profession: 'armorsmith',
+        professionLevel: 8,
+        materials: [
+            { resourceId: 'fourrure_epaisse', amount: 10 },
+            { resourceId: 'cuir_robuste', amount: 6 },
+            { resourceId: 'fabric_cotton', amount: 5 }
+        ],
+        craftTime: 3000,
+        stats: {
+            armor: 18,
+            defense: 12,
+            endurance: 10,
+            coldResist: 15
+        },
+        requiredLevel: 14,
+        description: 'Gilet isolant contre le froid, fait de fourrure épaisse.'
+    },
+    
+    {
+        id: 'battered_armor_restored',
+        name: 'Armure Cabossée Restaurée',
+        type: 'armor',
+        slot: 'chest',
+        icon: '🛡️',
+        rarity: 'rare',
+        archetype: 'tank',
+        profession: 'armorsmith',
+        professionLevel: 16,
+        materials: [
+            { resourceId: 'armure_cabossee', amount: 3 },
+            { resourceId: 'ore_mithril', amount: 15 },
+            { resourceId: 'monster_essence', amount: 5 }
+        ],
+        craftTime: 4500,
+        stats: {
+            armor: 35,
+            defense: 40,
+            endurance: 22,
+            health: 120
+        },
+        requiredLevel: 26,
+        description: 'Armure ancienne restaurée avec du mithril et de l\'essence magique.'
+    },
+    
+    {
+        id: 'legendary_leather_coat',
+        name: 'Manteau en Cuir Légendaire',
+        type: 'armor',
+        slot: 'chest',
+        icon: '🧥',
+        rarity: 'legendary',
+        archetype: 'archer',
+        profession: 'armorsmith',
+        professionLevel: 28,
+        materials: [
+            { resourceId: 'cuir_legendaire', amount: 8 },
+            { resourceId: 'fabric_spider_silk', amount: 10 },
+            { resourceId: 'gem_ruby', amount: 4 }
+        ],
+        craftTime: 6500,
+        stats: {
+            armor: 42,
+            agility: 45,
+            critChance: 20,
+            dodgeChance: 18,
+            attackSpeed: 12
+        },
+        requiredLevel: 40,
+        description: 'Manteau mythique fait du cuir des créatures les plus légendaires.'
+    },
+    
+    // TANNEUR - Cuirs spéciaux avec drops
+    {
+        id: 'harpy_leather',
+        name: 'Cuir de Harpie',
+        type: 'material',
+        slot: 'material',
+        icon: '🎒',
+        rarity: 'rare',
+        archetype: 'universal',
+        profession: 'tanner',
+        professionLevel: 12,
+        materials: [
+            { resourceId: 'plume_harpie', amount: 15 },
+            { resourceId: 'robust_hide', amount: 8 },
+            { resourceId: 'plant_sage', amount: 5 }
+        ],
+        craftTime: 3500,
+        produces: { resourceId: 'harpy_leather', amount: 5 },
+        requiredLevel: 20,
+        description: 'Cuir léger et résistant fait de peaux de harpies.'
+    },
+    
+    {
+        id: 'golem_leather',
+        name: 'Cuir de Golem',
+        type: 'material',
+        slot: 'material',
+        icon: '🧳',
+        rarity: 'epic',
+        archetype: 'universal',
+        profession: 'tanner',
+        professionLevel: 18,
+        materials: [
+            { resourceId: 'fragment_golem', amount: 12 },
+            { resourceId: 'peau_geant', amount: 6 },
+            { resourceId: 'ore_mithril', amount: 10 }
+        ],
+        craftTime: 5000,
+        produces: { resourceId: 'golem_leather', amount: 3 },
+        requiredLevel: 30,
+        description: 'Cuir ultra-résistant infusé de fragments de golem.'
+    },
+    
+    // TAILLEUR - Armures légères avec drops
+    {
+        id: 'shadow_robe',
+        name: 'Robe d\'Ombre',
+        type: 'armor',
+        slot: 'chest',
+        icon: '👘',
+        rarity: 'rare',
+        archetype: 'mage',
+        profession: 'tailor',
+        professionLevel: 15,
+        materials: [
+            { resourceId: 'aile_chauve_souris', amount: 20 },
+            { resourceId: 'fabric_silk', amount: 12 },
+            { resourceId: 'essence_vegetale_instable', amount: 6 }
+        ],
+        craftTime: 4000,
+        stats: {
+            armor: 22,
+            intelligence: 35,
+            manaRegen: 18,
+            shadowResist: 25
+        },
+        requiredLevel: 25,
+        description: 'Robe tissée avec des ailes de chauve-souris. Résiste aux ténèbres.'
     }
     
-    // ... À COMPLÉTER avec 100+ recettes supplémentaires ...
-    // (Armures, Accessoires, Potions, etc.)
+    // ... Plus de recettes à venir (accessoires, boucliers, etc.) ...
 ];
 
-// Export
-if (typeof window !== 'undefined') {
-    window.CraftRecipesExtended = CraftRecipesExtended;
-    console.log(`✅ ${CraftRecipesExtended.length} recettes étendues chargées`);
-}
+console.log(`✅ ${window.CraftRecipesExtended.length} recettes étendues chargées`);

@@ -173,13 +173,41 @@ class CraftingManager {
         const recipe = this.getAllRecipes().find(r => r.id === recipeId);
         if (!recipe) return false;
 
-        // Consommer les matériaux
-        for (const material of recipe.materials) {
-            this.game.professionManager.removeFromInventory(material.resourceId, material.amount);
+        // 🆕 BONUS: Calculer bonus craft selon niveau
+        const profession = this.game.professionManager.getProfession(recipe.profession);
+        const bonuses = this.getCraftingBonuses(recipe.profession, profession.level);
+        
+        // 🆕 BONUS: Chance d'économiser matériaux (25% niveau 50)
+        const materialSavingRoll = Math.random() * 100;
+        const saveMaterials = materialSavingRoll < bonuses.materialSaving;
+        
+        if (!saveMaterials) {
+            // Consommer les matériaux normalement
+            for (const material of recipe.materials) {
+                this.game.professionManager.removeFromInventory(material.resourceId, material.amount);
+            }
+        } else {
+            if (GameConfig.DEBUG.enabled) {
+                console.log(`💚 Matériaux économisés ! (${bonuses.materialSaving}% chance)`);
+            }
+            if (this.game.ui) {
+                this.game.ui.showNotification('💚 Matériaux économisés !', 'success');
+            }
         }
 
+        // 🆕 BONUS: Chance de craft double (50% niveau 50)
+        const doubleCraftRoll = Math.random() * 100;
+        const craftDouble = doubleCraftRoll < bonuses.doubleCraftChance;
+        const craftCount = craftDouble ? 2 : 1;
+        
+        if (craftDouble && GameConfig.DEBUG.enabled) {
+            console.log(`✨ Double craft ! (${bonuses.doubleCraftChance}% chance)`);
+        }
+        
         // Craft instantané : compléter immédiatement
-        this.completeCraft(recipe, sellDirectly);
+        for (let i = 0; i < craftCount; i++) {
+            this.completeCraft(recipe, sellDirectly, bonuses);
+        }
         
         // 🏗️ FIX: Mettre à jour le dernier craft avec la propriété privée
         this._lastCraftTime = now;
@@ -190,19 +218,26 @@ class CraftingManager {
     /**
      * Termine le craft et donne l'objet (ou vend directement)
      */
-    completeCraft(recipe = null, sellDirectly = false) {
+    completeCraft(recipe = null, sellDirectly = false, bonuses = null) {
         if (!recipe) {
             recipe = this.currentCraft;
         }
         if (!recipe) return;
 
-        // Générer une qualité aléatoire
-        const quality = this.generateQuality(recipe.profession);
+        // Calculer les bonus si non fournis
+        if (!bonuses) {
+            const profession = this.game.professionManager.getProfession(recipe.profession);
+            bonuses = this.getCraftingBonuses(recipe.profession, profession.level);
+        }
+
+        // 🆕 BONUS: Améliorer la qualité selon le niveau (50% niveau 50)
+        const quality = this.generateQuality(recipe.profession, bonuses.qualityBonus);
 
         // Créer l'équipement avec un ID unique
         const uniqueId = `${recipe.id}_${Date.now()}`;
         const equipment = new window.Equipment({
             id: uniqueId,
+            recipeId: recipe.id, // 🧪 Stocker l'ID de la recette pour retrouver les stats/effets
             name: recipe.name,
             type: recipe.type,
             slot: recipe.slot,
@@ -353,28 +388,31 @@ class CraftingManager {
      * Génère une qualité aléatoire pour un équipement
      * Prend en compte le niveau de la profession pour améliorer les chances
      */
-    generateQuality(professionId) {
+    generateQuality(professionId, qualityBonus = 0) {
         const profession = this.game.professionManager.getProfession(professionId);
         const professionLevel = profession ? profession.level : 1;
         
-        // Bonus de niveau : +0.5% par niveau pour les qualités supérieures
+        // Bonus de niveau : +0.5% par niveau pour les qualités supérieures (ancien système)
         const levelBonus = (professionLevel - 1) * 0.5;
+        
+        // 🆕 NOUVEAU: Bonus de qualité du système de métier (0-50% niveau 50)
+        const totalBonus = levelBonus + qualityBonus;
         
         // Tirer un nombre aléatoire
         const roll = Math.random() * 100;
         
-        // Probabilités de base (ajustées avec le niveau)
+        // Probabilités ajustées avec le nouveau bonus
         // Normal: 69%, Supérieur: 20%, Exceptionnel: 8%, Parfait: 2%, Œuvre Maître: 0.5%
-        if (roll < 0.5 - (levelBonus * 0.1)) {
-            return 'masterwork'; // 0.5% de base, augmente légèrement avec niveau
-        } else if (roll < 3 - (levelBonus * 0.2)) {
-            return 'perfect'; // 2.5% de base
-        } else if (roll < 11 + levelBonus) {
-            return 'exceptional'; // 8% + bonus niveau
-        } else if (roll < 31 + (levelBonus * 2)) {
-            return 'superior'; // 20% + bonus niveau
+        if (roll < 0.5 + (totalBonus * 0.1)) {
+            return 'masterwork'; // 0.5% de base, augmente avec bonus
+        } else if (roll < 3 + (totalBonus * 0.3)) {
+            return 'perfect'; // 2.5% de base, augmente fortement
+        } else if (roll < 11 + (totalBonus * 0.8)) {
+            return 'exceptional'; // 8% + fort bonus
+        } else if (roll < 31 + (totalBonus * 1.5)) {
+            return 'superior'; // 20% + très fort bonus
         } else {
-            return 'normal'; // Le reste
+            return 'normal'; // Le reste (diminue avec bonus)
         }
     }
 
@@ -448,6 +486,34 @@ class CraftingManager {
         }
         this.autoCraftState.enabled = false;
         this.autoCraftState.recipeId = null;
+    }
+
+    /**
+     * 🆕 Calculer les bonus de craft selon le niveau
+     * @param {string} professionId - 'blacksmith', 'armorsmith', 'jeweler', 'tailor', 'alchemist', 'fishmonger', 'tanner'
+     * @param {number} level - Niveau du métier
+     * @returns {object} Bonus calculés
+     */
+    getCraftingBonuses(professionId, level) {
+        const bonuses = {
+            speedBonus: 0,            // Réduction temps craft (%)
+            qualityBonus: 0,          // Augmentation qualité items (%)
+            doubleCraftChance: 0,     // Chance de craft double (%)
+            materialSaving: 0         // Chance d'économiser matériaux (%)
+        };
+
+        // Scaling linéaire
+        const speed = Math.min(100, level * 2.0);           // Max 100% niveau 50 (instant)
+        const quality = Math.min(50, level * 1.0);          // Max 50% niveau 50
+        const doubleChance = Math.min(50, level * 1.0);     // Max 50% niveau 50
+        const saving = Math.min(25, level * 0.5);           // Max 25% niveau 50
+        
+        bonuses.speedBonus = speed;
+        bonuses.qualityBonus = quality;
+        bonuses.doubleCraftChance = doubleChance;
+        bonuses.materialSaving = saving;
+        
+        return bonuses;
     }
 
     /**

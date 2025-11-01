@@ -14,6 +14,9 @@ class Profession {
         
         // Ressource actuellement ciblée
         this.targetResource = null;
+        
+        // 🆕 Flag pour déblocage bonus passif niveau 50
+        this.passiveBonusUnlocked = false;
     }
 
     /**
@@ -55,6 +58,11 @@ class Profession {
             window.game.ui.updateCraftRecipes(true);
             window.game.ui.updateCraftingTab();
         }
+        
+        // 🎯 Mettre à jour les quêtes de type 'profession_level'
+        if (window.game && window.game.questManager) {
+            window.game.questManager.updateProfessionLevelQuest(this.id, this.level);
+        }
     }
 
     /**
@@ -69,29 +77,36 @@ class Profession {
      * Retourne la ressource récoltée ou null si échec
      */
     click() {
-
-        // Si pas de ressource ciblée, prendre la première disponible
-        if (!this.targetResource) {
-            const resources = this.getAvailableResources();
-            if (resources.length > 0) {
-                this.targetResource = resources[0].id;
-            } else {
-                return null;
-            }
-        }
-
-        // Récupérer la ressource
-        const resource = this.getResourceData(this.targetResource);
-        if (!resource) {
+        // ✅ FIX: Choisir aléatoirement parmi TOUTES les ressources disponibles
+        // (pas juste la première comme avant)
+        const resources = this.getAvailableResources();
+        if (resources.length === 0) {
             return null;
         }
+
+        // Choisir une ressource aléatoire parmi celles débloquées
+        const randomIndex = Math.floor(Math.random() * resources.length);
+        const resource = resources[randomIndex];
 
         // TOUJOURS gagner de l'XP (même si drop raté)
         this.gainXp(this.baseClickXp);
 
-        // Vérifier le drop (avec dropRate)
+        // 🎯 Calculer le drop rate avec bonus de spécialisation
+        let effectiveDropRate = resource.dropRate;
+        
+        if (window.game && window.game.getSpecializationBonus) {
+            const specializationBonus = window.game.getSpecializationBonus(this.id, resource.id);
+            effectiveDropRate = Math.min(1.0, effectiveDropRate + specializationBonus);
+            
+            // Debug: afficher le bonus appliqué (seulement si actif)
+            if (specializationBonus > 0 && window.GameConfig?.DEBUG?.enabled) {
+                console.log(`🎯 Bonus spécialisation ${this.name}: ${resource.name} ${(resource.dropRate * 100).toFixed(0)}% → ${(effectiveDropRate * 100).toFixed(0)}%`);
+            }
+        }
+
+        // Vérifier le drop (avec dropRate + bonus)
         const dropChance = Math.random();
-        if (dropChance > resource.dropRate) {
+        if (dropChance > effectiveDropRate) {
             // Raté ! Pas de ressource mais XP gagné quand même
             return null;
         }
@@ -128,7 +143,8 @@ class Profession {
             id: this.id,
             level: this.level,
             xp: this.xp,
-            targetResource: this.targetResource
+            targetResource: this.targetResource,
+            passiveBonusUnlocked: this.passiveBonusUnlocked || false
         };
     }
 
@@ -139,6 +155,7 @@ class Profession {
         this.level = data.level || 1;
         this.xp = data.xp || 0;
         this.targetResource = data.targetResource || null;
+        this.passiveBonusUnlocked = data.passiveBonusUnlocked || false;
     }
 }
 

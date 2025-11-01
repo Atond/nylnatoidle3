@@ -38,6 +38,33 @@ class QuestManager {
     }
 
     /**
+     * 🔧 FIX: Vérifie et active les quêtes dont les prérequis sont remplis
+     * Appelé après chargement d'une sauvegarde pour réactiver les quêtes manquantes
+     */
+    checkAndActivateMissingQuests() {
+        let questsActivated = false;
+        
+        this.quests.forEach(quest => {
+            // Si la quête n'est pas active et pas complétée
+            if (!quest.isActive && !quest.isCompleted) {
+                // Vérifier si les prérequis sont remplis
+                if (quest.meetsRequirements(this.player, this)) {
+                    this.activateQuest(quest.id);
+                    questsActivated = true;
+                    if (GameConfig.DEBUG.enabled) {
+                        console.log(`🔓 Quête réactivée après chargement: ${quest.title}`);
+                    }
+                }
+            }
+        });
+        
+        // Mettre à jour l'UI si des quêtes ont été activées
+        if (questsActivated && window.game && window.game.ui) {
+            window.game.ui.updateQuests();
+        }
+    }
+
+    /**
      * Récupère une quête par son ID
      */
     getQuest(questId) {
@@ -49,6 +76,32 @@ class QuestManager {
      */
     getActiveQuests() {
         return this.activeQuests.filter(q => !q.isCompleted);
+    }
+
+    /**
+     * 🔓 Récupère les quêtes à afficher : actives + prochaines verrouillées
+     * Pour toujours montrer au joueur quoi faire ensuite
+     */
+    getDisplayedQuests() {
+        const displayed = [];
+        
+        // Ajouter toutes les quêtes actives non complétées
+        const active = this.getActiveQuests();
+        displayed.push(...active);
+        
+        // Si pas de quête active, chercher la prochaine quête principale disponible
+        if (active.length === 0) {
+            // Trouver la première quête principale non complétée
+            const nextMainQuest = Array.from(this.quests.values()).find(q => 
+                q.isMainQuest && !q.isCompleted && !q.isActive
+            );
+            
+            if (nextMainQuest) {
+                displayed.push(nextMainQuest);
+            }
+        }
+        
+        return displayed;
     }
 
     /**
@@ -239,6 +292,48 @@ class QuestManager {
                     if (completed !== false) {
                         this.onQuestComplete(quest);
                         questCompleted = true;
+                    }
+                }
+            }
+        });
+        
+        return questCompleted;
+    }
+
+    /**
+     * Met à jour la progression des quêtes de type 'profession_level'
+     * Appelé quand une profession gagne un niveau
+     */
+    updateProfessionLevelQuest(professionId, newLevel) {
+        let questCompleted = false;
+        
+        this.activeQuests.forEach(quest => {
+            if (quest.type === 'profession_level' && !quest.isCompleted) {
+                // Vérifier si cette profession fait partie des requirements
+                if (quest.requirements.professions && quest.requirements.professions.includes(professionId)) {
+                    // Vérifier si le niveau requis est atteint
+                    if (newLevel >= quest.requirements.professionLevel) {
+                        // Recompter combien de professions ont atteint le niveau requis
+                        let professionsAtLevel = 0;
+                        
+                        quest.requirements.professions.forEach(profId => {
+                            const profession = window.game?.professionManager?.getProfession(profId);
+                            if (profession && profession.level >= quest.requirements.professionLevel) {
+                                professionsAtLevel++;
+                            }
+                        });
+                        
+                        quest.progress = professionsAtLevel;
+                        
+                        // Si toutes les professions ont atteint le niveau requis
+                        if (professionsAtLevel >= quest.target) {
+                            const completed = quest.complete();
+                            
+                            if (completed !== false) {
+                                this.onQuestComplete(quest);
+                                questCompleted = true;
+                            }
+                        }
                     }
                 }
             }
@@ -579,6 +674,70 @@ class QuestManager {
                     }
                 }
             }
+        }
+        
+        // 🎯 INITIALISATION : Pour les quêtes 'unlock_professions', vérifier si les professions sont déjà débloquées
+        if (quest.type === 'unlock_professions' && quest.requirements.professions) {
+            let unlockedCount = 0;
+            
+            // Vérifier combien de professions requises sont déjà débloquées
+            quest.requirements.professions.forEach(professionId => {
+                const profession = window.game?.professionManager?.getProfession(professionId);
+                if (profession && profession.unlocked) {
+                    unlockedCount++;
+                }
+            });
+            
+            quest.progress = unlockedCount;
+            
+            // Si toutes les professions sont déjà débloquées, compléter immédiatement
+            if (unlockedCount >= quest.target) {
+                const completed = quest.complete();
+                
+                if (completed !== false) {
+                    this.onQuestComplete(quest);
+                    if (GameConfig.DEBUG.enabled) {
+                        console.log(`✅ Quête ${quest.title} complétée immédiatement (professions déjà débloquées)`);
+                    }
+                }
+            }
+        }
+        
+        // 🎯 INITIALISATION : Pour les quêtes 'profession_level', vérifier les niveaux actuels
+        if (quest.type === 'profession_level' && quest.requirements.professions && quest.requirements.professionLevel) {
+            let professionsAtLevel = 0;
+            
+            // Vérifier combien de professions ont atteint le niveau requis
+            quest.requirements.professions.forEach(professionId => {
+                const profession = window.game?.professionManager?.getProfession(professionId);
+                if (profession && profession.level >= quest.requirements.professionLevel) {
+                    professionsAtLevel++;
+                }
+            });
+            
+            quest.progress = professionsAtLevel;
+            
+            // Si toutes les professions ont déjà le niveau requis, compléter immédiatement
+            if (professionsAtLevel >= quest.target) {
+                const completed = quest.complete();
+                
+                if (completed !== false) {
+                    this.onQuestComplete(quest);
+                    if (GameConfig.DEBUG.enabled) {
+                        console.log(`✅ Quête ${quest.title} complétée immédiatement (professions déjà au niveau ${quest.requirements.professionLevel})`);
+                    }
+                }
+            }
+        }
+        
+        // 🎯 SPÉCIALISATION : Ouvrir le modal de sélection pour la quête de spécialisation
+        if (quest.type === 'choose_specialization' && quest.choices) {
+            // Ouvrir le modal après un court délai pour laisser l'UI se mettre à jour
+            setTimeout(() => {
+                if (window.game && window.game.ui) {
+                    window.game.ui.showSpecializationModal(quest);
+                }
+            }, 500);
         }
         
         return true;

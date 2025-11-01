@@ -10,10 +10,70 @@
 
 window.CraftRecipesArmors = [
   // ============================================
-  // HEAVY ARMOR - TANK (20 recipes)
+  // HEAVY ARMOR - TANK (22 recipes) - UPDATED
   // ============================================
   
   // TIER 1: IRON HEAVY ARMOR (Levels 1-10)
+  
+  // NEW: Armorsmith Level 1 Starter Recipe
+  {
+    id: 'iron_bracers',
+    name: 'Brassards de Fer',
+    archetype: 'tank',
+    category: 'armor',
+    profession: 'armorsmith',
+    tier: 1,
+    type: 'armor',
+    slot: 'gloves',
+    icon: '🥊',
+    rarity: 'common',
+    professionLevel: 1,
+    requiredLevel: 1,
+    materials: [
+      { resourceId: 'ore_iron', amount: 6 },
+      { resourceId: 'monster_hide', amount: 2 } // CORRIGÉ: monster_hide (drop monstre) au lieu de fabric_linen (ferme)
+    ],
+    produces: { resourceId: 'iron_bracers', amount: 1 },
+    craftTime: 20,
+    stats: {
+      armor: 3,
+      defense: 4,
+      force: 2,
+      endurance: 2,
+      health: 15
+    }
+  },
+  
+  // NEW: Armorsmith Level 2 Recipe
+  {
+    id: 'iron_boots_basic',
+    name: 'Bottes de Fer Simples',
+    archetype: 'tank',
+    category: 'armor',
+    profession: 'armorsmith',
+    tier: 1,
+    type: 'armor',
+    slot: 'boots',
+    icon: '🥾',
+    rarity: 'common',
+    professionLevel: 2,
+    requiredLevel: 1,
+    materials: [
+      { resourceId: 'ore_iron', amount: 10 },
+      { resourceId: 'ore_copper', amount: 3 },
+      { resourceId: 'fabric_hemp', amount: 3 }
+    ],
+    produces: { resourceId: 'iron_boots_basic', amount: 1 },
+    craftTime: 25,
+    stats: {
+      armor: 4,
+      defense: 6,
+      endurance: 3,
+      health: 20,
+      agility: -1
+    }
+  },
+  
   {
     id: 'iron_helmet',
     name: 'Casque de Fer',
@@ -75,7 +135,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'iron_legplates',
-    name: 'Iron Legplates',
+    name: 'Jambières de Fer',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',
@@ -104,7 +164,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'iron_boots',
-    name: 'Iron Boots',
+    name: 'Bottes de Fer',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',
@@ -133,7 +193,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'iron_gauntlets',
-    name: 'Iron Gauntlets',
+    name: 'Gantelets de Fer',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',
@@ -164,7 +224,7 @@ window.CraftRecipesArmors = [
   // TIER 2: STEEL HEAVY ARMOR (Levels 11-20)
   {
     id: 'steel_helmet',
-    name: 'Steel Helmet',
+    name: 'Casque d\'Acier',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',
@@ -194,7 +254,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'steel_chestplate_heavy',
-    name: 'Steel Chestplate',
+    name: 'Plastron d\'Acier',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',
@@ -226,7 +286,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'steel_legplates',
-    name: 'Steel Legplates',
+    name: 'Jambières d\'Acier',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',
@@ -255,7 +315,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'steel_boots',
-    name: 'Steel Boots',
+    name: 'Bottes d\'Acier',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',
@@ -285,7 +345,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'steel_gauntlets',
-    name: 'Steel Gauntlets',
+    name: 'Gantelets d\'Acier',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',
@@ -316,7 +376,7 @@ window.CraftRecipesArmors = [
   // TIER 3: MITHRIL HEAVY ARMOR (Levels 21-30)
   {
     id: 'mithril_helmet',
-    name: 'Mithril Helmet',
+    name: 'Casque de Mithril',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',
@@ -347,7 +407,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'mithril_chestplate',
-    name: 'Mithril Chestplate',
+    name: 'Plastron de Mithril',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',
@@ -380,7 +440,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'mithril_legplates',
-    name: 'Mithril Legplates',
+    name: 'Jambières de Mithril',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',
@@ -411,7 +471,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'mithril_boots',
-    name: 'Mithril Boots',
+    name: 'Bottes de Mithril',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',
@@ -442,7 +502,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'mithril_gauntlets',
-    name: 'Mithril Gauntlets',
+    name: 'Gantelets de Mithril',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',
@@ -474,7 +534,7 @@ window.CraftRecipesArmors = [
   // TIER 4: ADAMANTITE HEAVY ARMOR (Levels 31-40)
   {
     id: 'adamantite_helmet',
-    name: 'Adamantite Helmet',
+    name: 'Casque d\'Adamantite',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',
@@ -507,7 +567,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'adamantite_chestplate',
-    name: 'Adamantite Chestplate',
+    name: 'Plastron d\'Adamantite',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',
@@ -542,7 +602,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'adamantite_legplates',
-    name: 'Adamantite Legplates',
+    name: 'Jambières d\'Adamantite',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',
@@ -575,7 +635,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'adamantite_boots',
-    name: 'Adamantite Boots',
+    name: 'Bottes d\'Adamantite',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',
@@ -607,7 +667,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'adamantite_gauntlets',
-    name: 'Adamantite Gauntlets',
+    name: 'Gantelets d\'Adamantite',
     archetype: 'tank',
     category: 'armor',
     profession: 'armorsmith',
@@ -645,7 +705,7 @@ window.CraftRecipesArmors = [
   // TIER 1: LEATHER LIGHT ARMOR (Levels 1-10)
   {
     id: 'leather_hood',
-    name: 'Leather Hood',
+    name: 'Capuche de Cuir',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -674,7 +734,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'leather_vest',
-    name: 'Leather Vest',
+    name: 'Gilet de Cuir',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -705,7 +765,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'leather_pants',
-    name: 'Leather Pants',
+    name: 'Pantalon de Cuir',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -735,7 +795,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'leather_boots',
-    name: 'Leather Boots',
+    name: 'Bottes de Cuir',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -764,7 +824,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'leather_gloves',
-    name: 'Leather Gloves',
+    name: 'Gants de Cuir',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -793,7 +853,7 @@ window.CraftRecipesArmors = [
   // TIER 2: STUDDED LEATHER ARMOR (Levels 11-20)
   {
     id: 'studded_hood',
-    name: 'Studded Leather Hood',
+    name: 'Capuche de Cuir Clouté',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -824,7 +884,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'studded_vest',
-    name: 'Studded Leather Vest',
+    name: 'Gilet de Cuir Clouté',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -857,7 +917,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'studded_pants',
-    name: 'Studded Leather Pants',
+    name: 'Pantalon de Cuir Clouté',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -888,7 +948,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'studded_boots',
-    name: 'Studded Leather Boots',
+    name: 'Bottes de Cuir Clouté',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -919,7 +979,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'studded_gloves',
-    name: 'Studded Leather Gloves',
+    name: 'Gants de Cuir Clouté',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -950,7 +1010,7 @@ window.CraftRecipesArmors = [
   // TIER 3: DRAGON SCALE ARMOR (Levels 21-30)
   {
     id: 'dragonscale_hood',
-    name: 'Dragonscale Hood',
+    name: 'Capuche d\'Écailles de Dragon',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -982,7 +1042,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'dragonscale_vest',
-    name: 'Dragonscale Vest',
+    name: 'Gilet d\'Écailles de Dragon',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -1016,7 +1076,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'dragonscale_pants',
-    name: 'Dragonscale Pants',
+    name: 'Pantalon d\'Écailles de Dragon',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -1048,7 +1108,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'dragonscale_boots',
-    name: 'Dragonscale Boots',
+    name: 'Bottes d\'Écailles de Dragon',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -1080,7 +1140,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'dragonscale_gloves',
-    name: 'Dragonscale Gloves',
+    name: 'Gants d\'Écailles de Dragon',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -1112,7 +1172,7 @@ window.CraftRecipesArmors = [
   // TIER 4: SHADOW SILK ARMOR (Levels 31-40)
   {
     id: 'shadowsilk_hood',
-    name: 'Shadowsilk Hood',
+    name: 'Capuche de Soie d\'Ombre',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -1146,7 +1206,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'shadowsilk_vest',
-    name: 'Shadowsilk Vest',
+    name: 'Gilet de Soie d\'Ombre',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -1182,7 +1242,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'shadowsilk_pants',
-    name: 'Shadowsilk Pants',
+    name: 'Pantalon de Soie d\'Ombre',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -1216,7 +1276,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'shadowsilk_boots',
-    name: 'Shadowsilk Boots',
+    name: 'Bottes de Soie d\'Ombre',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -1250,7 +1310,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'shadowsilk_gloves',
-    name: 'Shadowsilk Gloves',
+    name: 'Gants de Soie d\'Ombre',
     archetype: 'archer',
     category: 'armor',
     profession: 'tailor',
@@ -1288,7 +1348,7 @@ window.CraftRecipesArmors = [
   // TIER 2: ENCHANTED ROBES (Levels 11-20)
   {
     id: 'enchanted_robe',
-    name: 'Enchanted Robe',
+    name: 'Robe Enchantée',
     archetype: 'mage',
     category: 'armor',
     profession: 'tailor',
@@ -1318,7 +1378,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'enchanted_hood',
-    name: 'Enchanted Hood',
+    name: 'Capuche Enchantée',
     archetype: 'mage',
     category: 'armor',
     profession: 'tailor',
@@ -1348,7 +1408,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'enchanted_pants',
-    name: 'Enchanted Pants',
+    name: 'Pantalon Enchanté',
     archetype: 'mage',
     category: 'armor',
     profession: 'tailor',
@@ -1377,7 +1437,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'enchanted_boots',
-    name: 'Enchanted Boots',
+    name: 'Bottes Enchantées',
     archetype: 'mage',
     category: 'armor',
     profession: 'tailor',
@@ -1406,7 +1466,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'enchanted_gloves',
-    name: 'Enchanted Gloves',
+    name: 'Gants Enchantés',
     archetype: 'mage',
     category: 'armor',
     profession: 'tailor',
@@ -1436,7 +1496,7 @@ window.CraftRecipesArmors = [
   // TIER 4: ARCHMAGE VESTMENTS (Levels 31-40)
   {
     id: 'archmage_robe',
-    name: 'Archmage Robe',
+    name: 'Robe d\'Archimage',
     archetype: 'mage',
     category: 'armor',
     profession: 'tailor',
@@ -1469,7 +1529,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'archmage_hood',
-    name: 'Archmage Hood',
+    name: 'Capuche d\'Archimage',
     archetype: 'mage',
     category: 'armor',
     profession: 'tailor',
@@ -1500,7 +1560,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'archmage_pants',
-    name: 'Archmage Pants',
+    name: 'Pantalon d\'Archimage',
     archetype: 'mage',
     category: 'armor',
     profession: 'tailor',
@@ -1531,7 +1591,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'archmage_boots',
-    name: 'Archmage Boots',
+    name: 'Bottes d\'Archimage',
     archetype: 'mage',
     category: 'armor',
     profession: 'tailor',
@@ -1562,7 +1622,7 @@ window.CraftRecipesArmors = [
   },
   {
     id: 'archmage_gloves',
-    name: 'Archmage Gloves',
+    name: 'Gants d\'Archimage',
     archetype: 'mage',
     category: 'armor',
     profession: 'tailor',
@@ -1585,8 +1645,461 @@ window.CraftRecipesArmors = [
     stats: {
       armor: 13,
       intelligence: 29,
-      spellCrit: 18,      magicResist: 18,
+      spellCrit: 18,
+      magicResist: 18,
       spellPenetration: 12
+    }
+  },
+
+  // ============================================
+  // CLOTH ARMOR - HEALER (15 recipes) - NEW
+  // ============================================
+  
+  // TIER 1: BASIC HEALER ROBES (Levels 1-10)
+  
+  {
+    id: 'basic_healer_robe',
+    name: 'Robe de Soigneur Basique',
+    archetype: 'healer',
+    category: 'armor',
+    profession: 'tailor',
+    tier: 1,
+    type: 'armor',
+    slot: 'armor',
+    icon: '👕',
+    rarity: 'common',
+    requiredLevel: 2,
+    professionLevel: 2,
+    materials: [
+      { resourceId: 'fabric_linen', amount: 8 },
+      { resourceId: 'plant_wild_mint', amount: 4 }
+    ],
+    produces: { resourceId: 'basic_healer_robe', amount: 1 },
+    craftTime: 20,
+    stats: {
+      armor: 5,
+      intelligence: 8,
+      healingPower: 6,
+      manaRegen: 3,
+      health: 20
+    }
+  },
+  {
+    id: 'basic_healer_hood',
+    name: 'Capuche de Soigneur Basique',
+    archetype: 'healer',
+    category: 'armor',
+    profession: 'tailor',
+    tier: 1,
+    type: 'armor',
+    slot: 'armor',
+    icon: '🎓',
+    rarity: 'common',
+    requiredLevel: 1,
+    professionLevel: 1,
+    materials: [
+      { resourceId: 'fabric_linen', amount: 5 },
+      { resourceId: 'plant_wild_mint', amount: 2 }
+    ],
+    produces: { resourceId: 'basic_healer_hood', amount: 1 },
+    craftTime: 15,
+    stats: {
+      armor: 2,
+      intelligence: 4,
+      healingPower: 3,
+      manaRegen: 2,
+      health: 10
+    }
+  },
+  {
+    id: 'basic_healer_pants',
+    name: 'Pantalon de Soigneur Basique',
+    archetype: 'healer',
+    category: 'armor',
+    profession: 'tailor',
+    tier: 1,
+    type: 'armor',
+    slot: 'armor',
+    icon: '👖',
+    rarity: 'common',
+    requiredLevel: 5,
+    professionLevel: 5,
+    materials: [
+      { resourceId: 'fabric_linen', amount: 7 },
+      { resourceId: 'plant_wild_mint', amount: 3 }
+    ],
+    produces: { resourceId: 'basic_healer_pants', amount: 1 },
+    craftTime: 18,
+    stats: {
+      armor: 4,
+      intelligence: 6,
+      healingPower: 5,
+      manaRegen: 2,
+      health: 15
+    }
+  },
+  {
+    id: 'basic_healer_boots',
+    name: 'Bottes de Soigneur Basique',
+    archetype: 'healer',
+    category: 'armor',
+    profession: 'tailor',
+    tier: 1,
+    type: 'armor',
+    slot: 'armor',
+    icon: '👟',
+    rarity: 'common',
+    requiredLevel: 3,
+    professionLevel: 3,
+    materials: [
+      { resourceId: 'fabric_linen', amount: 4 },
+      { resourceId: 'plant_wild_mint', amount: 2 }
+    ],
+    produces: { resourceId: 'basic_healer_boots', amount: 1 },
+    craftTime: 12,
+    stats: {
+      armor: 3,
+      intelligence: 5,
+      healingPower: 4,
+      manaRegen: 2,
+      health: 12
+    }
+  },
+  {
+    id: 'basic_healer_gloves',
+    name: 'Gants de Soigneur Basique',
+    archetype: 'healer',
+    category: 'armor',
+    profession: 'tailor',
+    tier: 1,
+    type: 'armor',
+    slot: 'armor',
+    icon: '🧤',
+    rarity: 'common',
+    requiredLevel: 7,
+    professionLevel: 7,
+    materials: [
+      { resourceId: 'fabric_linen', amount: 6 },
+      { resourceId: 'plant_wild_mint', amount: 3 }
+    ],
+    produces: { resourceId: 'basic_healer_gloves', amount: 1 },
+    craftTime: 16,
+    stats: {
+      armor: 3,
+      intelligence: 7,
+      healingPower: 5,
+      manaRegen: 3,
+      health: 13
+    }
+  },
+
+  // TIER 3: BLESSED HEALER ROBES (Levels 21-30)
+  
+  {
+    id: 'blessed_robe',
+    name: 'Robe Bénie',
+    archetype: 'healer',
+    category: 'armor',
+    profession: 'tailor',
+    tier: 3,
+    type: 'armor',
+    slot: 'armor',
+    icon: '👕',
+    rarity: 'rare',
+    requiredLevel: 25,
+    professionLevel: 25,
+    materials: [
+      { resourceId: 'fabric_silk', amount: 18 },
+      { resourceId: 'plant_chamomile', amount: 10 },
+      { resourceId: 'ore_silver', amount: 5 },
+      { resourceId: 'monster_essence', amount: 3 }
+    ],
+    produces: { resourceId: 'blessed_robe', amount: 1 },
+    craftTime: 45,
+    stats: {
+      armor: 20,
+      intelligence: 30,
+      healingPower: 25,
+      manaRegen: 18,
+      health: 60,
+      magicResist: 15
+    }
+  },
+  {
+    id: 'blessed_hood',
+    name: 'Capuche Bénie',
+    archetype: 'healer',
+    category: 'armor',
+    profession: 'tailor',
+    tier: 3,
+    type: 'armor',
+    slot: 'armor',
+    icon: '🎓',
+    rarity: 'rare',
+    requiredLevel: 21,
+    professionLevel: 21,
+    materials: [
+      { resourceId: 'fabric_silk', amount: 12 },
+      { resourceId: 'plant_chamomile', amount: 6 },
+      { resourceId: 'ore_silver', amount: 3 },
+      { resourceId: 'monster_essence', amount: 2 }
+    ],
+    produces: { resourceId: 'blessed_hood', amount: 1 },
+    craftTime: 35,
+    stats: {
+      armor: 15,
+      intelligence: 20,
+      healingPower: 15,
+      manaRegen: 12,
+      health: 40,
+      magicResist: 10
+    }
+  },
+  {
+    id: 'blessed_pants',
+    name: 'Pantalon Béni',
+    archetype: 'healer',
+    category: 'armor',
+    profession: 'tailor',
+    tier: 3,
+    type: 'armor',
+    slot: 'armor',
+    icon: '👖',
+    rarity: 'rare',
+    requiredLevel: 27,
+    professionLevel: 27,
+    materials: [
+      { resourceId: 'fabric_silk', amount: 15 },
+      { resourceId: 'plant_chamomile', amount: 8 },
+      { resourceId: 'ore_silver', amount: 4 },
+      { resourceId: 'monster_essence', amount: 2 }
+    ],
+    produces: { resourceId: 'blessed_pants', amount: 1 },
+    craftTime: 40,
+    stats: {
+      armor: 18,
+      intelligence: 25,
+      healingPower: 20,
+      manaRegen: 15,
+      health: 50,
+      magicResist: 12
+    }
+  },
+  {
+    id: 'blessed_boots',
+    name: 'Bottes Bénies',
+    archetype: 'healer',
+    category: 'armor',
+    profession: 'tailor',
+    tier: 3,
+    type: 'armor',
+    slot: 'armor',
+    icon: '👟',
+    rarity: 'rare',
+    requiredLevel: 23,
+    professionLevel: 23,
+    materials: [
+      { resourceId: 'fabric_silk', amount: 10 },
+      { resourceId: 'plant_chamomile', amount: 5 },
+      { resourceId: 'ore_silver', amount: 3 }
+    ],
+    produces: { resourceId: 'blessed_boots', amount: 1 },
+    craftTime: 30,
+    stats: {
+      armor: 16,
+      intelligence: 22,
+      healingPower: 18,
+      manaRegen: 13,
+      health: 45,
+      magicResist: 11
+    }
+  },
+  {
+    id: 'blessed_gloves',
+    name: 'Gants Bénis',
+    archetype: 'healer',
+    category: 'armor',
+    profession: 'tailor',
+    tier: 3,
+    type: 'armor',
+    slot: 'armor',
+    icon: '🧤',
+    rarity: 'rare',
+    requiredLevel: 29,
+    professionLevel: 29,
+    materials: [
+      { resourceId: 'fabric_silk', amount: 13 },
+      { resourceId: 'plant_chamomile', amount: 7 },
+      { resourceId: 'ore_silver', amount: 4 },
+      { resourceId: 'monster_essence', amount: 2 }
+    ],
+    produces: { resourceId: 'blessed_gloves', amount: 1 },
+    craftTime: 38,
+    stats: {
+      armor: 17,
+      intelligence: 27,
+      healingPower: 22,
+      manaRegen: 16,
+      health: 48,
+      magicResist: 13
+    }
+  },
+
+  // TIER 4: DIVINE VESTMENTS (Levels 31-40)
+  
+  {
+    id: 'divine_vestments_robe',
+    name: 'Robe de Vêtements Divins',
+    archetype: 'healer',
+    category: 'armor',
+    profession: 'tailor',
+    tier: 4,
+    type: 'armor',
+    slot: 'armor',
+    icon: '👕',
+    rarity: 'epic',
+    requiredLevel: 35,
+    professionLevel: 35,
+    materials: [
+      { resourceId: 'fabric_spider_silk', amount: 20 },
+      { resourceId: 'plant_moonflower', amount: 12 },
+      { resourceId: 'ore_gold', amount: 8 },
+      { resourceId: 'monster_essence', amount: 6 }
+    ],
+    produces: { resourceId: 'divine_vestments_robe', amount: 1 },
+    craftTime: 60,
+    stats: {
+      armor: 35,
+      intelligence: 45,
+      healingPower: 45,
+      manaRegen: 30,
+      health: 90,
+      magicResist: 25,
+      holyPower: 10
+    }
+  },
+  {
+    id: 'divine_vestments_hood',
+    name: 'Capuche de Vêtements Divins',
+    archetype: 'healer',
+    category: 'armor',
+    profession: 'tailor',
+    tier: 4,
+    type: 'armor',
+    slot: 'armor',
+    icon: '🎓',
+    rarity: 'epic',
+    requiredLevel: 31,
+    professionLevel: 31,
+    materials: [
+      { resourceId: 'fabric_spider_silk', amount: 14 },
+      { resourceId: 'plant_moonflower', amount: 8 },
+      { resourceId: 'ore_gold', amount: 5 },
+      { resourceId: 'monster_essence', amount: 4 }
+    ],
+    produces: { resourceId: 'divine_vestments_hood', amount: 1 },
+    craftTime: 45,
+    stats: {
+      armor: 25,
+      intelligence: 35,
+      healingPower: 30,
+      manaRegen: 20,
+      health: 65,
+      magicResist: 18,
+      holyPower: 6
+    }
+  },
+  {
+    id: 'divine_vestments_pants',
+    name: 'Pantalon de Vêtements Divins',
+    archetype: 'healer',
+    category: 'armor',
+    profession: 'tailor',
+    tier: 4,
+    type: 'armor',
+    slot: 'armor',
+    icon: '👖',
+    rarity: 'epic',
+    requiredLevel: 37,
+    professionLevel: 37,
+    materials: [
+      { resourceId: 'fabric_spider_silk', amount: 17 },
+      { resourceId: 'plant_moonflower', amount: 10 },
+      { resourceId: 'ore_gold', amount: 6 },
+      { resourceId: 'monster_essence', amount: 5 }
+    ],
+    produces: { resourceId: 'divine_vestments_pants', amount: 1 },
+    craftTime: 52,
+    stats: {
+      armor: 30,
+      intelligence: 40,
+      healingPower: 38,
+      manaRegen: 25,
+      health: 78,
+      magicResist: 22,
+      holyPower: 8
+    }
+  },
+  {
+    id: 'divine_vestments_boots',
+    name: 'Bottes de Vêtements Divins',
+    archetype: 'healer',
+    category: 'armor',
+    profession: 'tailor',
+    tier: 4,
+    type: 'armor',
+    slot: 'armor',
+    icon: '👟',
+    rarity: 'epic',
+    requiredLevel: 33,
+    professionLevel: 33,
+    materials: [
+      { resourceId: 'fabric_spider_silk', amount: 12 },
+      { resourceId: 'plant_moonflower', amount: 7 },
+      { resourceId: 'ore_gold', amount: 4 },
+      { resourceId: 'monster_essence', amount: 3 }
+    ],
+    produces: { resourceId: 'divine_vestments_boots', amount: 1 },
+    craftTime: 42,
+    stats: {
+      armor: 27,
+      intelligence: 37,
+      healingPower: 33,
+      manaRegen: 22,
+      health: 70,
+      magicResist: 20,
+      holyPower: 7
+    }
+  },
+  {
+    id: 'divine_vestments_gloves',
+    name: 'Gants de Vêtements Divins',
+    archetype: 'healer',
+    category: 'armor',
+    profession: 'tailor',
+    tier: 4,
+    type: 'armor',
+    slot: 'armor',
+    icon: '🧤',
+    rarity: 'epic',
+    requiredLevel: 39,
+    professionLevel: 39,
+    materials: [
+      { resourceId: 'fabric_spider_silk', amount: 15 },
+      { resourceId: 'plant_moonflower', amount: 9 },
+      { resourceId: 'ore_gold', amount: 5 },
+      { resourceId: 'monster_essence', amount: 4 }
+    ],
+    produces: { resourceId: 'divine_vestments_gloves', amount: 1 },
+    craftTime: 48,
+    stats: {
+      armor: 28,
+      intelligence: 42,
+      healingPower: 40,
+      manaRegen: 27,
+      health: 73,
+      magicResist: 23,
+      holyPower: 9
     }
   }
 ];

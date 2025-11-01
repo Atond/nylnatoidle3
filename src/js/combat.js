@@ -13,14 +13,24 @@ class Combat {
         this.monstersKilled = 0; // Compteur total
         this.bossKillsInRegion = 0; // Kills pour spawn du boss
         
-        // Système de progression
-        this.unlockedRegions = 1; // Nombre de régions débloquées
-        this.unlockedZones = {}; // { regionId: maxZoneUnlocked }
-        this.unlockedZones[1] = 1; // Région 1, Zone 1 débloquée
+    // Système de progression
+    this.unlockedRegions = 1; // Nombre de régions débloquées
+    this.unlockedZones = {}; // { regionId: maxZoneUnlocked }
+    this.unlockedZones[1] = 1; // Région 1, Zone 1 débloquée
+
+    // Suivi du combo de victoires d'affilée par zone
+    this.comboWinStreakPerZone = {}; // { 'region_zone': streak }
         
         // Compteurs de kills par zone (pour déblocage)
         this.monstersKilledPerZone = {};
         this.monstersKilledPerZone['1_1'] = 0; // Format: "regionId_zoneId"
+        
+        // Compteur d'or gagné par zone
+        this.goldEarnedPerZone = {};
+        this.goldEarnedPerZone['1_1'] = 0; // Format: "regionId_zoneId"
+        
+        // Tracker des boss vaincus par zone
+        this.bossDefeatedPerZone = {}; // { 'region_zone': true/false }
         
         // 🛡️ FIX EXPLOIT : Cache des monstres par zone pour éviter le re-roll
         // Format: { "regionId_zoneId": Monster }
@@ -33,6 +43,12 @@ class Combat {
         
         // Journal de combat
         this.combatLog = [];
+        
+        // 🎯 SYSTÈME DE COMBO pour clics manuels
+        this.comboCount = 0;
+        this.comboTimer = null;
+        this.COMBO_TIMEOUT = 3000; // 3 secondes pour maintenir le combo
+        this.MAX_COMBO = 10; // Combo maximum (x3.0 de bonus)
         
         // Timer pour régénération HP
         this.lastRegenTime = Date.now();
@@ -48,7 +64,21 @@ class Combat {
      * Obtient la zone actuelle depuis RegionsData
      */
     getCurrentZoneData() {
-        return window.RegionsData.getZone(this.currentRegion, this.currentZone);
+        if (!window.RegionsData) {
+            console.error('RegionsData non défini sur window');
+            return undefined;
+        }
+        const region = window.RegionsData.getRegion(this.currentRegion);
+        if (!region) {
+            console.error(`Région ${this.currentRegion} introuvable dans RegionsData`);
+            return undefined;
+        }
+        const zone = region.zones.find(z => z.id === this.currentZone);
+        if (!zone) {
+            console.error(`Zone ${this.currentZone} introuvable dans la région ${this.currentRegion}`);
+            return undefined;
+        }
+        return zone;
     }
 
     /**
@@ -80,7 +110,7 @@ class Combat {
         
         const regionData = this.getCurrentRegionData();
         
-        // ========== MÉCANIQUE BOSS : Zone 10 uniquement ==========
+        // ========== MÉCANIQUE BOSS : Zone 10 uniquement ========== 
         // Si c'est la Zone 10 ET que c'est le 10ème monstre de cette zone
         if (this.currentZone === 10 && zoneData.isBossZone && zoneData.bossSpawnLogic === "9_normal_then_boss") {
             // Compter les kills dans cette zone spécifique
@@ -89,6 +119,43 @@ class Combat {
             
             // Si on a tué 9 monstres dans cette zone, spawn le boss
             if (killsInThisZone >= 9 && regionData.boss) {
+                // 🔒 VÉRIFIER SI LE BOSS PEUT RESPAWN
+                const now = Date.now();
+                const bossData = window.MonstersData.boss[regionData.boss.id];
+                
+                if (bossData && bossData.lastKilledTime) {
+                    const timeSinceKill = now - bossData.lastKilledTime;
+                    
+                    if (timeSinceKill < bossData.respawnTime) {
+                        // Boss en cooldown
+                        const remainingMinutes = Math.ceil((bossData.respawnTime - timeSinceKill) / 60000);
+                        this.addLog(`⏰ ${bossData.name} est en respawn (${remainingMinutes} min restantes)`);
+                        
+                        if (window.game && window.game.ui) {
+                            window.game.ui.showNotification(
+                                `⏰ Boss indisponible ! Respawn dans ${remainingMinutes} minutes`,
+                                'warning',
+                                5000
+                            );
+                        }
+                        
+                        // Spawn un monstre normal à la place
+                        const allMonsters = Array.isArray(zoneData.monsters) ? zoneData.monsters : [];
+                        if (allMonsters.length === 0) {
+                            this.addLog(`Aucun monstre dans la zone ${this.currentZone}`);
+                            this.isSpawning = false;
+                            return;
+                        }
+                        const randomMonster = allMonsters[Math.floor(Math.random() * allMonsters.length)];
+                        const monsterLevel = zoneData.levelRange.min + Math.floor((zoneData.levelRange.max - zoneData.levelRange.min) / 2);
+                        this.currentMonster = new Monster(randomMonster.id, monsterLevel);
+                        this.addLog(`${this.currentMonster.getName()} apparaît à la place`);
+                        this.isSpawning = false;
+                        return;
+                    }
+                }
+                
+                // Boss disponible - spawn normal
                 // 🩺 Soigner le joueur à 100% avant le boss
                 this.player.heal(9999);
                 
@@ -114,45 +181,30 @@ class Combat {
         }
         
         // Sinon, spawn un monstre normal de la zone
-        const allMonsters = [
-            ...zoneData.monsters.common,
-            ...zoneData.monsters.rare,
-            ...zoneData.monsters.elite
-        ];
-        
+        const allMonsters = Array.isArray(zoneData.monsters) ? zoneData.monsters : [];
         if (allMonsters.length === 0) {
             console.error(`Aucun monstre dans la zone ${this.currentZone}`);
+            this.isSpawning = false; // 🛡️ FIX: Débloquer le flag en cas d'erreur
             return;
         }
-        
-        // Utiliser le système de RNG de MonstersData pour spawn rare/elite
-        const randomMonster = window.MonstersData.getRandomMonster(allMonsters);
-        
+        const randomMonster = allMonsters[Math.floor(Math.random() * allMonsters.length)];
         if (!randomMonster) {
             console.error(`Impossible de spawn un monstre`);
+            this.isSpawning = false; // 🛡️ FIX: Débloquer le flag en cas d'erreur
             return;
         }
-        
         // Créer le monstre avec le niveau de la zone
         const monsterLevel = zoneData.levelRange.min + Math.floor((zoneData.levelRange.max - zoneData.levelRange.min) / 2);
         this.currentMonster = new Monster(randomMonster.id, monsterLevel);
-        
-        // Message selon la rareté
-        const rarityPrefix = {
-            rare: '✨',
-            elite: '👑',
-            boss: '💀'
-        };
-        const prefix = rarityPrefix[this.currentMonster.getRarity()] || '';
-        
-        this.addLog(`${prefix} ${this.currentMonster.getName()} apparaît !`);
-        
+        // Message selon la rareté (si tu veux ajouter une propriété 'rarity' sur le monstre plus tard)
+        this.addLog(`${this.currentMonster.getName()} apparaît !`);
         // 🛡️ FIX: Débloquer le flag après spawn complet
         this.isSpawning = false;
     }
 
     /**
      * Attaque manuelle du joueur (clic)
+     * � SYSTÈME COMBO : Dégâts réduits de base mais combo augmente les dégâts
      */
     manualAttack() {
         if (!this.currentMonster || !this.currentMonster.isAlive) {
@@ -163,16 +215,42 @@ class Combat {
             return false;
         }
         
-        // Le joueur attaque
-        const attackResult = this.player.attack(this.currentMonster);
-        const actualDamage = this.currentMonster.takeDamage(attackResult.damage);
+        // 🎯 INCRÉMENTER LE COMBO
+        this.comboCount = Math.min(this.comboCount + 1, this.MAX_COMBO);
         
-        // Message avec critique
-        if (attackResult.isCritical) {
-            this.addLog(`💥 CRITIQUE! Vous infligez ${actualDamage} dégâts au ${this.currentMonster.getName()}`);
-        } else {
-            this.addLog(`Vous infligez ${actualDamage} dégâts au ${this.currentMonster.getName()}`);
+        // ⏱️ Réinitialiser le timer de combo
+        if (this.comboTimer) {
+            clearTimeout(this.comboTimer);
         }
+        this.comboTimer = setTimeout(() => {
+            this.comboCount = 0;
+            this.addLog(`💔 Combo perdu !`);
+        }, this.COMBO_TIMEOUT);
+        
+        // 📊 CALCUL DU MULTIPLICATEUR DE COMBO
+        // Combo 1-3: x0.6 à x1.0 (rattrapage de base)
+        // Combo 4-7: x1.1 à x1.7 (dépasse l'auto)
+        // Combo 8-10: x1.8 à x2.0 (récompense skill)
+        const comboMultiplier = 0.6 + (this.comboCount - 1) * 0.2; // 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4
+        
+        // Le joueur attaque avec le multiplicateur de combo
+        const attackResult = this.player.attack(this.currentMonster);
+        const comboDamage = Math.ceil(attackResult.damage * comboMultiplier);
+        const actualDamage = this.currentMonster.takeDamage(comboDamage);
+        
+        // Message avec combo et critique
+        let message = '';
+        if (this.comboCount > 1) {
+            message += `🔥 COMBO x${this.comboCount}! `;
+        }
+        if (attackResult.isCritical) {
+            message += `💥 CRITIQUE! `;
+        }
+        message += `Vous infligez ${actualDamage} dégâts`;
+        if (comboMultiplier >= 1.0) {
+            message += ` (×${comboMultiplier.toFixed(1)})`;
+        }
+        this.addLog(message);
         
         // Vérifier si le monstre est mort
         if (!this.currentMonster.isAlive) {
@@ -180,25 +258,30 @@ class Combat {
             return true;
         }
         
-        // ⚔️ LE MONSTRE RIPOSTE IMMÉDIATEMENT après l'attaque du joueur
+        // ⚔️ LE MONSTRE RIPOSTE SEULEMENT S'IL PEUT ATTAQUER (cooldown respecté)
+        const currentTime = Date.now();
         if (this.currentMonster && this.currentMonster.isAlive) {
-            const monsterDamage = this.currentMonster.attack();
-            const damageResult = this.player.takeDamage(monsterDamage);
-            
-            // Message selon le résultat
-            if (damageResult.blocked) {
-                this.addLog(`🛡️ BLOQUÉ! Vous bloquez l'attaque du ${this.currentMonster.getName()}`);
-            } else if (damageResult.evaded) {
-                this.addLog(`💨 ESQUIVÉ! Vous esquivez l'attaque du ${this.currentMonster.getName()}`);
-            } else {
-                this.addLog(`${this.currentMonster.getName()} riposte et inflige ${damageResult.damage} dégâts`);
+            // Vérifier si le monstre est prêt à attaquer
+            if (this.currentMonster.canAttack(currentTime)) {
+                const monsterDamage = this.currentMonster.attack();
+                const damageResult = this.player.takeDamage(monsterDamage);
+                
+                // Message selon le résultat
+                if (damageResult.blocked) {
+                    this.addLog(`🛡️ BLOQUÉ! Vous bloquez l'attaque du ${this.currentMonster.getName()}`);
+                } else if (damageResult.evaded) {
+                    this.addLog(`💨 ESQUIVÉ! Vous esquivez l'attaque du ${this.currentMonster.getName()}`);
+                } else {
+                    this.addLog(`${this.currentMonster.getName()} riposte et inflige ${damageResult.damage} dégâts`);
+                }
+                
+                // Vérifier si le joueur est mort
+                if (!this.player.isAlive) {
+                    this.onPlayerDeath();
+                    return true;
+                }
             }
-            
-            // Vérifier si le joueur est mort
-            if (!this.player.isAlive) {
-                this.onPlayerDeath();
-                return true;
-            }
+            // Sinon le monstre ne peut pas riposter (cooldown en cours)
         }
         
         return true;
@@ -295,6 +378,13 @@ class Combat {
         const levelUps = this.player.gainXp(xp);
         this.player.resources.gold += gold;
         
+        // Tracker l'or gagné par zone
+        const currentZoneKey = `${this.currentRegion}_${this.currentZone}`;
+        if (!this.goldEarnedPerZone[currentZoneKey]) {
+            this.goldEarnedPerZone[currentZoneKey] = 0;
+        }
+        this.goldEarnedPerZone[currentZoneKey] += gold;
+        
         // 💪 CARRY MODE : Alt gagne aussi de l'XP
         if (window.game && window.game.altCharacterManager) {
             const carryState = window.game.altCharacterManager.getCarryState();
@@ -317,6 +407,38 @@ class Combat {
         // Message de victoire
         const victoryIcon = isBoss ? '👑' : '⚔️';
         this.addLog(`${victoryIcon} Victoire ! +${xp} XP, +${gold} or`);
+        
+        // 🔒 SYSTÈME ANTI-FARMING BOSS
+        if (isBoss && this.currentMonster.id) {
+            const now = Date.now();
+            const bossData = window.MonstersData.boss[this.currentMonster.id];
+            
+            if (bossData) {
+                // Reset quotidien (minuit)
+                const today = new Date().toDateString();
+                if (bossData.lastResetDate !== today) {
+                    bossData.legendaryDropsToday = 0;
+                    bossData.lastResetDate = today;
+                }
+                
+                // Vérifier le respawn timer
+                if (bossData.lastKilledTime && (now - bossData.lastKilledTime) < bossData.respawnTime) {
+                    const remainingTime = Math.ceil((bossData.respawnTime - (now - bossData.lastKilledTime)) / 60000);
+                    this.addLog(`⏰ ${this.currentMonster.name} respawn dans ${remainingTime} min`);
+                    
+                    if (window.game && window.game.ui) {
+                        window.game.ui.showNotification(
+                            `⏰ Boss en respawn ! Attendez ${remainingTime} minutes`,
+                            'warning',
+                            5000
+                        );
+                    }
+                }
+                
+                // Mettre à jour le timestamp du kill
+                bossData.lastKilledTime = now;
+            }
+        }
         
         // ⭐ NOUVEAU : Calculer et appliquer les drops
         const drops = this.currentMonster.getDrops();
@@ -382,9 +504,17 @@ class Combat {
         if (!isBoss) {
             this.bossKillsInRegion++; // Compte vers le spawn du boss
         }
-        
-        // 🛡️ FIX EXPLOIT : Supprimer le monstre du cache quand il meurt
+
+        // Suivi du combo de victoires d'affilée par zone
         const zoneKey = `${this.currentRegion}_${this.currentZone}`;
+        if (!this.comboWinStreakPerZone[zoneKey]) this.comboWinStreakPerZone[zoneKey] = 0;
+        if (this.player.isAlive && !isBoss) {
+            this.comboWinStreakPerZone[zoneKey]++;
+        } else {
+            this.comboWinStreakPerZone[zoneKey] = 0;
+        }
+
+        // 🛡️ FIX EXPLOIT : Supprimer le monstre du cache quand il meurt
         delete this.monstersByZone[zoneKey];
         
         // 🎯 Mise à jour des quêtes
@@ -477,6 +607,38 @@ class Combat {
         
         // Restaurer le compteur de la zone actuelle
         this.monstersKilled = this.monstersKilledPerZone[this.currentZone];
+        
+        // 💡 Conseils pour le joueur
+        const playerLevel = this.player.level;
+        const tips = [];
+        
+        // Vérifier si le joueur a de l'équipement
+        const hasWeapon = this.player.equipment.weapon !== null;
+        const hasArmor = this.player.equipment.chest !== null || this.player.equipment.helmet !== null;
+        
+        if (!hasWeapon && playerLevel < 5) {
+            tips.push('🗡️ Craftez une arme pour augmenter vos dégâts !');
+        }
+        if (!hasArmor && playerLevel < 5) {
+            tips.push('🛡️ Craftez une armure pour augmenter votre défense !');
+        }
+        if (playerLevel < 10) {
+            tips.push('⬆️ Retournez combattre dans une zone précédente pour gagner de l\'expérience et monter de niveau.');
+        }
+        if (tips.length === 0) {
+            tips.push('💪 Améliorez votre équipement ou montez de niveau avant de revenir !');
+        }
+        
+        // Afficher les conseils dans le log et en notification
+        tips.forEach(tip => this.addLog(tip));
+        
+        if (window.game && window.game.ui) {
+            window.game.ui.showNotification(
+                `💀 Défaite ! ${tips[0]}`,
+                'error',
+                5000
+            );
+        }
         
         // Réanimation après 3 secondes
         setTimeout(() => {
@@ -713,6 +875,8 @@ class Combat {
             unlockedRegions: this.unlockedRegions,
             unlockedZones: this.unlockedZones,
             monstersKilledPerZone: this.monstersKilledPerZone,
+            goldEarnedPerZone: this.goldEarnedPerZone,
+            comboWinStreakPerZone: this.comboWinStreakPerZone,
             monstersByZone: serializedMonstersByZone, // 🛡️ Sauvegarder le cache
             currentMonster: this.currentMonster ? this.currentMonster.toJSON() : null,
             isActive: this.isActive,
@@ -732,6 +896,8 @@ class Combat {
         this.unlockedRegions = data.unlockedRegions || 1;
         this.unlockedZones = data.unlockedZones || { 1: 1 };
         this.monstersKilledPerZone = data.monstersKilledPerZone || { '1_1': 0 };
+        this.goldEarnedPerZone = data.goldEarnedPerZone || { '1_1': 0 };
+        this.comboWinStreakPerZone = data.comboWinStreakPerZone || {};
         this.isActive = data.isActive !== undefined ? data.isActive : true;
         this.isFighting = data.isFighting || false;
         this.autoCombatEnabled = data.autoCombatEnabled || false;

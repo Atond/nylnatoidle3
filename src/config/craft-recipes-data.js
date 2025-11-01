@@ -2,7 +2,7 @@
  * Configuration des recettes de craft
  */
 
-const CraftRecipesData = [
+window.CraftRecipesData = [
     // ========== ARMES ==========
     {
         id: 'iron_sword',
@@ -59,42 +59,23 @@ const CraftRecipesData = [
         slot: 'chest',
         icon: '👔',
         rarity: 'common',
-        profession: 'armorsmith', // Armurier
-        professionLevel: 1,
+        profession: 'tanner', // Tanneur (pas armurier pour le cuir)
+        professionLevel: 2,
         materials: [
-            { resourceId: 'wood_oak', amount: 8 }
+            { resourceId: 'fabric_simple_leather', amount: 4 }, // Cuir traité par le tanneur
+            { resourceId: 'fabric_linen', amount: 2 } // Renfort textile
         ],
         craftTime: 2000,
         stats: {
             defense: 3,
-            endurance: 2
+            endurance: 2,
+            agility: 1 // Bonus agilité pour armure légère
         },
         requiredLevel: 1,
-        description: 'Une armure légère en cuir souple.'
+        description: 'Une armure légère en cuir souple. Fabriquée par un tanneur.'
     },
-    
-    {
-        id: 'iron_chestplate',
-        name: 'Plastron de Fer',
-        type: 'armor',
-        slot: 'chest',
-        icon: '👔',
-        rarity: 'uncommon',
-        profession: 'armorsmith',
-        professionLevel: 3,
-        materials: [
-            { resourceId: 'ore_iron', amount: 20 },
-            { resourceId: 'wood_oak', amount: 5 }
-        ],
-        craftTime: 3000,
-        stats: {
-            defense: 9,
-            endurance: 6,
-            force: 1
-        },
-        requiredLevel: 3,
-        description: 'Un plastron solide en fer battu.'
-    },
+
+    // iron_chestplate supprimé - voir craft-recipes-armors.js
 
     {
         id: 'steel_chestplate',
@@ -130,42 +111,23 @@ const CraftRecipesData = [
         slot: 'helmet',
         icon: '🎩',
         rarity: 'common',
-        profession: 'armorsmith',
+        profession: 'tanner', // Tanneur
         professionLevel: 1,
         materials: [
-            { resourceId: 'wood_oak', amount: 5 }
+            { resourceId: 'fabric_simple_leather', amount: 3 }, // Cuir traité
+            { resourceId: 'fabric_hemp', amount: 1 } // Renfort
         ],
         craftTime: 1500,
         stats: {
             defense: 2,
-            endurance: 1
+            endurance: 1,
+            agility: 1
         },
         requiredLevel: 1,
         description: 'Une simple capuche en cuir.'
     },
 
-    {
-        id: 'iron_helmet',
-        name: 'Casque de Fer',
-        type: 'armor',
-        slot: 'helmet',
-        icon: '🎩',
-        rarity: 'uncommon',
-        profession: 'armorsmith',
-        professionLevel: 4,
-        materials: [
-            { resourceId: 'ore_iron', amount: 15 },
-            { resourceId: 'wood_oak', amount: 3 }
-        ],
-        craftTime: 2500,
-        stats: {
-            defense: 6,
-            endurance: 4,
-            intelligence: 2
-        },
-        requiredLevel: 4,
-        description: 'Un casque protecteur en fer.'
-    },
+    // iron_helmet supprimé - voir craft-recipes-armors.js
 
     // ========== ARMURES - JAMBES ==========
     {
@@ -175,10 +137,11 @@ const CraftRecipesData = [
         slot: 'legs',
         icon: '🦵',
         rarity: 'common',
-        profession: 'armorsmith',
-        professionLevel: 2,
+        profession: 'tanner', // Tanneur
+        professionLevel: 3,
         materials: [
-            { resourceId: 'wood_oak', amount: 10 }
+            { resourceId: 'fabric_simple_leather', amount: 5 }, // Cuir traité
+            { resourceId: 'fabric_cotton', amount: 2 } // Renfort
         ],
         craftTime: 2000,
         stats: {
@@ -245,18 +208,20 @@ const CraftRecipesData = [
         slot: 'gloves',
         icon: '🧤',
         rarity: 'common',
-        profession: 'armorsmith',
-        professionLevel: 1,
+        profession: 'tanner', // Tanneur
+        professionLevel: 2,
         materials: [
-            { resourceId: 'wood_oak', amount: 6 }
+            { resourceId: 'fabric_simple_leather', amount: 2 }, // Cuir traité
+            { resourceId: 'fabric_linen', amount: 1 } // Renfort
         ],
         craftTime: 1000,
         stats: {
             professionXP: 5,
-            dropRate: 3
+            dropRate: 3,
+            agility: 1
         },
         requiredLevel: 1,
-        description: 'Des gants robustes pour les métiers.'
+        description: 'Des gants robustes en cuir pour les métiers.'
     },
 
     // ========== BOTTES ==========
@@ -267,10 +232,11 @@ const CraftRecipesData = [
         slot: 'boots',
         icon: '👞',
         rarity: 'common',
-        profession: 'armorsmith',
-        professionLevel: 2,
+        profession: 'tanner', // Tanneur
+        professionLevel: 3,
         materials: [
-            { resourceId: 'wood_oak', amount: 8 }
+            { resourceId: 'fabric_simple_leather', amount: 3 }, // Cuir traité
+            { resourceId: 'fabric_hemp', amount: 2 } // Semelles renforcées
         ],
         craftTime: 1500,
         stats: {
@@ -371,28 +337,7 @@ const CraftRecipesData = [
         description: 'Augmente l\'Agilité de 5 pendant 5 minutes.'
     },
 
-    // ========== POISSONNIER - PLATS ==========
-    {
-        id: 'grilled_fish',
-        name: 'Poisson Grillé',
-        type: 'food',
-        slot: 'consumable',
-        icon: '🐟',
-        rarity: 'common',
-        profession: 'fishmonger',
-        professionLevel: 1,
-        materials: [
-            { resourceId: 'fish_stream', amount: 3 }
-        ],
-        craftTime: 1000,
-        stats: {
-            hpRestore: 40,
-            endurance: 1,
-            duration: 180
-        },
-        requiredLevel: 1,
-        description: 'Restaure 40 HP et augmente l\'Endurance de 2 pendant 3 minutes.'
-    },
+    // ========== POISSONNIER - PLATS (grilled_fish est dans craft-recipes-consumables.js) ==========
 
     {
         id: 'fish_soup',
@@ -567,8 +512,7 @@ const CraftRecipesData = [
     }
 ];
 
-// Export global
+// ✅ Export déjà fait en haut du fichier avec window.CraftRecipesData
 if (typeof window !== 'undefined') {
-    window.CraftRecipesData = CraftRecipesData;
-    console.log(`✅ ${CraftRecipesData.length} recettes de craft chargées`);
+    console.log(`✅ ${window.CraftRecipesData.length} recettes de craft chargées`);
 }

@@ -13,7 +13,7 @@ const DropsData = {
         id: 'monster_hide',
         name: "Peau de Monstre",
         description: "Peau brute récupérée sur une bête sauvage. Peut être utilisée telle quelle ou traitée par un Tanneur.",
-        icon: "�",
+        icon: "🦌",
         type: "resource",
         rarity: "common",
         dropChance: 0.40, // 40% de chance
@@ -21,14 +21,15 @@ const DropsData = {
         sellPrice: 5
     },
     
-    griffes_usees: {
+    griffes_usees:
+    {
         id: 'griffes_usees',
         name: "Griffes Usées",
         description: "Griffes abîmées mais utilisables",
         icon: "🗡️",
         type: "resource",
         rarity: "common",
-        dropChance: 0.25, // 25% de chance
+        dropChance: 0.35, // 25% de chance
         quantity: { min: 1, max: 2 },
         sellPrice: 8
     },
@@ -67,7 +68,7 @@ const DropsData = {
         icon: "🎒",
         type: "resource",
         rarity: "uncommon",
-        dropChance: 0.35, // 35% de chance (monstres R2+)
+        dropChance: 0.25, // 35% de chance (monstres R2+)
         quantity: { min: 1, max: 2 },
         sellPrice: 15
     },
@@ -79,7 +80,7 @@ const DropsData = {
         icon: "🛡️",
         type: "resource",
         rarity: "rare",
-        dropChance: 0.60, // 60% sur monstre rare
+        dropChance: 0.12, // 60% sur monstre rare
         quantity: { min: 1, max: 2 },
         sellPrice: 30
     },
@@ -91,7 +92,7 @@ const DropsData = {
         icon: "🦷",
         type: "resource",
         rarity: "rare",
-        dropChance: 0.50, // 50% sur serpent
+        dropChance: 0.10, // 50% sur serpent
         quantity: { min: 1, max: 1 },
         sellPrice: 50
     },
@@ -103,7 +104,7 @@ const DropsData = {
         icon: "🌿",
         type: "resource",
         rarity: "rare",
-        dropChance: 0.40, // 40% sur épouvantail
+        dropChance: 0.10, // 40% sur épouvantail
         quantity: { min: 1, max: 1 },
         sellPrice: 40
     },
@@ -230,7 +231,7 @@ const DropsData = {
         icon: "🪶",
         type: "resource",
         rarity: "uncommon",
-        dropChance: 0.32,
+        dropChance: 0.28,
         quantity: { min: 1, max: 2 },
         sellPrice: 30
     },
@@ -478,7 +479,7 @@ const DropsData = {
         icon: "🪵",
         type: "resource",
         rarity: "uncommon",
-        dropChance: 0.32,
+        dropChance: 0.28,
         quantity: { min: 1, max: 2 },
         sellPrice: 30
     },
@@ -514,7 +515,7 @@ const DropsData = {
         icon: "🌳",
         type: "resource",
         rarity: "uncommon",
-        dropChance: 0.35,
+        dropChance: 0.28,
         quantity: { min: 1, max: 1 },
         sellPrice: 40
     },
@@ -526,7 +527,7 @@ const DropsData = {
         icon: "📖",
         type: "resource",
         rarity: "uncommon",
-        dropChance: 0.32,
+        dropChance: 0.28,
         quantity: { min: 1, max: 1 },
         sellPrice: 55
     },
@@ -575,7 +576,7 @@ const DropsData = {
         icon: "🩸",
         type: "resource",
         rarity: "rare",
-        dropChance: 0.45,
+        dropChance: 0.12,
         quantity: { min: 1, max: 1 },
         sellPrice: 80
     },
@@ -587,7 +588,7 @@ const DropsData = {
         icon: "💀",
         type: "resource",
         rarity: "rare",
-        dropChance: 0.40,
+        dropChance: 0.10,
         quantity: { min: 1, max: 1 },
         sellPrice: 100
     },
@@ -599,7 +600,7 @@ const DropsData = {
         icon: "🗿",
         type: "resource",
         rarity: "rare",
-        dropChance: 0.50,
+        dropChance: 0.12,
         quantity: { min: 1, max: 1 },
         sellPrice: 120
     },
@@ -757,7 +758,7 @@ const DropsData = {
         icon: "🪨",
         type: "resource",
         rarity: "uncommon",
-        dropChance: 0.32,
+        dropChance: 0.28,
         quantity: { min: 1, max: 2 },
         sellPrice: 35
     },
@@ -1131,6 +1132,10 @@ const DropsData = {
         let totalGoldBonus = 0;
         const droppedItems = [];
         
+        // 🔒 Récupérer l'ID du boss actuel si c'est un combat contre un boss
+        const currentMonster = game.combat.currentMonster;
+        const isBoss = currentMonster && currentMonster.getRarity() === 'boss';
+        
         for (const drop of drops) {
             const dropData = this.getDrop(drop.id);
             
@@ -1143,8 +1148,42 @@ const DropsData = {
             }
             // Si c'est une ressource
             else if (dropData.type === 'resource') {
+                // 🔒 LIMITATION DES DROPS LÉGENDAIRES DE BOSS
+                if (isBoss && dropData.rarity === 'legendary' && dropData.unique) {
+                    const bossData = window.MonstersData.boss[currentMonster.id];
+                    
+                    if (bossData) {
+                        // Reset quotidien
+                        const today = new Date().toDateString();
+                        if (bossData.lastResetDate !== today) {
+                            bossData.legendaryDropsToday = 0;
+                            bossData.lastResetDate = today;
+                        }
+                        
+                        // Vérifier la limite journalière
+                        if (bossData.legendaryDropsToday >= bossData.maxLegendaryDropsPerDay) {
+                            // Limite atteinte, skip ce drop
+                            console.warn(`⚠️ Limite journalière de drops légendaires atteinte pour ${bossData.name} (${bossData.legendaryDropsToday}/${bossData.maxLegendaryDropsPerDay})`);
+                            
+                            if (game.ui) {
+                                game.ui.showNotification(
+                                    `⚠️ Limite de drops légendaires atteinte aujourd'hui (${bossData.maxLegendaryDropsPerDay}/jour)`,
+                                    'warning',
+                                    5000
+                                );
+                            }
+                            
+                            continue; // Skip ce drop
+                        }
+                        
+                        // Incrémenter le compteur
+                        bossData.legendaryDropsToday++;
+                    }
+                }
+                
                 // Ajouter à l'inventaire via ProfessionManager
-                const resourceId = `loot_${drop.id}`;
+                // Ne PAS ajouter le préfixe "loot_" car les IDs dans resources-data.js et recettes n'ont pas ce préfixe
+                const resourceId = drop.id;
                 if (game.professionManager) {
                     game.professionManager.addToInventory(resourceId, drop.quantity);
                 }

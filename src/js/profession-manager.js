@@ -161,8 +161,47 @@ class ProfessionManager {
                 return { ...result, storageFull: true };
             }
             
+            // 🆕 BONUS: Calculer chance de double drop
+            let amountToAdd = 1;
+            let passiveBonus = 0;
+            const gatheringProfessions = ['woodcutter', 'miner', 'herbalist', 'fisher'];
+            if (gatheringProfessions.includes(professionId)) {
+                const bonuses = this.getGatheringBonuses(professionId, profession.level);
+                
+                // Chance de drop double
+                if (Math.random() * 100 < bonuses.doubleDropChance) {
+                    amountToAdd = 2;
+                    if (GameConfig.DEBUG.enabled) {
+                        console.log(`✨ Double drop ! (${bonuses.doubleDropChance}% chance)`);
+                    }
+                }
+                
+                // 🎉 NOUVEAU: Bonus passif au niveau 50+
+                passiveBonus = this.getPassiveClickBonus(professionId, profession.level);
+                if (passiveBonus > 0) {
+                    // Ajouter le bonus passif au total
+                    amountToAdd += passiveBonus;
+                    
+                    // 🎊 Message spécial si premier déblocage niveau 50
+                    if (!profession.passiveBonusUnlocked) {
+                        profession.passiveBonusUnlocked = true;
+                        if (game && game.ui) {
+                            game.ui.createNotification(
+                                `🎉 BONUS PASSIF DÉBLOQUÉ ! Niveau 50 ${professionId} : +${passiveBonus} par clic`,
+                                'success',
+                                5000
+                            );
+                        }
+                    }
+                    
+                    if (GameConfig.DEBUG.enabled) {
+                        console.log(`🌟 Bonus passif niveau 50: +${passiveBonus} ressources`);
+                    }
+                }
+            }
+            
             // Ajouter la ressource à l'inventaire
-            this.addToInventory(result.resourceId, 1);
+            this.addToInventory(result.resourceId, amountToAdd);
 
             if (GameConfig.DEBUG.enabled) {
             }
@@ -181,16 +220,23 @@ class ProfessionManager {
         
         if (!minerProfession) return;
         
+        // 🆕 BONUS: Appliquer le bonus de chance gemme
+        const bonuses = this.getGatheringBonuses('miner', minerProfession.level);
+        const gemBonusMultiplier = 1 + (bonuses.gemBonus / 100); // 1.0 à 2.0 (niveau 50 = +100%)
+        
         // Filtrer uniquement les gemmes débloquées selon le niveau de mineur
         const availableGems = gems.filter(gem => gem.unlockLevel <= minerProfession.level);
         
         for (const gem of availableGems) {
+            // Appliquer le bonus à la drop rate
+            const adjustedDropRate = gem.dropRate * gemBonusMultiplier;
             const roll = Math.random();
-            if (roll <= gem.dropRate) {
+            
+            if (roll <= adjustedDropRate) {
                 this.addToInventory(gem.id, 1);
                 
                 if (GameConfig.DEBUG.enabled) {
-                    console.log(`💎 Gemme drop: ${gem.name} (${(gem.dropRate * 100).toFixed(2)}%)`);
+                    console.log(`💎 Gemme drop: ${gem.name} (${(adjustedDropRate * 100).toFixed(2)}% avec bonus ${bonuses.gemBonus}%)`);
                 }
                 
                 // Notification
@@ -213,11 +259,21 @@ class ProfessionManager {
     addToInventory(resourceId, amount = 1) {
         if (amount <= 0) return 0;
         
-        const current = this.inventory.get(resourceId) || 0;
+        // ✅ FIX: Normaliser l'ID de ressource pour les drops sans préfixe
+        // Si resourceId='plumes_sombres' et que dans resources-data.js c'est 'loot_plumes_sombres',
+        // on doit utiliser l'ID correct pour que l'UI puisse l'afficher
+        let normalizedId = resourceId;
+        const resourceData = this.getResourceData(resourceId);
+        if (resourceData && resourceData.id !== resourceId) {
+            // La ressource existe mais avec un ID différent (probablement avec préfixe loot_)
+            normalizedId = resourceData.id;
+        }
+        
+        const current = this.inventory.get(normalizedId) || 0;
         
         // 🛡️ PROTECTION: Vérifier les limites de stockage
         if (window.game && window.game.storageManager) {
-            const limit = window.game.storageManager.getLimit(resourceId);
+            const limit = window.game.storageManager.getLimit(normalizedId);
             const spaceAvailable = Math.max(0, limit - current);
             
             // Limiter la quantité ajoutée à l'espace disponible
@@ -225,13 +281,13 @@ class ProfessionManager {
             
             if (amount <= 0) {
                 if (GameConfig.DEBUG.enabled) {
-                    console.log(`⚠️ Stockage plein pour ${resourceId}, ajout bloqué`);
+                    console.log(`⚠️ Stockage plein pour ${normalizedId}, ajout bloqué`);
                 }
                 return 0;
             }
         }
         
-        this.inventory.set(resourceId, current + amount);
+        this.inventory.set(normalizedId, current + amount);
         
         // Mettre à jour les quêtes de collecte (si disponible)
         if (window.game && window.game.questManager) {
@@ -285,10 +341,27 @@ class ProfessionManager {
     getResourceType(resourceId) {
         if (resourceId.startsWith('wood_')) return 'wood';
         if (resourceId.startsWith('ore_')) return 'ore';
-        if (resourceId.startsWith('plant_')) return 'plants'; // ✅ NOUVEAU
-        if (resourceId.startsWith('fish_')) return 'fish';   // ✅ NOUVEAU
-        if (resourceId.startsWith('gem_')) return 'gems'; // Avec un S !
+        if (resourceId.startsWith('plant_')) return 'plants';
+        if (resourceId.startsWith('fish_')) return 'fish';
+        if (resourceId.startsWith('gem_')) return 'gems';
         if (resourceId.startsWith('loot_')) return 'loot';
+        
+        // ✅ FIX: Les loots de combat sans préfixe (monster_hide, monster_fang, robust_hide, etc.)
+        if (resourceId.startsWith('monster_') || resourceId.startsWith('robust_')) return 'loot';
+        
+        // ✅ FIX: Les cuirs traités par le Tanneur (fabric_simple_leather, fabric_tanned_leather)
+        if (resourceId.startsWith('fabric_')) return 'fabrics';
+        
+        // ✅ FIX COMPLET: TOUS les drops de combat sans préfixe
+        // Beaucoup de drops dans drops-data.js utilisent des IDs sans préfixe (plumes_sombres, essence_vegetale_instable, etc.)
+        // Au lieu de lister ~80+ IDs manuellement, on vérifie si l'ID existe dans DropsData
+        if (typeof window !== 'undefined' && window.DropsData && window.DropsData.getDrop) {
+            const dropData = window.DropsData.getDrop(resourceId);
+            if (dropData && dropData.type === 'resource') {
+                return 'loot';
+            }
+        }
+        
         return 'unknown';
     }
 
@@ -367,8 +440,20 @@ class ProfessionManager {
         // Arrêter l'ancien interval si existe
         this.stopAutoGather(professionId);
         
-        // Déterminer l'intervalle selon le métier
-        const interval = professionId === 'fisher' ? this.fisherGatherInterval : this.autoGatherInterval;
+        // 🆕 BONUS: Calculer la vitesse ajustée selon le niveau
+        const profession = this.getProfession(professionId);
+        const bonuses = this.getGatheringBonuses(professionId, profession.level);
+        
+        // Intervalle de base selon le métier
+        const baseInterval = professionId === 'fisher' ? this.fisherGatherInterval : this.autoGatherInterval;
+        
+        // Appliquer la réduction de vitesse (max 80% = 5000ms → 1000ms)
+        const speedReduction = bonuses.autoGatherSpeed / 100; // 0.0 à 0.8
+        const adjustedInterval = Math.max(1000, baseInterval * (1 - speedReduction));
+        
+        if (GameConfig.DEBUG.enabled) {
+            console.log(`⚡ Auto-gather ${professionId}: ${baseInterval}ms → ${adjustedInterval}ms (-${bonuses.autoGatherSpeed}%)`);
+        }
         
         // Créer le nouvel interval
         this.autoGatherIntervals[professionId] = setInterval(() => {
@@ -377,9 +462,7 @@ class ProfessionManager {
                 window.game.ui.updateProfessions();
                 window.game.ui.updateInventory();
             }
-        }, interval);
-        
-
+        }, adjustedInterval);
     }
 
     /**
@@ -391,6 +474,86 @@ class ProfessionManager {
             delete this.autoGatherIntervals[professionId];
 
         }
+    }
+
+    /**
+     * 🆕 Calculer les bonus de récolte selon le niveau
+     * @param {string} professionId - 'woodcutter', 'miner', 'herbalist', 'fisher'
+     * @param {number} level - Niveau du métier
+     * @returns {object} Bonus calculés
+     */
+    getGatheringBonuses(professionId, level) {
+        const bonuses = {
+            autoGatherSpeed: 0,       // Réduction intervalle auto-gather (%)
+            doubleDropChance: 0,      // Chance de drop ×2 (%)
+            storageEfficiency: 0,     // Bonus capacité stockage (%)
+            qualityBonus: 0,          // Chance ressource qualité supérieure (%)
+            gemBonus: 0               // Bonus chance gemme (mineur uniquement) (%)
+        };
+
+        // Scaling linéaire : 1.6% par niveau
+        const speedReduction = Math.min(80, level * 1.6);  // Max 80% au niveau 50
+        const doubleChance = Math.min(50, level * 1.0);    // Max 50% au niveau 50
+        const storageBonus = Math.min(100, level * 2.0);   // Max 100% au niveau 50
+        const quality = Math.min(50, level * 1.0);         // Max 50% au niveau 50
+        
+        bonuses.autoGatherSpeed = speedReduction;
+        bonuses.doubleDropChance = doubleChance;
+        bonuses.storageEfficiency = storageBonus;
+        bonuses.qualityBonus = quality;
+        
+        // Bonus spécial mineur : +100% chance gemme niveau 50
+        if (professionId === 'miner') {
+            bonuses.gemBonus = Math.min(100, level * 2.0);
+        }
+        
+        return bonuses;
+    }
+
+    /**
+     * 🆕 Calculer le bonus de clic passif (niveau 50+)
+     * @param {string} professionId - 'woodcutter', 'miner', 'herbalist', 'fisher'
+     * @param {number} level - Niveau du métier
+     * @returns {number} Ressources bonus par clic
+     */
+    getPassiveClickBonus(professionId, level) {
+        // 🔒 DÉBLOCAGE : Niveau 50 requis
+        if (level < 50) return 0;
+        
+        const buildingProduction = this.getBuildingProductionPerMin(professionId);
+        if (!buildingProduction || buildingProduction === 0) return 0;
+        
+        // Bonus fixe de 5% production passive
+        const bonusPercent = 5.0;
+        const productionPerSecond = buildingProduction / 60;
+        return Math.floor(productionPerSecond * (bonusPercent / 100));
+    }
+
+    /**
+     * 🆕 Obtient la production passive par minute pour un métier
+     * @param {string} professionId - 'woodcutter', 'miner', 'herbalist', 'fisher'
+     * @returns {number} Production par minute
+     */
+    getBuildingProductionPerMin(professionId) {
+        const buildingMap = {
+            woodcutter: 'sawmill',
+            miner: 'quarry',
+            herbalist: 'greenhouse',
+            fisher: 'fishery'
+        };
+        
+        const buildingId = buildingMap[professionId];
+        if (!buildingId) return 0;
+        
+        // Vérifier que le game existe
+        if (!window.game || !window.game.buildingManager) return 0;
+        
+        const building = window.game.buildingManager.buildings.get(buildingId);
+        if (!building || building.level === 0) return 0;
+        
+        // Production = baseProduction × level
+        const baseProduction = building.baseProduction || 0;
+        return baseProduction * building.level;
     }
 
     /**

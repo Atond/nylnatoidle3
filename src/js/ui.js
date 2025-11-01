@@ -75,10 +75,12 @@ class UI {
             requiredXp: document.getElementById('requiredXp'),
             xpBar: document.getElementById('xpBar'),
 
-            // Zone info
-            currentRegionName: document.getElementById('currentRegionName'),
-            currentZoneNum: document.getElementById('currentZoneNum'),
-            monsterType: document.getElementById('monsterType'),
+            // Zone info (Progression Panel - Combat tab)
+            progressRegionName: document.getElementById('progressRegionName'),
+            progressZoneDots: document.getElementById('progressZoneDots'),
+            progressCurrentZone: document.getElementById('progressCurrentZone'),
+            progressTotalZones: document.getElementById('progressTotalZones'),
+            progressKills: document.getElementById('progressKills'),
             combatInventoryGrid: document.getElementById('combatInventoryGrid'),
 
             // Quêtes
@@ -241,7 +243,36 @@ class UI {
         this.currentFilter = 'all'; // Filtre actif par défaut
         this.selectedRecipeId = null; // Aucune recette sélectionnée par défaut
 
-        // 🐉 Event listeners dragons
+        // 🆕 Event listeners Auto-Sell
+        document.querySelectorAll('[id^="toggle-autosell-"]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const category = btn.dataset.category;
+                const enabled = this.game.buildingManager.toggleAutoSell(category);
+                this.updateAutoSellToggles();
+                this.showNotification(
+                    `Auto-vente ${category === 'wood' ? 'Bois' : category === 'ore' ? 'Minerais' : category === 'plants' ? 'Plantes' : 'Poissons'} : ${enabled ? 'ON ✅' : 'OFF ❌'}`,
+                    enabled ? 'success' : 'info'
+                );
+            });
+        });
+
+        // � Event listeners Recherches
+        document.querySelectorAll('.research-category-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const category = btn.dataset.category;
+                
+                // Changer catégorie active
+                document.querySelectorAll('.research-category-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Afficher grille correspondante
+                document.querySelectorAll('.research-grid').forEach(g => g.classList.remove('active'));
+                const grid = document.getElementById(`research-grid-${category}`);
+                if (grid) grid.classList.add('active');
+            });
+        });
+
+        // �🐉 Event listeners dragons
         if (GameConfig.FEATURES.enableDragons) {
             this.initDragonsEventListeners();
         }
@@ -259,8 +290,15 @@ class UI {
         const selectedTab = document.querySelector(`[data-tab="${tabName}"]`);
         const selectedContent = document.getElementById(`tab-${tabName}`);
 
+        console.log(`🔍 switchTab(${tabName}):`, { selectedTab, selectedContent });
+
         if (selectedTab) selectedTab.classList.add('active');
-        if (selectedContent) selectedContent.classList.add('active');
+        if (selectedContent) {
+            selectedContent.classList.add('active');
+            console.log(`✅ Onglet ${tabName} activé`);
+        } else {
+            console.error(`❌ Contenu tab-${tabName} introuvable`);
+        }
 
         // Mettre à jour l'équipement si on ouvre l'onglet équipement
         if (tabName === 'equipment') {
@@ -284,6 +322,17 @@ class UI {
             this.updateTownTab();
         }
         
+        // 🔬 Mettre à jour les recherches si on ouvre l'onglet recherches
+        if (tabName === 'research') {
+            this.updateResearchTab();
+        }
+
+        // 🗺️ Mettre à jour la carte si on ouvre l'onglet carte
+        if (tabName === 'map') {
+            this.updateMapRegionTabs();
+            this.showMapRegion(this.game.combat.currentRegion);
+        }
+        
         // 🎭 Initialiser UI Alt Characters si onglet characters
         if (tabName === 'characters') {
             this.initializeAltCharactersUI();
@@ -305,6 +354,8 @@ class UI {
         this.updateZoneInfo();
         this.updateQuests();
         this.updateBuffDisplay(); // 💫 Mettre à jour l'affichage des buffs
+        this.updateCombatPotions(); // 🧪 Mettre à jour les potions en combat
+        this.updateProgressionPanel(); // 📊 Mettre à jour le panneau de progression
 
         // Mettre à jour les barres XP des professions de craft
         this.updateCraftingProfessions();
@@ -475,6 +526,59 @@ class UI {
             div.textContent = entry.message;
             this.elements.combatLog.appendChild(div);
         });
+        
+        // 🎯 Mettre à jour l'affichage du combo
+        this.updateComboDisplay();
+    }
+    
+    /**
+     * 🆕 Met à jour l'affichage du combo sur le bouton d'attaque
+     */
+    updateComboDisplay() {
+        const attackBtn = document.getElementById('attackBtn');
+        const attackBtnText = document.getElementById('attackBtnText');
+        const comboDisplay = document.getElementById('comboDisplay');
+        
+        if (!attackBtn || !attackBtnText || !comboDisplay) return;
+        
+        const combat = this.game.combat;
+        const comboCount = combat.comboCount || 0;
+        
+        if (comboCount >= 1) {
+            // Afficher le combo
+            const comboMultiplier = 0.6 + (comboCount - 1) * 0.2;
+            
+            // Changer la couleur selon le niveau de combo
+            let comboColor = '#ffcc00'; // Jaune par défaut
+            if (comboCount >= 8) {
+                comboColor = '#ff1744'; // Rouge vif (excellent)
+                attackBtn.style.boxShadow = '0 0 20px rgba(255, 23, 68, 0.6)';
+            } else if (comboCount >= 5) {
+                comboColor = '#ff6b35'; // Orange (très bon)
+                attackBtn.style.boxShadow = '0 0 15px rgba(255, 107, 53, 0.5)';
+            } else if (comboCount >= 3) {
+                comboColor = '#ffd700'; // Or (bon)
+                attackBtn.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.4)';
+            } else {
+                attackBtn.style.boxShadow = 'none';
+            }
+            
+            comboDisplay.style.color = comboColor;
+            comboDisplay.textContent = `🔥 COMBO ×${comboCount} (×${comboMultiplier.toFixed(1)})`;
+            comboDisplay.style.display = 'inline';
+            
+            // Animation de pulsation pour les gros combos
+            if (comboCount >= 5) {
+                attackBtn.style.animation = 'comboPulse 0.5s ease-in-out infinite';
+            } else {
+                attackBtn.style.animation = 'none';
+            }
+        } else {
+            // Pas de combo
+            comboDisplay.style.display = 'none';
+            attackBtn.style.boxShadow = 'none';
+            attackBtn.style.animation = 'none';
+        }
     }
 
     /**
@@ -501,149 +605,8 @@ class UI {
         this.elements.zoneProgress.textContent =
             `${killed} / ${GameConfig.ZONES.MONSTERS_TO_UNLOCK}`;
 
-        // Zone actuelle (sidebar)
-        if (regionData && zoneData) {
-            this.elements.currentRegionName.textContent = `${regionData.icon} ${regionData.name}`;
-            this.elements.currentZoneNum.textContent = `${zoneData.icon} ${zoneData.name}`;
-        } else {
-            this.elements.currentRegionName.textContent = 'Région inconnue';
-            this.elements.currentZoneNum.textContent = `Zone ${combat.currentZone}`;
-        }
-
-        // Type de monstre
-        if (combat.currentMonster) {
-            const rarityColor = combat.currentMonster.getRarityColor ? combat.currentMonster.getRarityColor() : '#fff';
-            this.elements.monsterType.textContent = combat.currentMonster.getName();
-            this.elements.monsterType.style.color = rarityColor;
-        }
-
-        // Mettre à jour la mini-map
-        this.updateMinimap();
-    }
-
-    /**
-     * Met à jour la mini-map des régions
-     */
-    updateMinimap() {
-        const minimapRegions = document.getElementById('minimapRegions');
-        if (!minimapRegions) return;
-
-        const combat = this.game.combat;
-        if (!combat) return;
-
-        const regionsData = window.RegionsData;
-        if (!regionsData || !regionsData.regions) return;
-
-        const regions = regionsData.regions;
-        const player = this.game.player;
-
-        // Calculer la progression globale
-        let totalZones = 0;
-        let completedZones = 0;
-
-        regions.forEach(region => {
-            region.zones.forEach(zone => {
-                totalZones++;
-                const zoneKey = `${region.id}_${zone.id}`;
-                const killed = combat.monstersKilledPerZone[zoneKey] || 0;
-                if (killed >= GameConfig.ZONES.MONSTERS_TO_UNLOCK) {
-                    completedZones++;
-                }
-            });
-        });
-
-        // Mettre à jour la progression globale
-        const globalProgress = document.getElementById('minimapGlobalProgress');
-        if (globalProgress) {
-            globalProgress.textContent = `${completedZones}/${totalZones}`;
-        }
-
-        // Générer les régions
-        minimapRegions.innerHTML = '';
-
-        regions.forEach((region, index) => {
-            const isLocked = player.level < region.levelRange.min;
-            const isCurrentRegion = combat.currentRegion === region.id;
-
-            // Calculer la progression de cette région
-            let regionZonesCompleted = 0;
-            let regionTotalZones = region.zones.length;
-
-            region.zones.forEach(zone => {
-                const zoneKey = `${region.id}_${zone.id}`;
-                const killed = combat.monstersKilledPerZone[zoneKey] || 0;
-                if (killed >= GameConfig.ZONES.MONSTERS_TO_UNLOCK) {
-                    regionZonesCompleted++;
-                }
-            });
-
-            const regionCompleted = regionZonesCompleted === regionTotalZones;
-            const progressPercent = Math.floor((regionZonesCompleted / regionTotalZones) * 100);
-
-            // Créer l'élément région
-            const regionDiv = document.createElement('div');
-            regionDiv.className = 'minimap-region';
-
-            if (isLocked) {
-                regionDiv.classList.add('locked');
-            } else if (isCurrentRegion) {
-                regionDiv.classList.add('active');
-            } else if (regionCompleted) {
-                regionDiv.classList.add('completed');
-            }
-
-            // Contenu de la région
-            let statusBadge = '';
-            if (isLocked) {
-                statusBadge = `<span class="minimap-region-badge locked">🔒 Niv. ${region.levelRange.min}</span>`;
-            } else if (isCurrentRegion) {
-                statusBadge = '<span class="minimap-region-badge current">En cours</span>';
-            } else if (regionCompleted) {
-                statusBadge = '<span class="minimap-region-badge completed">✓ Terminée</span>';
-            }
-
-            regionDiv.innerHTML = `
-                <div class="minimap-region-header">
-                    <div class="minimap-region-name">
-                        <span class="minimap-region-icon">${region.icon}</span>
-                        <span>${region.name}</span>
-                    </div>
-                    <div class="minimap-region-status">
-                        ${statusBadge}
-                    </div>
-                </div>
-                <div class="minimap-zones-progress">
-                    <div class="minimap-zones-bar">
-                        <div class="minimap-zones-bar-fill" style="width: ${progressPercent}%"></div>
-                    </div>
-                    <div class="minimap-zones-text">${regionZonesCompleted}/${regionTotalZones}</div>
-                </div>
-                <div class="minimap-region-info">
-                    <div class="minimap-region-stat">
-                        <span>📊</span>
-                        <span>Niv. ${region.levelRange.min}+</span>
-                    </div>
-                    <div class="minimap-region-stat">
-                        <span>🗺️</span>
-                        <span>${region.zones.length} zones</span>
-                    </div>
-                </div>
-            `;
-
-            // Click sur la région pour y aller (si débloquée)
-            if (!isLocked) {
-                regionDiv.style.cursor = 'pointer';
-                regionDiv.addEventListener('click', () => {
-                    // Aller à la première zone de cette région
-                    combat.currentRegion = region.id;
-                    combat.currentZone = 1;
-                    combat.generateMonster();
-                    this.update();
-                });
-            }
-
-            minimapRegions.appendChild(regionDiv);
-        });
+        // NOTE: Les infos de zone actuelle sont maintenant dans le Progression Panel
+        // Géré par updateProgressionPanel() qui est appelé dans update()
     }
 
     /**
@@ -667,6 +630,142 @@ class UI {
             btn.textContent = '⚙️ Auto-Combat : OFF';
             btn.classList.remove('active');
         }
+    }
+
+    /**
+     * 🧪 Met à jour les potions disponibles en combat (hotbar)
+     */
+    updateCombatPotions() {
+        const panel = document.getElementById('combatPotionsPanel');
+        const hotbar = document.getElementById('potionsHotbar');
+        
+        if (!panel || !hotbar || !this.game.equipmentManager) return;
+
+        // Récupérer toutes les potions de l'inventaire
+        const allPotions = this.game.equipmentManager.inventory.filter(item => 
+            item.type === 'potion' || 
+            item.slot === 'consumable' ||
+            (item.name && item.name.includes('Potion'))
+        );
+
+        // Grouper par type et compter
+        const potionGroups = {};
+        allPotions.forEach(potion => {
+            const key = potion.recipeId || potion.id.replace(/_\d+$/, ''); // Grouper par ID sans numéro unique
+            if (!potionGroups[key]) {
+                potionGroups[key] = {
+                    item: potion,
+                    count: 0
+                };
+            }
+            potionGroups[key].count++;
+        });
+
+        // Limiter à 4 slots (hotbar)
+        const potionTypes = Object.values(potionGroups).slice(0, 4);
+
+        // Afficher le panneau seulement si on a des potions
+        if (potionTypes.length > 0) {
+            panel.style.display = '';
+        } else {
+            panel.style.display = 'none';
+            return;
+        }
+
+        // Générer les slots
+        hotbar.innerHTML = '';
+        for (let i = 0; i < 4; i++) {
+            const potionGroup = potionTypes[i];
+            
+            if (potionGroup) {
+                const potion = potionGroup.item;
+                const count = potionGroup.count;
+                
+                hotbar.innerHTML += `
+                    <div class="potion-slot" data-potion-id="${potion.id}">
+                        <div class="potion-icon">${potion.icon || '🧪'}</div>
+                        <div class="potion-name">${potion.name}</div>
+                        <div class="potion-count">×${count}</div>
+                    </div>
+                `;
+            } else {
+                hotbar.innerHTML += `
+                    <div class="potion-slot empty">
+                        <div class="potion-icon">⬜</div>
+                        <div class="potion-name">Vide</div>
+                    </div>
+                `;
+            }
+        }
+
+        // Ajouter les événements de clic
+        hotbar.querySelectorAll('.potion-slot:not(.empty)').forEach(slot => {
+            slot.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const potionId = slot.dataset.potionId;
+                const potion = allPotions.find(p => p.id === potionId);
+                
+                if (potion) {
+                    this.usePotionInCombat(potion);
+                }
+            });
+        });
+    }
+
+    /**
+     * 🍽️ Utilise une potion pendant le combat
+     */
+    usePotionInCombat(potion) {
+        if (!potion || (potion.type !== 'potion' && potion.slot !== 'consumable')) {
+            this.showNotification('❌ Ceci n\'est pas une potion', 'error');
+            return;
+        }
+
+        // Retirer la potion de l'inventaire
+        const index = this.game.equipmentManager.inventory.findIndex(p => p.id === potion.id);
+        if (index === -1) {
+            this.showNotification('❌ Potion introuvable', 'error');
+            return;
+        }
+
+        this.game.equipmentManager.inventory.splice(index, 1);
+
+        // Appliquer l'effet de heal
+        let healed = 0;
+        
+        // Chercher d'abord dans stats.hpRestore (structure craft-recipes-data.js)
+        if (potion.stats && potion.stats.hpRestore) {
+            healed = Math.min(potion.stats.hpRestore, 
+                this.game.player.stats.maxHp - this.game.player.stats.hp);
+            this.game.player.stats.hp += healed;
+            this.showNotification(`💚 +${healed} PV restaurés !`, 'success');
+        } 
+        // Sinon chercher dans recipe.effects (ancien système)
+        else {
+            const recipe = this.game.craftingManager.getAllRecipes().find(r => 
+                r.id === potion.recipeId || r.id === potion.id.replace(/_\d+$/, '')
+            );
+            
+            if (recipe && recipe.effects && recipe.effects.healAmount) {
+                healed = Math.min(recipe.effects.healAmount, 
+                    this.game.player.stats.maxHp - this.game.player.stats.hp);
+                this.game.player.stats.hp += healed;
+                this.showNotification(`💚 +${healed} PV restaurés !`, 'success');
+            }
+            
+            // Appliquer le buff si durée > 0
+            if (recipe && recipe.effects && recipe.effects.duration > 0) {
+                this.game.buffManager.applyBuff(recipe, 1);
+            }
+        }
+
+        if (healed === 0) {
+            this.showNotification('⚠️ Effets de la potion introuvables', 'warning');
+        }
+
+        // Mettre à jour l'interface
+        this.updateCombatPotions();
+        this.updatePlayerUI();
     }
 
     /**
@@ -828,18 +927,18 @@ class UI {
     updateQuests() {
         if (!this.game.questManager || !this.elements.questsList) return;
 
-        const activeQuests = this.game.questManager.getActiveQuests();
+        const displayedQuests = this.game.questManager.getDisplayedQuests();
 
         // Vider la liste
         this.elements.questsList.innerHTML = '';
 
-        // Afficher les quêtes actives
-        if (activeQuests.length === 0) {
+        // Afficher les quêtes (actives ou prochaine disponible)
+        if (displayedQuests.length === 0) {
             this.elements.questsList.innerHTML = '<p class="text-muted">Aucune quête active</p>';
             return;
         }
 
-        activeQuests.forEach(quest => {
+        displayedQuests.forEach(quest => {
             const questCard = this.createQuestCard(quest);
             this.elements.questsList.appendChild(questCard);
         });
@@ -851,17 +950,46 @@ class UI {
     createQuestCard(quest) {
         const card = document.createElement('div');
         card.className = 'quest-card';
+        
+        // Vérifier si la quête est active ou verrouillée
+        const isLocked = !quest.isActive && !quest.isCompleted;
+        const meetsRequirements = quest.meetsRequirements(this.game.player, this.game.questManager);
+        
         if (quest.isCompleted) {
             card.classList.add('completed');
+        } else if (isLocked) {
+            card.classList.add('locked');
         }
 
         const progressPercent = quest.getProgressPercentage();
+        
+        // Générer le message de prérequis si verrouillée
+        let requirementsHtml = '';
+        if (isLocked && !meetsRequirements) {
+            const reqs = [];
+            
+            if (quest.requirements?.quest) {
+                const reqQuest = this.game.questManager.getQuest(quest.requirements.quest);
+                if (reqQuest && !reqQuest.isCompleted) {
+                    reqs.push(`🔒 Complétez d'abord : ${reqQuest.title}`);
+                }
+            }
+            
+            if (quest.requirements?.level && this.game.player.level < quest.requirements.level) {
+                reqs.push(`🔒 Niveau ${quest.requirements.level} requis (actuel : ${this.game.player.level})`);
+            }
+            
+            if (reqs.length > 0) {
+                requirementsHtml = `<div class="quest-requirements" style="color: #ff6b6b; margin-top: 10px; font-size: 0.9rem;">${reqs.join('<br>')}</div>`;
+            }
+        }
 
         card.innerHTML = `
             <div class="quest-title">
-                ${quest.isCompleted ? '✅' : '📋'} ${quest.title}
+                ${quest.isCompleted ? '✅' : isLocked ? '🔒' : '📋'} ${quest.title}
             </div>
             <div class="quest-description">${quest.description}</div>
+            ${requirementsHtml}
             <div class="quest-progress">
                 <div class="quest-progress-text">
                     <span>Progression</span>
@@ -1065,9 +1193,10 @@ class UI {
             'crafting': 'crafting_tab',      // 🔨 Fabrication (M06)
             'alchemy': 'alchemy_tab',        // ⚗️ Transmutation (M08)
             'town': 'town_tab',              // 🏘️ Ville (M10)
+            'research': 'research_tab',      // 🔬 Recherches (M10b)
             'characters': 'characters_tab',  // 🎭 Alt Characters (M11)
             'dungeons': 'dungeons_tab',      // 🏰 Donjons (M13)
-            'dragons': 'dragons_tab',        // 🐉 Dragons (futur)
+            'dragons': 'dragons_tab',        // 🐉 Dragons (M20)
             'guild': 'guild_tab'             // 👥 Guilde (futur)
         };
         
@@ -1236,7 +1365,65 @@ class UI {
 
             // Niveau
             const levelEl = document.getElementById(`${profId}-level`);
-            if (levelEl) levelEl.textContent = String(profession.level);
+            if (levelEl) {
+                levelEl.textContent = String(profession.level);
+                
+                // � Afficher la spécialisation active si débloquée
+                if (this.game.unlocks.resource_specialization && this.game.specializations[profId]) {
+                    const resourceId = this.game.specializations[profId];
+                    const professionTypeMap = {
+                        woodcutter: 'wood',
+                        miner: 'ore',
+                        herbalist: 'plants',
+                        fisher: 'fish'
+                    };
+                    const resourceType = professionTypeMap[profId];
+                    const resource = window.ResourcesData[resourceType]?.find(r => r.id === resourceId);
+                    
+                    if (resource && !levelEl.querySelector('.specialization-badge')) {
+                        const badge = document.createElement('span');
+                        badge.className = 'specialization-badge';
+                        badge.textContent = `🎯 ${resource.name} (+25%)`;
+                        badge.title = `Spécialisation : ${resource.name} - Vous recevez +25% de drop rate sur cette ressource`;
+                        badge.style.cssText = 'display: inline-block; margin-left: 8px; padding: 2px 8px; background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.1)); border: 1px solid rgba(255,215,0,0.4); border-radius: 12px; font-size: 0.75rem; color: #ffd700; font-weight: bold;';
+                        levelEl.appendChild(badge);
+                    } else if (resource) {
+                        // Mettre à jour le badge existant
+                        const existingBadge = levelEl.querySelector('.specialization-badge');
+                        if (existingBadge) {
+                            existingBadge.textContent = `🎯 ${resource.name} (+25%)`;
+                            existingBadge.title = `Spécialisation : ${resource.name} - Vous recevez +25% de drop rate sur cette ressource`;
+                        }
+                    }
+                } else {
+                    // Retirer le badge si spécialisation non débloquée
+                    const badge = levelEl.querySelector('.specialization-badge');
+                    if (badge) badge.remove();
+                }
+                
+                // �🆕 Badge niveau 50 : Bonus passif actif
+                if (profession.level >= 50) {
+                    const passiveBonus = this.game.professionManager.getPassiveClickBonus(profId, profession.level);
+                    if (passiveBonus > 0 && !levelEl.querySelector('.level-50-badge')) {
+                        const badge = document.createElement('span');
+                        badge.className = 'level-50-badge';
+                        badge.textContent = `🎉 +${passiveBonus}/clic`;
+                        badge.title = `Bonus passif niveau 50 : +${passiveBonus} ressources par clic (5% production bâtiment)`;
+                        levelEl.appendChild(badge);
+                    } else if (passiveBonus > 0) {
+                        // Mettre à jour le badge existant
+                        const existingBadge = levelEl.querySelector('.level-50-badge');
+                        if (existingBadge) {
+                            existingBadge.textContent = `🎉 +${passiveBonus}/clic`;
+                            existingBadge.title = `Bonus passif niveau 50 : +${passiveBonus} ressources par clic (5% production bâtiment)`;
+                        }
+                    }
+                } else {
+                    // Retirer le badge si niveau < 50
+                    const badge = levelEl.querySelector('.level-50-badge');
+                    if (badge) badge.remove();
+                }
+            }
 
             // XP
             const xpEl = document.getElementById(`${profId}-xp`);
@@ -1320,8 +1507,15 @@ class UI {
                 if (isFull) storageClass = 'storage-full';
                 else if (isAlmostFull) storageClass = 'storage-warning';
 
+                // 💡 Tooltip pour ressources T4+ : Recommandation transmutation
+                const tier = item.data.tier || 1;
+                let tooltipText = `${item.data.name} (Tier ${tier})`;
+                if (tier >= 4) {
+                    tooltipText += `\n⚠️ Drop rate très faible (${(item.data.dropRate * 100).toFixed(0)}%)\n✅ Recommandation: Utilisez la Transmutation`;
+                }
+
                 return `
-                <div class="inventory-item ${storageClass}" style="border-color: ${rarityColor}">
+                <div class="inventory-item ${storageClass}" style="border-color: ${rarityColor}" title="${tooltipText}">
                     <div class="item-icon">${icon}</div>
                     <div class="item-name" style="color: ${rarityColor}">${item.data.name}</div>
                     <div class="item-amount">
@@ -1800,7 +1994,7 @@ class UI {
      * Met à jour les niveaux des professions de craft
      */
     updateCraftingProfessions() {
-        const professions = ['blacksmith', 'armorsmith', 'jeweler', 'tanner'];
+        const professions = ['blacksmith', 'armorsmith', 'jeweler', 'alchemist', 'tailor', 'fishmonger', 'tanner'];
 
         professions.forEach(profId => {
             const profession = this.game.professionManager.getProfession(profId);
@@ -1845,6 +2039,9 @@ class UI {
 
         // Récupérer les recettes pour cette profession
         const recipes = this.game.craftingManager.getRecipesByProfession(professionId);
+
+        // ✅ TRI PAR NIVEAU DE PROFESSION (du + bas au + haut)
+        recipes.sort((a, b) => a.professionLevel - b.professionLevel);
 
         if (recipes.length === 0) {
             recipesList.innerHTML = '<div class="empty-state"><p class="text-muted">Aucune recette disponible pour ce métier</p></div>';
@@ -1940,10 +2137,13 @@ class UI {
         if (!detailPanel) return;
 
         const canCraftResult = this.game.craftingManager.canCraft(recipeId);
-        const stats = Object.entries(recipe.stats).map(([stat, value]) => {
+        
+        // Générer les stats uniquement si la recette en a (équipements)
+        const stats = recipe.stats ? Object.entries(recipe.stats).map(([stat, value]) => {
             const statName = this.getStatName(stat);
-            return `<div class="detail-stat">+${value} ${statName}</div>`;
-        }).join('');
+            const sign = value >= 0 ? '+' : ''; // Pas de + si négatif (affiche automatiquement -)
+            return `<div class="detail-stat">${sign}${value} ${statName}</div>`;
+        }).join('') : '';
 
         const materials = recipe.materials.map(mat => {
             const resourceData = window.findResourceById(mat.resourceId);
@@ -1981,10 +2181,31 @@ class UI {
                 </div>
             </div>
             
-            <div class="detail-stats">
-                <h4>📊 Statistiques</h4>
-                ${stats}
-            </div>
+            ${recipe.stats ? `
+                <div class="detail-stats">
+                    <h4>📊 Statistiques</h4>
+                    ${stats}
+                </div>
+            ` : ''}
+            
+            ${recipe.produces ? `
+                <div class="detail-stats">
+                    <h4>🎁 Production</h4>
+                    <div class="detail-stat" style="color: var(--color-success);">
+                        ${(() => {
+                            // Pour les recettes de processing (transformation), chercher la ressource produite
+                            if (recipe.type === 'processing') {
+                                const producedResource = window.findResourceById(recipe.produces.resourceId);
+                                return `${producedResource?.icon || '📦'} ${recipe.produces.amount}x ${producedResource?.name || recipe.produces.resourceId}`;
+                            }
+                            // Pour les équipements, utiliser le nom et l'icône de la recette
+                            else {
+                                return `${recipe.icon || '📦'} ${recipe.produces.amount}x ${recipe.name}`;
+                            }
+                        })()}
+                    </div>
+                </div>
+            ` : ''}
             
             <div class="detail-requirements">
                 <h4>📦 Matériaux requis</h4>
@@ -2100,6 +2321,136 @@ class UI {
         this.updateCityBuildings();
         this.updateBuildingsGrid();
         this.updateTownProductionSummary();
+        this.updateAutoSellToggles();
+    }
+
+    /**
+     * 🆕 Met à jour les boutons de toggle auto-sell
+     */
+    updateAutoSellToggles() {
+        if (!this.game.buildingManager) return;
+        
+        const autoSellEnabled = this.game.buildingManager.autoSellEnabled;
+        
+        for (const [category, enabled] of Object.entries(autoSellEnabled)) {
+            const btn = document.getElementById(`toggle-autosell-${category}`);
+            if (btn) {
+                const statusSpan = btn.querySelector('.toggle-status');
+                if (statusSpan) {
+                    statusSpan.textContent = enabled ? 'ON' : 'OFF';
+                }
+                
+                if (enabled) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            }
+        }
+    }
+
+    /**
+     * 🔬 Met à jour l'onglet Recherches
+     */
+    updateResearchTab() {
+        if (!this.game.researchManager) return;
+        
+        // Statistiques globales
+        const stats = this.game.researchManager.getStats();
+        const progressEl = document.getElementById('research-progress');
+        const percentageEl = document.getElementById('research-percentage');
+        
+        if (progressEl) progressEl.textContent = `${stats.unlocked}/${stats.total}`;
+        if (percentageEl) percentageEl.textContent = `${stats.percentage}%`;
+        
+        // Mettre à jour chaque catégorie
+        const categories = ['production', 'combat', 'progression', 'town', 'endgame'];
+        
+        categories.forEach(category => {
+            const grid = document.getElementById(`research-grid-${category}`);
+            if (!grid) return;
+            
+            const researches = this.game.researchManager.getResearchesByCategory(category);
+            
+            grid.innerHTML = researches.map(research => {
+                const isUnlocked = research.unlocked;
+                const checkResult = research.canPurchase;
+                const canBuy = checkResult.canBuy;
+                
+                // Classes CSS
+                let cardClasses = 'research-card';
+                if (isUnlocked) {
+                    cardClasses += ' unlocked';
+                } else if (!canBuy) {
+                    cardClasses += ' locked';
+                }
+                
+                // Statut
+                let statusHtml = '';
+                if (isUnlocked) {
+                    statusHtml = '<div class="research-status unlocked">✅ RECHERCHÉ</div>';
+                } else if (canBuy) {
+                    statusHtml = '<div class="research-status can-purchase">💰 ACHETER</div>';
+                } else {
+                    statusHtml = `<div class="research-status locked">🔒 ${checkResult.reason}</div>`;
+                }
+                
+                // Coûts
+                const costHtml = Object.entries(research.cost).map(([resourceId, amount]) => {
+                    let playerAmount = 0;
+                    let insufficient = false;
+                    
+                    if (resourceId === 'gold') {
+                        playerAmount = this.game.player.resources.gold;
+                        insufficient = playerAmount < amount;
+                    } else {
+                        playerAmount = this.game.professionManager.getInventoryAmount(resourceId);
+                        insufficient = playerAmount < amount;
+                    }
+                    
+                    const icon = resourceId === 'gold' ? '💰' : '📦';
+                    const insufficientClass = insufficient ? 'insufficient' : '';
+                    
+                    return `<div class="cost-item ${insufficientClass}">
+                        ${icon} ${amount} ${resourceId.replace(/_/g, ' ')}
+                    </div>`;
+                }).join('');
+                
+                // Prérequis
+                let requiresHtml = '';
+                if (research.requires && research.requires.length > 0 && !isUnlocked) {
+                    const requireNames = research.requires.map(reqId => {
+                        const req = this.game.researchManager.getResearchById(reqId);
+                        return req ? req.name : reqId;
+                    }).join(', ');
+                    requiresHtml = `<div class="research-requires">🔗 Prérequis: ${requireNames}</div>`;
+                }
+                
+                return `
+                    <div class="${cardClasses}" data-research-id="${research.id}">
+                        <div class="research-card-header">
+                            <div class="research-icon">${research.icon}</div>
+                            <div class="research-info">
+                                <div class="research-name">${research.name}</div>
+                                <span class="research-tier tier-${research.tier}">Tier ${research.tier}</span>
+                            </div>
+                        </div>
+                        <div class="research-description">${research.description}</div>
+                        <div class="research-cost">${costHtml}</div>
+                        ${requiresHtml}
+                        ${statusHtml}
+                    </div>
+                `;
+            }).join('');
+            
+            // Event listeners pour les cartes (achat)
+            grid.querySelectorAll('.research-card:not(.unlocked):not(.locked)').forEach(card => {
+                card.addEventListener('click', () => {
+                    const researchId = card.dataset.researchId;
+                    this.game.researchManager.purchase(researchId);
+                });
+            });
+        });
     }
 
     /**
@@ -2722,15 +3073,47 @@ class UI {
      */
     getStatName(stat) {
         const names = {
+            // Stats de base
             force: 'Force',
             agility: 'Agilité',
             intelligence: 'Intelligence',
             wisdom: 'Sagesse',
             endurance: 'Endurance',
+            
+            // Stats de combat
             damage: 'Dégâts',
             defense: 'Défense',
+            armor: 'Armure',
+            health: 'Santé',
+            hpRegen: 'Régén. Santé',
+            
+            // Stats magiques
+            manaRegen: 'Régén. Mana',
+            magicResist: 'Résist. Magie',
+            spellCrit: 'Critiques Magiques',
+            spellPenetration: 'Pénétration Magique',
+            healingPower: 'Puissance de Soin',
+            healing: 'Soins',
+            hpRestore: 'Restauration PV',
+            holyPower: 'Puissance Sacrée',
+            
+            // Stats défensives
+            blockChance: 'Chance de Blocage',
+            damageReduction: 'Réduction Dégâts',
+            
+            // Stats offensives
+            critChance: 'Chance Critique',
+            critDamage: 'Dégâts Critiques',
+            attackSpeed: 'Vitesse d\'Attaque',
+            
+            // Stats utilitaires
             professionXP: 'XP Métier',
-            dropRate: 'Taux de Drop'
+            dropRate: 'Taux de Drop',
+            goldFind: 'Chance d\'Or',
+            
+            // Autres
+            speed: 'Vitesse',
+            luck: 'Chance'
         };
         return names[stat] || stat;
     }
@@ -2965,9 +3348,9 @@ class UI {
      * Met à jour l'onglet Transmutation
      */
     updateAlchemy() {
-        if (!this.game.alchemyManager) return;
+        if (!this.game.transmutationManager) return;
 
-        const alchemy = this.game.alchemyManager;
+        const alchemy = this.game.transmutationManager;
 
         // Mettre à jour niveau et XP
         const levelEl = document.getElementById('alchemy-level');
@@ -3006,7 +3389,7 @@ class UI {
      * Met à jour les conversions disponibles
      */
     updateAlchemyConversions() {
-        const alchemy = this.game.alchemyManager;
+        const alchemy = this.game.transmutationManager;
         if (!alchemy || !window.ALCHEMY_CONVERSIONS) return;
 
         const woodList = document.getElementById('conversions-wood');
@@ -3083,7 +3466,7 @@ class UI {
             return;
         }
 
-        const alchemy = this.game.alchemyManager;
+        const alchemy = this.game.transmutationManager;
         const currentAmount = this.game.professionManager.getInventoryAmount(conversion.input.resourceId);
         const maxPossible = Math.floor(currentAmount / conversion.input.amount);
 
@@ -3367,7 +3750,7 @@ class UI {
         if (!this.currentModal) return;
 
         const quantity = this.currentModal.selectedQuantity;
-        this.game.alchemyManager.startConversion(conversionId, quantity);
+        this.game.transmutationManager.startConversion(conversionId, quantity);
         this.closeConversionModal();
     }
 
@@ -3389,7 +3772,7 @@ class UI {
      * Met à jour la file de conversion
      */
     updateAlchemyQueue() {
-        const alchemy = this.game.alchemyManager;
+        const alchemy = this.game.transmutationManager;
         if (!alchemy) return;
 
         const queueCount = document.getElementById('queue-count');
@@ -3419,7 +3802,7 @@ class UI {
                     <div class="queue-item-header">
                         <div class="queue-item-name">${item.conversion.name}</div>
                         <button class="queue-item-cancel" 
-                                onclick="game.alchemyManager.cancelConversion(${item.id})">
+                                onclick="game.transmutationManager.cancelConversion(${item.id})">
                             ✕ Annuler
                         </button>
                     </div>
@@ -3442,7 +3825,7 @@ class UI {
      * Met à jour les bonus de Transmutation
      */
     updateAlchemyBonuses() {
-        const alchemy = this.game.alchemyManager;
+        const alchemy = this.game.transmutationManager;
         if (!alchemy || !window.ALCHEMY_CONFIG) return;
 
         const bonusesList = document.getElementById('alchemyBonusesList');
@@ -4915,9 +5298,9 @@ class UI {
                 <h3 style="color: var(--accent-color); margin-top: 0;">📋 Les 4 Métiers</h3>
                 <ul style="margin: 10px 0; padding-left: 20px;">
                     <li><strong>🪓 Bûcheron :</strong> Récolte du bois (Chêne, Frêne, Érable...)</li>
-                    <li><strong>⛏️ Mineur :</strong> Récolte des minerais (Cuivre, Fer, Mithril...) et gemmes</li>
-                    <li><strong>🌿 Herboriste :</strong> Récolte des plantes (Sauge, Gingembre, Chardon...)</li>
-                    <li><strong>🎣 Pêcheur :</strong> Récolte des poissons (Poisson-chat, Saumon, Espadon...)</li>
+                    <li><strong>⛏️ Mineur :</strong> Récolte des minerais (Fer, Cuivre, Mithril...) et gemmes</li>
+                    <li><strong>🌿 Herboriste :</strong> Récolte des plantes (débloqué niveau 10)</li>
+                    <li><strong>🎣 Pêcheur :</strong> Récolte des poissons (débloqué niveau 10)</li>
                 </ul>
             </div>
 
@@ -4933,14 +5316,14 @@ class UI {
 
             <div style="margin-bottom: 20px; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
                 <h3 style="color: var(--accent-color); margin-top: 0;">⚡ Auto-Récolte</h3>
-                <p>Construisez des bâtiments dans l'onglet <strong>🏘️ Ville</strong> pour automatiser la récolte :</p>
+                <p>Débloquez l'auto-récolte en atteignant <strong>niveau 50</strong> pour Bûcheron et Mineur :</p>
                 <ul style="margin: 10px 0; padding-left: 20px;">
-                    <li><strong>Scierie :</strong> Auto-bois (1 bois/10s)</li>
-                    <li><strong>Mine :</strong> Auto-minerai (1 minerai/10s)</li>
-                    <li><strong>Jardin d'Herbes :</strong> Auto-plantes (1 plante/10s)</li>
-                    <li><strong>Étang de Pêche :</strong> Auto-poisson (1 poisson/10s)</li>
+                    <li><strong>🪓 Auto-Bûcheron :</strong> 1 bois toutes les 60 secondes (Coût : 50🪵 50⚒️)</li>
+                    <li><strong>⛏️ Auto-Mineur :</strong> 1 minerai toutes les 60 secondes (Coût : 50🪵 50⚒️)</li>
+                    <li><strong>🌿 Herboriste :</strong> Déblocage automatique au niveau 10 du joueur</li>
+                    <li><strong>🎣 Pêcheur :</strong> Déblocage automatique au niveau 10 du joueur</li>
                 </ul>
-                <p style="color: #5CFF5C; margin-top: 10px;"><strong>💡 Astuce :</strong> Les bâtiments produisent automatiquement le tier de ressource le plus élevé que vous avez débloqué !</p>
+                <p style="color: #5CFF5C; margin-top: 10px;"><strong>💡 Astuce :</strong> L'auto-récolte fonctionne en arrière-plan, même quand vous ne jouez pas !</p>
             </div>
 
             <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, rgba(100, 200, 100, 0.2), rgba(50, 150, 50, 0.2)); border: 2px solid rgba(100, 200, 100, 0.4); border-radius: 10px;">
@@ -4982,12 +5365,13 @@ class UI {
             <h2 style="margin-top: 0; text-align: center; color: var(--accent-color);">🔨 Guide des Métiers de Fabrication</h2>
 
             <div style="margin-bottom: 20px; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
-                <h3 style="color: var(--accent-color); margin-top: 0;">📋 Les 4 Métiers</h3>
+                <h3 style="color: var(--accent-color); margin-top: 0;">📋 Les 5 Métiers</h3>
                 <ul style="margin: 10px 0; padding-left: 20px;">
-                    <li><strong>⚒️ Forgeron :</strong> Fabrique des armes (épées, arcs, bâtons...)</li>
+                    <li><strong>⚔️ Forgeron :</strong> Fabrique des armes (épées, arcs, bâtons...)</li>
                     <li><strong>🛡️ Armurier :</strong> Fabrique des armures (casques, plastrons, bottes...)</li>
-                    <li><strong>💍 Joaillier :</strong> Fabrique des accessoires (anneaux, amulettes...)</li>
-                    <li><strong>⚗️ Alchimiste :</strong> Transmute les ressources (T1 → T2 → T3)</li>
+                    <li><strong>🎒 Tanneur :</strong> Traite les peaux en cuir de qualité (débloqué niveau 10)</li>
+                    <li><strong>💍 Joaillier :</strong> Fabrique des accessoires avec gemmes (anneaux, amulettes...)</li>
+                    <li><strong>⚗️ Alchimiste :</strong> Transmute les ressources (T1 → T2 → T3, débloqué niveau 20)</li>
                 </ul>
             </div>
 
@@ -5277,9 +5661,568 @@ class UI {
         }
         this.dungeonsUI.initialize();
     }
+    
+    /**
+     * 🎯 Affiche le modal de spécialisation des ressources (Quête M20b)
+     * @param {Quest} quest - La quête de spécialisation
+     */
+    showSpecializationModal(quest) {
+        const modal = document.getElementById('specializationModal');
+        if (!modal) {
+            console.error('❌ Modal de spécialisation introuvable');
+            return;
+        }
+        
+        const container = document.getElementById('specializationsContainer');
+        const btnConfirm = document.getElementById('btnConfirmSpecializations');
+        
+        if (!container || !btnConfirm) {
+            console.error('❌ Éléments du modal introuvables');
+            return;
+        }
+        
+        // Réinitialiser
+        container.innerHTML = '';
+        this.specializationChoices = {
+            woodcutter: null,
+            miner: null,
+            herbalist: null,
+            fisher: null
+        };
+        
+        // Créer les 4 cartes de professions
+        const professions = [
+            { id: 'woodcutter', name: 'Bûcheron', icon: '🪓', unlocked: this.game.unlocks.profession_woodcutting },
+            { id: 'miner', name: 'Mineur', icon: '⛏️', unlocked: this.game.unlocks.profession_mining },
+            { id: 'herbalist', name: 'Herboriste', icon: '🌿', unlocked: this.game.unlocks.profession_herbalism },
+            { id: 'fisher', name: 'Pêcheur', icon: '🎣', unlocked: this.game.unlocks.profession_fishing }
+        ];
+        
+        professions.forEach(prof => {
+            if (!prof.unlocked) return; // Sauter si non débloqué
+            
+            const profCard = document.createElement('div');
+            profCard.className = 'profession-specialization';
+            profCard.dataset.profession = prof.id;
+            
+            // Header
+            const header = document.createElement('div');
+            header.className = 'profession-header';
+            header.innerHTML = `
+                <div class="profession-icon">${prof.icon}</div>
+                <div class="profession-info">
+                    <h3>${prof.name}</h3>
+                    <div class="profession-status">Aucune spécialisation</div>
+                </div>
+            `;
+            
+            // Choix de ressources
+            const choices = quest.choices[prof.id] || [];
+            const choicesContainer = document.createElement('div');
+            choicesContainer.className = 'resource-choices';
+            
+            choices.forEach(choice => {
+                const choiceBtn = document.createElement('div');
+                choiceBtn.className = 'resource-choice';
+                choiceBtn.dataset.resourceId = choice.resourceId;
+                choiceBtn.innerHTML = `
+                    <span class="resource-name">${choice.name}</span>
+                    <span class="resource-bonus">${choice.description}</span>
+                    <span class="checkmark">✓</span>
+                `;
+                
+                // Click handler
+                choiceBtn.addEventListener('click', () => {
+                    this.selectSpecialization(prof.id, choice.resourceId);
+                });
+                
+                choicesContainer.appendChild(choiceBtn);
+            });
+            
+            profCard.appendChild(header);
+            profCard.appendChild(choicesContainer);
+            container.appendChild(profCard);
+        });
+        
+        // Bouton de confirmation
+        btnConfirm.disabled = true;
+        btnConfirm.onclick = () => this.confirmSpecializations(quest);
+        
+        // Afficher le modal
+        modal.style.display = 'flex';
+        
+        // Notification
+        this.showNotification('🎯 Choisissez vos spécialisations !', 'info');
+    }
+    
+    /**
+     * 🎯 Sélectionne une spécialisation pour une profession
+     * @param {string} professionId - ID de la profession
+     * @param {string} resourceId - ID de la ressource
+     */
+    selectSpecialization(professionId, resourceId) {
+        // Enregistrer le choix
+        this.specializationChoices[professionId] = resourceId;
+        
+        // Mettre à jour l'UI
+        const profCard = document.querySelector(`.profession-specialization[data-profession="${professionId}"]`);
+        if (!profCard) return;
+        
+        // Désélectionner tous les choix de cette profession
+        const allChoices = profCard.querySelectorAll('.resource-choice');
+        allChoices.forEach(choice => choice.classList.remove('selected'));
+        
+        // Sélectionner le choix actuel
+        const selectedChoice = profCard.querySelector(`.resource-choice[data-resource-id="${resourceId}"]`);
+        if (selectedChoice) {
+            selectedChoice.classList.add('selected');
+        }
+        
+        // Mettre à jour le statut
+        const statusEl = profCard.querySelector('.profession-status');
+        if (statusEl) {
+            statusEl.textContent = '✓ Spécialisation choisie';
+            statusEl.classList.add('completed');
+        }
+        
+        profCard.classList.add('completed');
+        
+        // Vérifier si tous les choix sont faits
+        this.checkSpecializationsComplete();
+    }
+    
+    /**
+     * 🎯 Vérifie si toutes les spécialisations sont choisies
+     */
+    checkSpecializationsComplete() {
+        const allChosen = Object.values(this.specializationChoices).every(choice => choice !== null);
+        
+        const btnConfirm = document.getElementById('btnConfirmSpecializations');
+        if (btnConfirm) {
+            btnConfirm.disabled = !allChosen;
+        }
+    }
+    
+    /**
+     * 🎯 Confirme les spécialisations et complète la quête
+     * @param {Quest} quest - La quête de spécialisation
+     */
+    confirmSpecializations(quest) {
+        // Vérifier que tous les choix sont faits
+        const allChosen = Object.values(this.specializationChoices).every(choice => choice !== null);
+        if (!allChosen) {
+            this.showNotification('❌ Vous devez choisir une spécialisation pour chaque métier', 'error');
+            return;
+        }
+        
+        // Enregistrer les spécialisations dans le jeu
+        Object.entries(this.specializationChoices).forEach(([professionId, resourceId]) => {
+            this.game.chooseSpecialization(professionId, resourceId);
+        });
+        
+        // Compléter la quête
+        quest.progress = quest.target;
+        const completed = quest.complete();
+        
+        if (completed !== false && this.game.questManager) {
+            this.game.questManager.onQuestComplete(quest);
+        }
+        
+        // Fermer le modal
+        const modal = document.getElementById('specializationModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        
+        // Notification finale
+        this.showNotification('🎉 Spécialisations enregistrées ! Vous recevez +25% de drop rate sur vos ressources choisies !', 'success');
+        
+        // Rafraîchir l'UI
+        this.updateProfessions();
+        this.update();
+    }
+
+    /**
+     * 🗺️ NOUVEL ONGLET CARTE - Génère les tabs de régions
+     */
+    updateMapRegionTabs() {
+        console.log('🗺️ updateMapRegionTabs appelée');
+        const container = document.getElementById('regionTabs');
+        if (!container) {
+            console.error('❌ Container regionTabs introuvable');
+            return;
+        }
+
+        const combat = this.game.combat;
+        const unlockedRegions = combat.unlockedRegions || 1;
+        
+        console.log('📊 Combat:', combat);
+        console.log('🔓 Régions débloquées:', unlockedRegions);
+        console.log('🗺️ RegionsData:', window.RegionsData);
+        
+        container.innerHTML = '';
+
+        // Créer un tab pour chaque région (5 régions max)
+        for (let regionId = 1; regionId <= 5; regionId++) {
+            const regionData = window.RegionsData?.regions?.find(r => r.id === regionId);
+            console.log(`🔍 Région ${regionId}:`, regionData);
+            if (!regionData) continue;
+
+            const tab = document.createElement('button');
+            tab.className = 'region-tab';
+            
+            if (regionId > unlockedRegions) {
+                tab.classList.add('locked');
+                tab.disabled = true;
+            }
+            
+            if (regionId === combat.currentRegion) {
+                tab.classList.add('active');
+            }
+
+            tab.innerHTML = `
+                <span class="region-tab-icon">${regionData.icon}</span>
+                <span class="region-tab-name">${regionData.name}</span>
+            `;
+
+            tab.onclick = () => {
+                if (regionId <= unlockedRegions) {
+                    this.showMapRegion(regionId);
+                }
+            };
+
+            container.appendChild(tab);
+        }
+    }
+
+    /**
+     * 🗺️ Affiche une région spécifique sur la carte
+     */
+    showMapRegion(regionId) {
+        console.log(`🗺️ showMapRegion(${regionId}) appelée`);
+        const combat = this.game.combat;
+        const regionData = window.RegionsData?.regions?.find(r => r.id === regionId);
+        if (!regionData) {
+            console.error(`❌ Région ${regionId} introuvable`);
+            return;
+        }
+        console.log('✅ Région trouvée:', regionData);
+
+        // Mettre à jour les tabs
+        document.querySelectorAll('.region-tab').forEach((tab, index) => {
+            tab.classList.toggle('active', index + 1 === regionId);
+        });
+
+        // Mettre à jour le header de région
+        document.getElementById('mapRegionName').textContent = `${regionData.icon} ${regionData.name}`;
+        document.getElementById('mapRegionDescription').textContent = regionData.description || 'Une région mystérieuse...';
+
+        // Calculer progression
+        const unlockedZones = combat.unlockedZones[regionId] || 1;
+        const totalZones = regionData.zones?.length || 10;
+        document.getElementById('mapRegionProgress').textContent = `${unlockedZones}/${totalZones}`;
+
+        // Boss vaincu ?
+        const bossKilled = combat.bossesKilled?.[regionId] || false;
+        document.getElementById('mapRegionBoss').textContent = bossKilled ? '✅' : '❌';
+
+        // Générer la grid des zones
+        this.updateMapZonesGrid(regionId);
+    }
+
+    /**
+     * 🗺️ Génère la grid des zones pour une région
+     */
+    updateMapZonesGrid(regionId) {
+        const container = document.getElementById('mapZonesGrid');
+        if (!container) return;
+
+        const combat = this.game.combat;
+        const regionData = window.RegionsData?.regions?.find(r => r.id === regionId);
+        if (!regionData) return;
+
+        // Vérifier si la région est débloquée (comme les onglets)
+        const unlockedRegions = combat.unlockedRegions || 1;
+        if (regionId > unlockedRegions) {
+            container.innerHTML = '<div style="opacity:0.5;filter:grayscale(0.7);text-align:center;padding:40px 0;font-size:1.2rem;">🔒 Région non débloquée<br><span style="font-size:0.95rem;">Termine la quête correspondante pour accéder à cette région.</span></div>';
+            return;
+        }
+
+        const unlockedZones = combat.unlockedZones[regionId] || 1;
+        const zones = regionData.zones || [];
+
+        container.innerHTML = '';
+
+        zones.forEach((zone, index) => {
+            const zoneNum = index + 1;
+            const isUnlocked = zoneNum <= unlockedZones;
+            const isCurrent = (regionId === combat.currentRegion && zoneNum === combat.currentZone);
+            const zoneKey = `${regionId}_${zoneNum}`;
+            const kills = combat.monstersKilledPerZone[zoneKey] || 0;
+            const isCompleted = kills >= GameConfig.ZONES.MONSTERS_TO_UNLOCK;
+
+            const card = document.createElement('div');
+            card.className = 'map-zone-card';
+
+            if (!isUnlocked) card.classList.add('locked');
+            if (isCurrent) card.classList.add('current');
+            if (isCompleted) card.classList.add('completed');
+
+            let statusText = '';
+            let statusClass = '';
+            if (!isUnlocked) {
+                statusText = '🔒 Verrouillée';
+                statusClass = 'locked';
+            } else if (isCompleted) {
+                statusText = '✅ Complétée';
+                statusClass = 'completed';
+            } else {
+                statusText = '⚔️ Disponible';
+                statusClass = 'unlocked';
+            }
+
+            card.innerHTML = `
+                <div class="zone-number">Zone ${zoneNum}</div>
+                <div class="zone-name">${zone.icon} ${zone.name}</div>
+                <div class="zone-monster-type">${zone.monsterTypes?.join(', ') || 'Inconnu'}</div>
+                <div class="zone-status ${statusClass}">${statusText}</div>
+            `;
+
+            if (isUnlocked) {
+                card.onclick = () => this.showZoneDetails(regionId, zoneNum);
+            }
+
+            container.appendChild(card);
+        });
+    }
+
+    /**
+     * 🗺️ Affiche les détails d'une zone
+     */
+    showZoneDetails(regionId, zoneNum) {
+        const combat = this.game.combat;
+        const regionData = window.RegionsData?.regions?.find(r => r.id === regionId);
+        const zoneData = regionData?.zones?.[zoneNum - 1];
+        if (!zoneData) return;
+
+        const detailsPanel = document.getElementById('mapZoneDetails');
+        if (!detailsPanel) return;
+
+        const zoneKey = `${regionId}_${zoneNum}`;
+        const kills = combat.monstersKilledPerZone[zoneKey] || 0;
+        const gold = combat.goldEarnedPerZone[zoneKey] || 0;
+        // Mission 1 : tuer 100 ennemis
+        const mission1Goal = 100;
+        document.getElementById('zoneMission1Goal').textContent = mission1Goal.toString();
+        const mission1Progress = Math.min(kills, mission1Goal);
+        document.getElementById('zoneMission1ProgressBar').value = mission1Progress;
+        document.getElementById('zoneMission1ProgressBar').max = mission1Goal;
+        document.getElementById('zoneMission1ProgressText').textContent = `${mission1Progress}/${mission1Goal}`;
+        if (kills >= mission1Goal) {
+            document.getElementById('zoneMission1Reward').style.display = '';
+        } else {
+            document.getElementById('zoneMission1Reward').style.display = 'none';
+        }
+
+        // Mission 2 : combo de victoires d'affilée (à stocker dans combat.comboWinStreakPerZone)
+        const mission2Goal = 20;
+        document.getElementById('zoneMission2Goal').textContent = mission2Goal.toString();
+        let comboStreak = 0;
+        if (combat.comboWinStreakPerZone && combat.comboWinStreakPerZone[zoneKey]) {
+            comboStreak = combat.comboWinStreakPerZone[zoneKey];
+        }
+        const mission2Progress = Math.min(comboStreak, mission2Goal);
+        document.getElementById('zoneMission2ProgressBar').value = mission2Progress;
+        document.getElementById('zoneMission2ProgressBar').max = mission2Goal;
+        document.getElementById('zoneMission2ProgressText').textContent = `${mission2Progress}/${mission2Goal}`;
+        if (comboStreak >= mission2Goal) {
+            document.getElementById('zoneMission2Reward').style.display = '';
+        } else {
+            document.getElementById('zoneMission2Reward').style.display = 'none';
+        }
+
+        // Mission 3 : vaincre le boss (à stocker dans combat.bossDefeatedPerZone)
+        let bossDefeated = false;
+        if (combat.bossDefeatedPerZone && combat.bossDefeatedPerZone[zoneKey]) {
+            bossDefeated = true;
+        }
+        document.getElementById('zoneMission3Status').textContent = bossDefeated ? '✅' : '❌';
+        if (bossDefeated) {
+            document.getElementById('zoneMission3Reward').style.display = '';
+        } else {
+            document.getElementById('zoneMission3Reward').style.display = 'none';
+        }
+
+        // Affichage des infos selon missions
+        let showMonsters = kills >= mission1Goal;
+        let showDrops = comboStreak >= mission2Goal;
+        document.getElementById('zoneDetailsName').textContent = `${zoneData.icon} ${zoneData.name}`;
+        document.getElementById('zoneDetailskills').textContent = kills.toString();
+        document.getElementById('zoneDetailsGold').textContent = gold.toString();
+
+        // Affichage description
+        if (showMonsters) {
+            document.getElementById('zoneDetailsDescription').textContent = zoneData.description || 'Une zone dangereuse...';
+        } else {
+            document.getElementById('zoneDetailsDescription').textContent = '??? (Débloque la mission Monstres)';
+        }
+
+        // Affichage liste des monstres
+        const monstersListDiv = document.getElementById('zoneMonstersList');
+        if (showMonsters && Array.isArray(zoneData.monsters) && zoneData.monsters.length > 0) {
+            monstersListDiv.style.display = '';
+            monstersListDiv.innerHTML = '<div style="font-weight:bold;color:#ffe082;margin-bottom:8px;">Monstres :</div>' +
+                '<div style="display:flex;flex-wrap:wrap;gap:8px;">' +
+                zoneData.monsters.map(m => {
+                    const monsterData = window.MonstersData?.common?.[m.id] || window.MonstersData?.rare?.[m.id] || window.MonstersData?.elite?.[m.id];
+                    const icon = monsterData?.icon || '👾';
+                    
+                    // Afficher les drops seulement si la mission 2 est complétée (showDrops === true)
+                    let dropsDisplay = '';
+                    if (showDrops) {
+                        const drops = Array.isArray(m.drops) ? m.drops.map(d => d.name).join(', ') : '';
+                        if (drops) {
+                            dropsDisplay = `<div style="font-size:11px;color:#b2ffb2;text-align:center;opacity:0.8;">🎁 ${drops}</div>`;
+                        }
+                    } else {
+                        dropsDisplay = `<div style="font-size:11px;color:#888;text-align:center;opacity:0.6;">🎁 ???</div>`;
+                    }
+                    
+                    return `
+                        <div style="
+                            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+                            border: 1px solid rgba(255,255,255,0.15);
+                            border-radius: 8px;
+                            padding: 10px 14px;
+                            min-width: 140px;
+                            flex: 1 1 auto;
+                            transition: all 0.3s ease;
+                            cursor: default;
+                        " onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='rgba(255,224,130,0.4)';this.style.boxShadow='0 4px 12px rgba(255,224,130,0.2)'" onmouseout="this.style.transform='';this.style.borderColor='rgba(255,255,255,0.15)';this.style.boxShadow=''">
+                            <div style="font-size: 24px;text-align:center;margin-bottom:6px;">${icon}</div>
+                            <div style="font-weight:bold;color:#fff;text-align:center;font-size:13px;margin-bottom:4px;">${m.name}</div>
+                            ${dropsDisplay}
+                        </div>
+                    `;
+                }).join('') +
+                '</div>';
+        } else {
+            monstersListDiv.style.display = 'none';
+            monstersListDiv.innerHTML = '';
+        }
+
+        // Affichage liste des drops par monstre
+        const dropsListDiv = document.getElementById('zoneDropsList');
+        if (showDrops && Array.isArray(zoneData.monsters) && zoneData.monsters.length > 0) {
+            dropsListDiv.style.display = '';
+            let html = '<div style="font-weight:bold;color:#ffe082;margin-bottom:2px;">Drops par monstre :</div>';
+            zoneData.monsters.forEach(m => {
+                if (Array.isArray(m.drops) && m.drops.length > 0) {
+                    html += `<div style='margin-bottom:2px;'><span style='color:#b2ffb2;'>${m.name}</span> : ` +
+                        m.drops.map(d => `<span style='margin-right:8px;'>🎁 ${d.name}</span>`).join('') + '</div>';
+                }
+            });
+            dropsListDiv.innerHTML = html;
+        } else {
+            dropsListDiv.style.display = 'none';
+            dropsListDiv.innerHTML = '';
+        }
+
+        // Stocker les coordonnées pour le voyage
+        detailsPanel.dataset.regionId = regionId;
+        detailsPanel.dataset.zoneNum = zoneNum;
+
+        detailsPanel.style.display = 'block';
+    }
+
+    /**
+     * 🗺️ Ferme les détails de zone
+     */
+    closeZoneDetails() {
+        const detailsPanel = document.getElementById('mapZoneDetails');
+        if (detailsPanel) {
+            detailsPanel.style.display = 'none';
+        }
+    }
+
+    /**
+     * 🗺️ Voyage vers une zone
+     */
+    travelToZone() {
+        const detailsPanel = document.getElementById('mapZoneDetails');
+        if (!detailsPanel) return;
+
+        const regionId = parseInt(detailsPanel.dataset.regionId);
+        const zoneNum = parseInt(detailsPanel.dataset.zoneNum);
+
+        if (!regionId || !zoneNum) return;
+
+        const combat = this.game.combat;
+
+        // Changer de région/zone
+        combat.currentRegion = regionId;
+        combat.currentZone = zoneNum;
+
+        // Spawn nouveau monstre
+        combat.spawnMonster();
+
+        // Fermer détails et switcher vers Combat
+        this.closeZoneDetails();
+        this.switchTab('combat');
+
+        this.showNotification(`🚀 Voyage vers ${regionId === combat.currentRegion ? 'Zone' : 'Région'} ${zoneNum} !`, 'success');
+        this.update();
+    }
+
+    /**
+     * 🗺️ Met à jour le panneau de progression compact (onglet Combat)
+     */
+    updateProgressionPanel() {
+        const combat = this.game.combat;
+        if (!combat) return;
+
+        const regionData = combat.getCurrentRegionData?.();
+        if (!regionData) return;
+
+        // Nom de la région
+        const regionNameEl = document.getElementById('progressRegionName');
+        if (regionNameEl) {
+            regionNameEl.textContent = regionData.name;
+        }
+
+        // Dots des zones (2 lignes de 5)
+        const dotsEl = document.getElementById('progressZoneDots');
+        if (dotsEl) {
+            const unlockedZones = combat.unlockedZones[combat.currentRegion] || 1;
+            const totalZones = regionData.zones?.length || 10;
+            let dots = '';
+            for (let i = 1; i <= totalZones; i++) {
+                if (i < combat.currentZone) {
+                    dots += '✅'; // Complétée
+                } else if (i === combat.currentZone) {
+                    dots += '🎯'; // Actuelle
+                } else if (i <= unlockedZones) {
+                    dots += '⭕'; // Débloquée
+                } else {
+                    dots += '🔒'; // Verrouillée
+                }
+                // Ajouter un saut de ligne après la 5ème zone
+                if (i === 5) {
+                    dots += '\n';
+                }
+            }
+            dotsEl.textContent = dots;
+        }
+
+        // Stats
+        document.getElementById('progressCurrentZone').textContent = combat.currentZone;
+        document.getElementById('progressTotalZones').textContent = regionData.zones?.length || 10;
+        document.getElementById('progressKills').textContent = combat.monstersKilled || 0;
+    }
 }
 
 // Rendre disponible globalement
 if (typeof window !== 'undefined') {
     window.UI = UI;
 }
+

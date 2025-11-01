@@ -1,0 +1,422 @@
+/**
+ * 🗺️ STYLES ONGLET CARTE
+ * Carte interactive avec régions, zones et système de voyage
+ */
+
+/* ===== CONTAINER PRINCIPAL ===== */
+.map-container {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.map-container h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--color-warning);
+    font-size: 2rem;
+}
+
+/* ===== TABS DE RÉGIONS ===== */
+.region-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.region-tab {
+    padding: 14px 28px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(40,120,255,0.10) 100%);
+    border: 2.5px solid var(--color-border);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(.4,1,.7,1.2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.08rem;
+    color: #fffbe7;
+    font-weight: 600;
+    box-shadow: 0 2px 12px 0 rgba(80,180,255,0.08);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    z-index: 1;
+}
+
+.region-tab.active {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    border-color: var(--color-warning);
+    color: #fffbe7;
+    box-shadow: 0 0 18px 2px rgba(255, 220, 40, 0.18);
+}
+
+.region-tab.locked {
+    background: linear-gradient(135deg, rgba(60, 60, 60, 0.18) 0%, rgba(20, 20, 20, 0.12) 100%);
+    color: #888;
+    opacity: 0.5;
+    filter: grayscale(0.7);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.region-tab:hover {
+    border-color: var(--color-warning);
+    transform: translateY(-2px);
+}
+
+.region-tab.active {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    border-color: var(--color-warning);
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+}
+
+.region-tab.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}
+
+.region-tab.locked:hover {
+    transform: none;
+    border-color: var(--color-border);
+}
+
+.region-tab-icon {
+    font-size: 1.5rem;
+}
+
+.region-tab-name {
+    font-weight: bold;
+}
+
+/* ===== HEADER RÉGION ===== */
+.map-region-header {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3));
+    border: 2px solid var(--color-border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.map-region-info h3 {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+    color: var(--color-warning);
+}
+
+.map-region-info p {
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+}
+
+.map-region-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.map-region-stats .stat-item {
+    display: flex;
+    gap: 8px;
+    font-size: 0.95rem;
+}
+
+.map-region-stats .stat-label {
+    color: var(--color-text-secondary);
+}
+
+.map-region-stats .stat-value {
+    font-weight: bold;
+    color: var(--color-warning);
+}
+
+/* ===== GRID DES ZONES ===== */
+.map-zones-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.map-zone-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(40, 120, 255, 0.10) 100%);
+    border: 3px solid var(--color-border);
+    border-radius: 16px;
+    padding: 22px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(.4,1,.7,1.2);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 24px 0 rgba(80,180,255,0.10), 0 1.5px 0 0 rgba(255,255,255,0.08);
+    color: var(--color-text);
+    font-weight: 500;
+    z-index: 1;
+}
+
+.map-zone-card .zone-number,
+.map-zone-card .zone-name {
+    color: #fffbe7;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+.map-zone-card .zone-status {
+    background: rgba(255,255,255,0.10);
+    color: #ffe082;
+    font-weight: bold;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.18);
+}
+
+.map-zone-card.completed {
+    background: linear-gradient(135deg, rgba(80, 255, 180, 0.18) 0%, rgba(0, 180, 120, 0.10) 100%);
+    border-color: var(--color-success);
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.25);
+}
+
+.map-zone-card.current {
+    background: linear-gradient(135deg, rgba(255, 255, 180, 0.18) 0%, rgba(255, 220, 40, 0.10) 100%);
+    border-color: var(--color-warning);
+    box-shadow: 0 0 24px 4px rgba(255, 220, 40, 0.18);
+}
+
+.map-zone-card.locked {
+    background: linear-gradient(135deg, rgba(60, 60, 60, 0.25) 0%, rgba(20, 20, 20, 0.18) 100%);
+    color: #888;
+    opacity: 0.5;
+    filter: grayscale(0.7);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.map-zone-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--color-warning);
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+}
+
+.map-zone-card.current {
+    border-color: var(--color-success);
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+}
+
+.map-zone-card.current::before {
+    content: "📍";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+}
+
+.map-zone-card.completed {
+    border-color: var(--color-info);
+}
+
+.map-zone-card.completed .zone-status {
+    color: var(--color-success);
+}
+
+.map-zone-card.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}
+
+.map-zone-card.locked:hover {
+    transform: none;
+    border-color: var(--color-border);
+    box-shadow: none;
+}
+
+.zone-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--color-warning);
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.zone-name {
+    font-size: 1rem;
+    text-align: center;
+    margin-bottom: 12px;
+    color: var(--color-text);
+}
+
+.zone-monster-type {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 8px;
+}
+
+.zone-status {
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.zone-status.unlocked {
+    color: var(--color-warning);
+}
+
+.zone-status.completed {
+    color: var(--color-success);
+}
+
+.zone-status.locked {
+    color: var(--color-text-secondary);
+}
+
+/* ===== DÉTAILS DE ZONE ===== */
+.map-zone-details {
+    background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(40,120,255,0.10) 100%);
+    border: 2.5px solid var(--color-border);
+    border-radius: 18px;
+    margin-bottom: 28px;
+    padding: 22px 38px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 18px 0 rgba(80,180,255,0.10);
+    color: #fffbe7;
+    font-weight: 600;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+.map-zone-details h3 {
+    font-size: 2rem;
+    color: var(--color-warning);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.zone-details-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+}
+
+.zone-details-left p {
+    font-size: 1.1rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.zone-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+.zone-stat {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    border: 2px solid var(--color-border);
+}
+
+.zone-stat-icon {
+    font-size: 1.5rem;
+}
+
+.zone-stat-label {
+    flex: 1;
+    color: var(--color-text-secondary);
+}
+
+.zone-stat-value {
+    font-weight: bold;
+    color: var(--color-warning);
+    font-size: 1.1rem;
+}
+
+.zone-details-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.zone-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.zone-actions .btn {
+    width: 100%;
+    padding: 15px 20px;
+    font-size: 1.1rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+    .map-zones-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .map-zones-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .zone-details-content {
+        grid-template-columns: 1fr;
+    }
+
+    .map-region-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 600px) {
+    .map-zones-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .region-tabs {
+        flex-direction: column;
+    }
+
+    .map-zone-card {
+        padding: 15px;
+    }
+
+    .zone-number {
+        font-size: 1.5rem;
+    }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes zoneUnlock {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.map-zone-card.just-unlocked {
+    animation: zoneUnlock 0.6s ease-out;
+}

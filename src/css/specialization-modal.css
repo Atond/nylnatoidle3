@@ -1,0 +1,225 @@
+/**
+ * 🎯 Modal de Spécialisation des Ressources
+ * Style pour la quête M20b "Maître Artisan des Ressources"
+ */
+
+.specialization-modal {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 900px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 2px solid #ffd700;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+.specialization-modal h2 {
+    color: #ffd700;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.specialization-subtitle {
+    text-align: center;
+    color: #a8d5ff;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+.specialization-warning {
+    text-align: center;
+    color: #ff6b6b;
+    font-size: 1rem;
+    margin-bottom: 30px;
+    font-weight: bold;
+    padding: 10px;
+    background: rgba(255, 107, 107, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+/* Container des 4 métiers */
+.specializations-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+/* Carte de métier */
+.profession-specialization {
+    background: rgba(26, 35, 45, 0.8);
+    border-radius: 12px;
+    padding: 20px;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.profession-specialization:hover {
+    border-color: rgba(255, 215, 0, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.2);
+}
+
+.profession-specialization.completed {
+    border-color: #4caf50;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.profession-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.profession-icon {
+    font-size: 2rem;
+}
+
+.profession-info h3 {
+    color: #ffd700;
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.profession-status {
+    color: #a8d5ff;
+    font-size: 0.9rem;
+}
+
+.profession-status.completed {
+    color: #4caf50;
+    font-weight: bold;
+}
+
+/* Liste des choix de ressources */
+.resource-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.resource-choice {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.resource-choice:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 215, 0, 0.4);
+    transform: translateX(5px);
+}
+
+.resource-choice.selected {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.1));
+    border-color: #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.resource-name {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.resource-choice.selected .resource-name {
+    color: #ffd700;
+    font-weight: bold;
+}
+
+.resource-bonus {
+    color: #4caf50;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.resource-choice.selected .resource-bonus {
+    color: #ffd700;
+}
+
+.resource-choice .checkmark {
+    display: none;
+    color: #ffd700;
+    font-size: 1.2rem;
+}
+
+.resource-choice.selected .checkmark {
+    display: inline;
+    animation: checkmarkPop 0.3s ease-out;
+}
+
+@keyframes checkmarkPop {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Boutons d'action */
+.specialization-actions {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.specialization-actions .btn {
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    min-width: 300px;
+}
+
+.specialization-actions .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #666;
+}
+
+/* Animation d'entrée */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .specializations-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .specialization-modal {
+        padding: 20px;
+        max-width: 95%;
+    }
+    
+    .specialization-modal h2 {
+        font-size: 1.5rem;
+    }
+    
+    .specialization-actions .btn {
+        min-width: 100%;
+    }
+}

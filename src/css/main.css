@@ -391,10 +391,41 @@ main {
     color: white;
     font-size: 1.3rem;
     padding: var(--spacing-lg) var(--spacing-xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.3s ease;
 }
 
 .btn-attack:hover {
     background: linear-gradient(135deg, #c0392b, #a93226);
+}
+
+/* 🎯 Animation de pulsation pour les gros combos */
+@keyframes comboPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+#comboDisplay {
+    font-size: 0.9em;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 107, 53, 0.8);
+    animation: comboGlow 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes comboGlow {
+    from {
+        text-shadow: 0 0 5px currentColor;
+    }
+    to {
+        text-shadow: 0 0 15px currentColor, 0 0 20px currentColor;
+    }
 }
 
 .btn-toggle {
@@ -414,6 +445,84 @@ main {
 
 .btn-toggle.active:hover {
     background: linear-gradient(135deg, #229954, #1e8449);
+}
+
+/* 🧪 Combat Potions Hotbar */
+.combat-potions {
+    background: var(--bg-panel);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+}
+
+.potions-title {
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--color-info);
+    margin-bottom: var(--spacing-sm);
+    text-align: center;
+}
+
+.potions-hotbar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-sm);
+}
+
+.potion-slot {
+    background: var(--bg-light);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-sm);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    min-height: 70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.potion-slot:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.potion-slot.empty {
+    opacity: 0.3;
+    cursor: not-allowed;
+    border-style: dashed;
+}
+
+.potion-slot.empty:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.potion-icon {
+    font-size: 1.8rem;
+    margin-bottom: var(--spacing-xs);
+}
+
+.potion-name {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: bold;
+}
+
+.potion-count {
+    font-size: 0.7rem;
+    color: var(--xp-color);
+    margin-top: var(--spacing-xs);
+}
+
+.potion-cooldown {
+    font-size: 0.65rem;
+    color: var(--color-warning);
+    font-style: italic;
 }
 
 .btn-secondary {
@@ -862,39 +971,129 @@ main {
     font-size: 0.85rem;
 }
 
-/* ✨ NOUVEAU : Minimap compacte (20%) */
-.minimap-panel {
-    flex: 1; /* 20% de l'espace */
-    max-height: 200px;
+/* 📊 NOUVEAU : Panneau Progression Compact */
+.progression-panel {
+    flex: 2; /* Plus d'espace (maintenant ~40% au lieu de 20%) */
+    max-height: 280px; /* Augmenté pour contenir 2 lignes de zones */
 }
 
-.minimap-compact .minimap-title {
-    font-size: 0.9rem;
+.progression-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.minimap-compact .minimap-progress {
-    font-size: 0.75rem;
+.region-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Augmenté de 8px → 12px pour plus d'espacement */
 }
 
-.minimap-compact .minimap-regions {
-    max-height: 120px;
+.region-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.region-icon {
+    font-size: 1.5rem;
+}
+
+.region-name {
+    font-weight: bold;
+    font-size: 1rem;
+    color: var(--color-warning);
+}
+
+.zones-dots {
+    font-size: 1.2rem;
+    letter-spacing: 4px;
+    text-align: center;
+    line-height: 1.8; /* Espacer les lignes */
+    white-space: pre-wrap; /* Préserve les sauts de ligne (\n) */
+    max-width: 100%;
+    word-spacing: 4px;
+    padding: 8px 0; /* Padding vertical pour plus d'espace */
+}
+
+.progress-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin-top: 4px; /* Petit espace supplémentaire */
+}
+
+.progression-compact .btn-sm {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+}
+
+/* 🎒 NOUVEAU : Butin récent agrandi */
+.combat-inventory-panel-large {
+    flex: 1.5; /* Espace flexible */
+    max-height: 300px; /* Hauteur suffisante pour voir le butin */
+}
+
+/* Dans la sidebar gauche, on ajuste la hauteur */
+.sidebar-left .combat-inventory-panel-large {
+    max-height: 320px;
+}
+
+.combat-inventory-panel-large h3 {
+    font-size: 1rem;
+    margin-bottom: 8px;
+}
+
+.combat-inventory-grid-large {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+    max-height: 220px;
     overflow-y: auto;
+    padding: 4px;
 }
 
-/* ✨ NOUVEAU : Butin récent ultra-compact (5%) */
-.combat-inventory-panel {
-    flex: 0.25; /* 5% de l'espace */
-    max-height: 80px;
+.combat-inventory-grid-large .item-slot {
+    aspect-ratio: 1;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--color-border);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
 }
 
-.combat-inventory-panel h3 {
-    font-size: 0.9rem;
-    margin-bottom: 4px;
+.combat-inventory-grid-large .item-slot:hover {
+    transform: scale(1.05);
+    border-color: var(--color-warning);
+    box-shadow: 0 0 15px rgba(255, 193, 7, 0.5);
 }
 
-.combat-inventory-panel .combat-inventory-grid {
-    max-height: 50px;
-    font-size: 0.75rem;
+.combat-inventory-grid-large .item-icon {
+    font-size: 2rem;
+}
+
+.combat-inventory-grid-large .item-name {
+    font-size: 0.7rem;
+    text-align: center;
+    margin-top: 4px;
+}
+
+.combat-inventory-grid-large .item-count {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: white;
 }
 
 /* Scrollbar personnalisée pour les quêtes */
@@ -935,6 +1134,30 @@ main {
 .quest-card.completed {
     opacity: 0.7;
     border-color: var(--color-success);
+}
+
+.quest-card.locked {
+    opacity: 0.65;
+    border-color: var(--color-warning);
+    background: linear-gradient(135deg, var(--bg-light) 0%, rgba(255, 193, 7, 0.05) 100%);
+}
+
+.quest-card.locked .quest-title {
+    color: var(--color-warning);
+}
+
+.quest-card.locked .quest-description {
+    opacity: 0.8;
+}
+
+.quest-requirements {
+    background: rgba(255, 107, 107, 0.1);
+    border-left: 3px solid var(--color-danger);
+    padding: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    line-height: 1.5;
 }
 
 .quest-card:hover {
@@ -1128,6 +1351,35 @@ main {
     color: var(--accent-color);
     margin-bottom: 15px;
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 🆕 Badge bonus passif niveau 50 */
+.level-50-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #000;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+    animation: pulse-glow 2s ease-in-out infinite;
+    cursor: help;
+    white-space: nowrap;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 4px 16px rgba(255, 215, 0, 0.6);
+        transform: scale(1.05);
+    }
 }
 
 .profession-xp-bar {
@@ -1301,8 +1553,8 @@ main {
 }
 
 .inventory-item:hover {
-    transform: translateY(-3px);
     box-shadow: 0 5px 12px rgba(0, 0, 0, 0.5);
+    border-color: var(--color-primary);
 }
 
 .item-icon {
@@ -3117,5 +3369,344 @@ main {
     
     .city-overview {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ========== AUTO-SELL SYSTEM ========== */
+.auto-sell-panel {
+    margin-top: 20px;
+}
+
+.auto-sell-toggles {
+    display: grid;
+    gap: 12px;
+}
+
+.btn-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(80, 80, 100, 0.4), rgba(60, 60, 80, 0.4));
+    border: 2px solid rgba(150, 150, 170, 0.3);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border-color: rgba(150, 150, 170, 0.5);
+}
+
+.btn-toggle.active {
+    background: linear-gradient(135deg, rgba(46, 204, 113, 0.4), rgba(39, 174, 96, 0.4));
+    border-color: rgba(46, 204, 113, 0.6);
+}
+
+.btn-toggle.active:hover {
+    background: linear-gradient(135deg, rgba(46, 204, 113, 0.5), rgba(39, 174, 96, 0.5));
+    border-color: rgba(46, 204, 113, 0.8);
+}
+
+.toggle-icon {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.toggle-status {
+    font-weight: bold;
+    padding: 4px 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+    font-size: 0.75rem;
+    min-width: 40px;
+    text-align: center;
+}
+
+.btn-toggle.active .toggle-status {
+    background: rgba(46, 204, 113, 0.3);
+    color: #2ecc71;
+}
+
+/* ========================================
+   🔬 ONGLET RECHERCHES
+   ======================================== */
+
+.research-container {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.research-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.research-header h2 {
+    font-size: 2rem;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.research-stats {
+    display: flex;
+    gap: 30px;
+}
+
+.research-stats .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.research-stats .stat-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+}
+
+.research-stats .stat-value {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+.research-category-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.research-category-btn {
+    padding: 12px 24px;
+    background: rgba(30, 30, 50, 0.6);
+    border: 2px solid rgba(150, 150, 170, 0.3);
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.research-category-btn:hover {
+    background: rgba(40, 40, 60, 0.8);
+    border-color: rgba(150, 150, 170, 0.5);
+    transform: translateY(-2px);
+}
+
+.research-category-btn.active {
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.3), rgba(75, 0, 130, 0.3));
+    border-color: rgba(138, 43, 226, 0.6);
+    color: var(--text-primary);
+}
+
+.research-grid-container {
+    position: relative;
+    min-height: 400px;
+}
+
+.research-grid {
+    display: none;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+.research-grid.active {
+    display: grid;
+}
+
+.research-card {
+    background: linear-gradient(135deg, rgba(30, 30, 50, 0.7), rgba(20, 20, 40, 0.7));
+    border: 2px solid rgba(150, 150, 170, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.research-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent-color), var(--xp-color));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.research-card:hover::before {
+    opacity: 1;
+}
+
+.research-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(138, 43, 226, 0.3);
+    border-color: rgba(138, 43, 226, 0.5);
+}
+
+.research-card.unlocked {
+    background: linear-gradient(135deg, rgba(46, 204, 113, 0.2), rgba(39, 174, 96, 0.2));
+    border-color: rgba(46, 204, 113, 0.5);
+    cursor: default;
+}
+
+.research-card.unlocked::before {
+    background: linear-gradient(90deg, #2ecc71, #27ae60);
+    opacity: 1;
+}
+
+.research-card.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.research-card.locked:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.research-card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.research-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+}
+
+.research-info {
+    flex: 1;
+}
+
+.research-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+}
+
+.research-tier {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.research-tier.tier-1 { background: rgba(128, 128, 128, 0.3); color: #a8a8a8; }
+.research-tier.tier-2 { background: rgba(46, 204, 113, 0.3); color: #2ecc71; }
+.research-tier.tier-3 { background: rgba(52, 152, 219, 0.3); color: #3498db; }
+.research-tier.tier-4 { background: rgba(155, 89, 182, 0.3); color: #9b59b6; }
+.research-tier.tier-5 { background: rgba(230, 126, 34, 0.3); color: #e67e22; }
+.research-tier.tier-6 { background: rgba(231, 76, 60, 0.3); color: #e74c3c; }
+.research-tier.tier-7 { background: linear-gradient(90deg, #f39c12, #e74c3c); color: #fff; }
+
+.research-description {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.research-cost {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.cost-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.cost-item.insufficient {
+    color: #e74c3c;
+    border: 1px solid rgba(231, 76, 60, 0.5);
+}
+
+.research-requires {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 10px;
+}
+
+.research-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    margin-top: 15px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.research-status.can-purchase {
+    background: rgba(46, 204, 113, 0.2);
+    border: 2px solid rgba(46, 204, 113, 0.5);
+    color: #2ecc71;
+}
+
+.research-status.unlocked {
+    background: rgba(52, 152, 219, 0.2);
+    border: 2px solid rgba(52, 152, 219, 0.5);
+    color: #3498db;
+}
+
+.research-status.locked {
+    background: rgba(189, 195, 199, 0.2);
+    border: 2px solid rgba(189, 195, 199, 0.3);
+    color: var(--text-muted);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .research-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .research-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .research-stats {
+        width: 100%;
+        justify-content: space-between;
     }
 }

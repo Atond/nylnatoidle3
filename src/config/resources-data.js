@@ -4,27 +4,27 @@
 
 const ResourcesData = {
     // ========== BOIS ==========
-    // Tier 1 (Common) : Région 1 (1-10) - Drop 100% dans leur région
-    // Tier 2 (Uncommon) : Région 2 (11-20) - Drop 30% dans région précédente
-    // Tier 3 (Rare) : Région 3 (21-30) - Drop 10% dans région précédente
+    // Tier 1 (Common) : Région 1 (1-15) - UNE SEULE ressource jusqu'à niveau 12
+    // Tier 2 (Uncommon) : Région 2 (15-28) - Drop 40-80%
+    // Tier 3 (Rare) : Région 3 (28-40) - Drop 30-70%
     // Tier 4+ : Régions suivantes - Obtention via Transmutation/Donjons
     wood: [
-        // T1 - Région 1 (1-10)
+        // T1 - Région 1 (1-15) - UNE SEULE ressource jusqu'à niveau 12 pour farming focus
         { id: 'wood_oak', name: 'Bois de Chêne', unlockLevel: 1, rarity: 'common', dropRate: 1.0, tier: 1 },
-        { id: 'wood_ash', name: 'Bois de Frêne', unlockLevel: 4, rarity: 'common', dropRate: 0.9, tier: 1 },
-        { id: 'wood_maple', name: 'Bois d\'Érable', unlockLevel: 8, rarity: 'uncommon', dropRate: 0.8, tier: 1 },
+        { id: 'wood_ash', name: 'Bois de Frêne', unlockLevel: 12, rarity: 'common', dropRate: 0.9, tier: 1 },
+        { id: 'wood_maple', name: 'Bois d\'Érable', unlockLevel: 15, rarity: 'uncommon', dropRate: 0.8, tier: 1 },
 
-        // T2 - Région 2 (11-20) - Disponibles en Région 1 avec 30% drop
-        { id: 'wood_birch', name: 'Bois de Bouleau', unlockLevel: 10, rarity: 'uncommon', dropRate: 0.3, tier: 2 },
-        { id: 'wood_walnut', name: 'Bois de Noyer', unlockLevel: 12, rarity: 'uncommon', dropRate: 0.7, tier: 2 },
-        { id: 'wood_cedar', name: 'Bois de Cèdre', unlockLevel: 15, rarity: 'rare', dropRate: 0.6, tier: 2 },
-        { id: 'wood_yew', name: 'Bois d\'If', unlockLevel: 18, rarity: 'rare', dropRate: 0.5, tier: 2 },
+        // T2 - Région 2 (15-28) - Drop rates améliorés 40-80%
+        { id: 'wood_birch', name: 'Bois de Bouleau', unlockLevel: 15, rarity: 'uncommon', dropRate: 0.4, tier: 2 },
+        { id: 'wood_walnut', name: 'Bois de Noyer', unlockLevel: 18, rarity: 'uncommon', dropRate: 0.8, tier: 2 },
+        { id: 'wood_cedar', name: 'Bois de Cèdre', unlockLevel: 22, rarity: 'rare', dropRate: 0.65, tier: 2 },
+        { id: 'wood_yew', name: 'Bois d\'If', unlockLevel: 25, rarity: 'rare', dropRate: 0.5, tier: 2 },
 
-        // T3 - Région 3 (21-30) - Disponibles en Région 2 avec 10% drop
-        { id: 'wood_elm', name: 'Bois d\'Orme', unlockLevel: 20, rarity: 'rare', dropRate: 0.1, tier: 3 },
-        { id: 'wood_sequoia', name: 'Bois de Séquoia', unlockLevel: 22, rarity: 'epic', dropRate: 0.5, tier: 3 },
-        { id: 'wood_bamboo', name: 'Bois de Bambou', unlockLevel: 25, rarity: 'epic', dropRate: 0.4, tier: 3 },
-        { id: 'wood_ebony', name: 'Bois d\'Ébène', unlockLevel: 28, rarity: 'epic', dropRate: 0.3, tier: 3 },
+        // T3 - Région 3 (28-40) - Drop rates améliorés 30-70%
+        { id: 'wood_elm', name: 'Bois d\'Orme', unlockLevel: 28, rarity: 'rare', dropRate: 0.3, tier: 3 },
+        { id: 'wood_sequoia', name: 'Bois de Séquoia', unlockLevel: 32, rarity: 'epic', dropRate: 0.7, tier: 3 },
+        { id: 'wood_bamboo', name: 'Bois de Bambou', unlockLevel: 35, rarity: 'epic', dropRate: 0.55, tier: 3 },
+        { id: 'wood_ebony', name: 'Bois d\'Ébène', unlockLevel: 38, rarity: 'epic', dropRate: 0.4, tier: 3 },
 
         // T4 - Région 4 (31-40) - Transmutation ou Donjons recommandés
         { id: 'wood_baobab', name: 'Bois de Baobab', unlockLevel: 30, rarity: 'legendary', dropRate: 0.05, tier: 4 },
@@ -42,25 +42,24 @@ const ResourcesData = {
         { id: 'wood_eternal', name: 'Bois Éternel', unlockLevel: 70, rarity: 'divine', dropRate: 0.01, tier: 7 }
     ],
 
-    // ========== MINERAIS ==========
-    // Même progression que le bois : aligné avec les régions
+    // ========== MINERAIS (Mineur) ==========
     ore: [
-        // T1 - Région 1 (1-10)
+        // T1 - Région 1 (1-15) - UNE SEULE ressource jusqu'à niveau 12 pour farming focus
         { id: 'ore_iron', name: 'Fer', unlockLevel: 1, rarity: 'common', dropRate: 1.0, tier: 1 },
-        { id: 'ore_copper', name: 'Cuivre', unlockLevel: 4, rarity: 'common', dropRate: 0.9, tier: 1 },
-        { id: 'ore_tin', name: 'Étain', unlockLevel: 8, rarity: 'uncommon', dropRate: 0.8, tier: 1 },
+        { id: 'ore_copper', name: 'Cuivre', unlockLevel: 12, rarity: 'common', dropRate: 0.9, tier: 1 },
+        { id: 'ore_tin', name: 'Étain', unlockLevel: 15, rarity: 'uncommon', dropRate: 0.8, tier: 1 },
 
-        // T2 - Région 2 (11-20)
-        { id: 'ore_bronze', name: 'Bronze', unlockLevel: 10, rarity: 'uncommon', dropRate: 0.3, tier: 2 },
-        { id: 'ore_silver', name: 'Argent', unlockLevel: 12, rarity: 'uncommon', dropRate: 0.7, tier: 2 },
-        { id: 'ore_gold', name: 'Or', unlockLevel: 15, rarity: 'rare', dropRate: 0.6, tier: 2 },
-        { id: 'ore_steel', name: 'Acier', unlockLevel: 18, rarity: 'rare', dropRate: 0.5, tier: 2 },
+        // T2 - Région 2 (15-28) - Drop rates améliorés 40-80%
+        { id: 'ore_bronze', name: 'Bronze', unlockLevel: 15, rarity: 'uncommon', dropRate: 0.4, tier: 2 },
+        { id: 'ore_silver', name: 'Argent', unlockLevel: 18, rarity: 'uncommon', dropRate: 0.8, tier: 2 },
+        { id: 'ore_gold', name: 'Or', unlockLevel: 22, rarity: 'rare', dropRate: 0.65, tier: 2 },
+        { id: 'ore_steel', name: 'Acier', unlockLevel: 25, rarity: 'rare', dropRate: 0.5, tier: 2 },
 
-        // T3 - Région 3 (21-30)
-        { id: 'ore_mithril', name: 'Mithril', unlockLevel: 20, rarity: 'rare', dropRate: 0.1, tier: 3 },
-        { id: 'ore_obsidian', name: 'Obsidienne', unlockLevel: 22, rarity: 'epic', dropRate: 0.5, tier: 3 },
-        { id: 'ore_platinum', name: 'Platine', unlockLevel: 25, rarity: 'epic', dropRate: 0.4, tier: 3 },
-        { id: 'ore_cobalt', name: 'Cobalt', unlockLevel: 28, rarity: 'epic', dropRate: 0.3, tier: 3 },
+        // T3 - Région 3 (28-40) - Drop rates améliorés 30-70%
+        { id: 'ore_mithril', name: 'Mithril', unlockLevel: 28, rarity: 'rare', dropRate: 0.3, tier: 3 },
+        { id: 'ore_obsidian', name: 'Obsidienne', unlockLevel: 32, rarity: 'epic', dropRate: 0.7, tier: 3 },
+        { id: 'ore_platinum', name: 'Platine', unlockLevel: 35, rarity: 'epic', dropRate: 0.55, tier: 3 },
+        { id: 'ore_cobalt', name: 'Cobalt', unlockLevel: 38, rarity: 'epic', dropRate: 0.4, tier: 3 },
 
         // T4 - Région 4 (31-40)
         { id: 'ore_adamantite', name: 'Adamantite', unlockLevel: 30, rarity: 'legendary', dropRate: 0.05, tier: 4 },
@@ -80,26 +79,26 @@ const ResourcesData = {
 
     // ========== PLANTES (Herboriste) ==========
     plants: [
-        // T1 - Région 1 (1-10)
-        { id: 'plant_dandelion', name: 'Feuille de Pissenlit', unlockLevel: 1, rarity: 'common', dropRate: 1.0, tier: 1 },
-        { id: 'plant_medicinal_herb', name: 'Herbe médicinale', unlockLevel: 2, rarity: 'common', dropRate: 0.95, tier: 1 },
-        { id: 'plant_nettle', name: 'Ortie', unlockLevel: 4, rarity: 'common', dropRate: 0.9, tier: 1 },
-        { id: 'plant_clover', name: 'Trèfle des champs', unlockLevel: 6, rarity: 'common', dropRate: 0.85, tier: 1 },
-        { id: 'plant_sage', name: 'Sauge', unlockLevel: 8, rarity: 'uncommon', dropRate: 0.8, tier: 1 },
+        // T1 - Région 1 (1-15) - UNE SEULE ressource jusqu'à niveau 12 pour farming focus
+        { id: 'plant_dandelion', name: 'Pissenlit', unlockLevel: 1, rarity: 'common', dropRate: 1.0, tier: 1 },
+        { id: 'plant_herb', name: 'Herbe médicinale', unlockLevel: 12, rarity: 'common', dropRate: 0.95, tier: 1 },
+        { id: 'plant_nettle', name: 'Ortie', unlockLevel: 15, rarity: 'common', dropRate: 0.9, tier: 1 },
+        { id: 'plant_clover', name: 'Trèfle', unlockLevel: 15, rarity: 'common', dropRate: 0.85, tier: 1 },
+        { id: 'plant_sage', name: 'Sauge', unlockLevel: 15, rarity: 'uncommon', dropRate: 0.8, tier: 1 },
 
-        // T2 - Région 2 (11-20)
-        { id: 'plant_lavender', name: 'Lavande', unlockLevel: 10, rarity: 'uncommon', dropRate: 0.3, tier: 2 },
-        { id: 'plant_thyme', name: 'Thym', unlockLevel: 11, rarity: 'uncommon', dropRate: 0.75, tier: 2 },
-        { id: 'plant_rosemary', name: 'Romarin', unlockLevel: 12, rarity: 'uncommon', dropRate: 0.7, tier: 2 },
-        { id: 'plant_wood_mushroom', name: 'Champignon des bois', unlockLevel: 15, rarity: 'uncommon', dropRate: 0.6, tier: 2 },
-        { id: 'plant_wild_mint', name: 'Menthe sauvage', unlockLevel: 18, rarity: 'rare', dropRate: 0.5, tier: 2 },
+        // T2 - Région 2 (15-28) - Drop rates améliorés 40-80%
+        { id: 'plant_lavender', name: 'Lavande', unlockLevel: 15, rarity: 'uncommon', dropRate: 0.4, tier: 2 },
+        { id: 'plant_thyme', name: 'Thym', unlockLevel: 17, rarity: 'uncommon', dropRate: 0.75, tier: 2 },
+        { id: 'plant_rosemary', name: 'Romarin', unlockLevel: 18, rarity: 'uncommon', dropRate: 0.7, tier: 2 },
+        { id: 'plant_wood_mushroom', name: 'Champignon des bois', unlockLevel: 22, rarity: 'uncommon', dropRate: 0.6, tier: 2 },
+        { id: 'plant_wild_mint', name: 'Menthe sauvage', unlockLevel: 25, rarity: 'rare', dropRate: 0.5, tier: 2 },
 
-        // T3 - Région 3 (21-30)
-        { id: 'plant_mandrake', name: 'Mandragore', unlockLevel: 20, rarity: 'rare', dropRate: 0.1, tier: 3 },
-        { id: 'plant_ginseng', name: 'Ginseng', unlockLevel: 22, rarity: 'rare', dropRate: 0.5, tier: 3 },
-        { id: 'plant_ghostbloom', name: 'Fleur fantôme', unlockLevel: 24, rarity: 'rare', dropRate: 0.45, tier: 3 },
-        { id: 'plant_lunar_fern', name: 'Fougère lunaire', unlockLevel: 25, rarity: 'epic', dropRate: 0.4, tier: 3 },
-        { id: 'plant_blood_flower', name: 'Fleur de sang', unlockLevel: 30, rarity: 'epic', dropRate: 0.3, tier: 3 },
+        // T3 - Région 3 (28-40) - Drop rates améliorés 30-70%
+        { id: 'plant_mandrake', name: 'Mandragore', unlockLevel: 28, rarity: 'rare', dropRate: 0.3, tier: 3 },
+        { id: 'plant_ginseng', name: 'Ginseng', unlockLevel: 32, rarity: 'rare', dropRate: 0.7, tier: 3 },
+        { id: 'plant_ghostbloom', name: 'Fleur fantôme', unlockLevel: 34, rarity: 'rare', dropRate: 0.6, tier: 3 },
+        { id: 'plant_lunar_fern', name: 'Fougère lunaire', unlockLevel: 25, rarity: 'epic', dropRate: 0.5, tier: 3 },
+        { id: 'plant_blood_flower', name: 'Fleur de sang', unlockLevel: 30, rarity: 'epic', dropRate: 0.4, tier: 3 },
 
         // T4 - Région 4 (31-40)
         { id: 'plant_moonflower', name: 'Fleur lunaire', unlockLevel: 32, rarity: 'epic', dropRate: 0.25, tier: 4 },
@@ -119,28 +118,28 @@ const ResourcesData = {
 
     // ========== POISSONS (Pêcheur) ==========
     fish: [
-        // T1 - Région 1 (1-10)
+        // T1 - Région 1 (1-15) - UNE SEULE ressource jusqu'à niveau 12 pour farming focus
         { id: 'fish_stream', name: 'Poisson de ruisseau', unlockLevel: 1, rarity: 'common', dropRate: 1.0, tier: 1 },
-        { id: 'fish_bass', name: 'Achigan', unlockLevel: 2, rarity: 'common', dropRate: 0.97, tier: 1 },
-        { id: 'fish_silver_trout', name: 'Truite argentée', unlockLevel: 3, rarity: 'common', dropRate: 0.95, tier: 1 },
-        { id: 'fish_herring', name: 'Hareng des mers', unlockLevel: 5, rarity: 'common', dropRate: 0.9, tier: 1 },
-        { id: 'fish_wild_salmon', name: 'Saumon sauvage', unlockLevel: 7, rarity: 'common', dropRate: 0.85, tier: 1 },
+        { id: 'fish_bass', name: 'Achigan', unlockLevel: 12, rarity: 'common', dropRate: 0.97, tier: 1 },
+        { id: 'fish_silver_trout', name: 'Truite argentée', unlockLevel: 15, rarity: 'common', dropRate: 0.95, tier: 1 },
+        { id: 'fish_herring', name: 'Hareng des mers', unlockLevel: 15, rarity: 'common', dropRate: 0.9, tier: 1 },
+        { id: 'fish_wild_salmon', name: 'Saumon sauvage', unlockLevel: 15, rarity: 'common', dropRate: 0.85, tier: 1 },
 
-        // T2 - Région 2 (11-20)
-        { id: 'fish_golden_perch', name: 'Perche dorée', unlockLevel: 10, rarity: 'uncommon', dropRate: 0.3, tier: 2 },
-        { id: 'fish_red_snapper', name: 'Vivaneau rouge', unlockLevel: 11, rarity: 'uncommon', dropRate: 0.75, tier: 2 },
-        { id: 'fish_lunar_carp', name: 'Carpe lunaire', unlockLevel: 12, rarity: 'uncommon', dropRate: 0.7, tier: 2 },
-        { id: 'fish_golden_carp', name: 'Carpe dorée', unlockLevel: 13, rarity: 'uncommon', dropRate: 0.68, tier: 2 },
-        { id: 'fish_deep_eel', name: 'Anguille des profondeurs', unlockLevel: 15, rarity: 'uncommon', dropRate: 0.6, tier: 2 },
-        { id: 'fish_striped_bass', name: 'Bar rayé', unlockLevel: 18, rarity: 'uncommon', dropRate: 0.5, tier: 2 },
+        // T2 - Région 2 (15-28) - Drop rates améliorés 40-80%
+        { id: 'fish_golden_perch', name: 'Perche dorée', unlockLevel: 15, rarity: 'uncommon', dropRate: 0.4, tier: 2 },
+        { id: 'fish_red_snapper', name: 'Vivaneau rouge', unlockLevel: 17, rarity: 'uncommon', dropRate: 0.75, tier: 2 },
+        { id: 'fish_lunar_carp', name: 'Carpe lunaire', unlockLevel: 18, rarity: 'uncommon', dropRate: 0.7, tier: 2 },
+        { id: 'fish_golden_carp', name: 'Carpe dorée', unlockLevel: 20, rarity: 'uncommon', dropRate: 0.68, tier: 2 },
+        { id: 'fish_deep_eel', name: 'Anguille des profondeurs', unlockLevel: 22, rarity: 'uncommon', dropRate: 0.6, tier: 2 },
+        { id: 'fish_striped_bass', name: 'Bar rayé', unlockLevel: 25, rarity: 'uncommon', dropRate: 0.5, tier: 2 },
 
-        // T3 - Région 3 (21-30)
-        { id: 'fish_blue_tuna', name: 'Thon bleu', unlockLevel: 20, rarity: 'rare', dropRate: 0.1, tier: 3 },
-        { id: 'fish_swordfish', name: 'Espadon', unlockLevel: 22, rarity: 'rare', dropRate: 0.5, tier: 3 },
-        { id: 'fish_giant_catfish', name: 'Silure géant', unlockLevel: 24, rarity: 'rare', dropRate: 0.47, tier: 3 },
-        { id: 'fish_coral_shark', name: 'Requin corail', unlockLevel: 25, rarity: 'rare', dropRate: 0.4, tier: 3 },
-        { id: 'fish_moonfish', name: 'Poisson-lune', unlockLevel: 28, rarity: 'epic', dropRate: 0.35, tier: 3 },
-        { id: 'fish_abyss_moray', name: 'Murène des abysses', unlockLevel: 30, rarity: 'epic', dropRate: 0.3, tier: 3 },
+        // T3 - Région 3 (28-40) - Drop rates améliorés 30-70%
+        { id: 'fish_blue_tuna', name: 'Thon bleu', unlockLevel: 28, rarity: 'rare', dropRate: 0.3, tier: 3 },
+        { id: 'fish_swordfish', name: 'Espadon', unlockLevel: 30, rarity: 'rare', dropRate: 0.7, tier: 3 },
+        { id: 'fish_giant_catfish', name: 'Silure géant', unlockLevel: 32, rarity: 'rare', dropRate: 0.67, tier: 3 },
+        { id: 'fish_coral_shark', name: 'Requin corail', unlockLevel: 34, rarity: 'rare', dropRate: 0.6, tier: 3 },
+        { id: 'fish_moonfish', name: 'Poisson-lune', unlockLevel: 36, rarity: 'epic', dropRate: 0.5, tier: 3 },
+        { id: 'fish_abyss_moray', name: 'Murène des abysses', unlockLevel: 38, rarity: 'epic', dropRate: 0.4, tier: 3 },
 
         // T4 - Région 4 (31-40)
         { id: 'fish_silver_eel', name: 'Anguille argentée', unlockLevel: 32, rarity: 'epic', dropRate: 0.25, tier: 4 },
@@ -286,8 +285,8 @@ const RarityColors = {
  * Fonction helper pour trouver une ressource par ID
  */
 function findResourceById(resourceId) {
-    // Chercher dans toutes les catégories
-    for (const category of ['wood', 'ore', 'gems', 'loot', 'plants', 'fish', 'fabrics']) {
+    // Chercher dans toutes les catégories (y compris processed_leather pour les cuirs traités par le Tanneur)
+    for (const category of ['wood', 'ore', 'gems', 'loot', 'plants', 'fish', 'fabrics', 'processed_leather']) {
         const resource = ResourcesData[category]?.find(r => r.id === resourceId);
         if (resource) {
             // Ajouter l'icône selon la catégorie (ou utiliser celle définie dans loot)
@@ -305,6 +304,21 @@ function findResourceById(resourceId) {
             };
         }
     }
+    
+    // ✅ FIX: Si pas trouvé et que ce n'est pas déjà préfixé, essayer avec le préfixe loot_
+    // Beaucoup de drops dans drops-data.js utilisent des IDs sans préfixe (plumes_sombres, essence_vegetale_instable, etc.)
+    // alors que resources-data.js les stocke avec le préfixe loot_ (loot_plumes_sombres, etc.)
+    if (!resourceId.startsWith('loot_')) {
+        const withPrefix = `loot_${resourceId}`;
+        const lootResource = ResourcesData['loot']?.find(r => r.id === withPrefix);
+        if (lootResource) {
+            return {
+                ...lootResource,
+                icon: lootResource.icon || '🎁'
+            };
+        }
+    }
+    
     return null;
 }
 

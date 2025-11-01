@@ -1,20 +1,23 @@
 /**
- * AlchemyManager
- * Gère le système de conversion alchimique T1→T2→T3→etc.
+ * TransmutationManager
+ * Gère le système de conversion/transmutation T1→T2→T3→etc.
+ * 
+ * ATTENTION: Ne pas confondre avec le métier "Alchimiste" qui fabrique des potions
+ * La Transmutation est un système de conversion de ressources pour l'endgame
  */
 
-import { ALCHEMY_CONVERSIONS, ALCHEMY_CONFIG, calculateConversionTime, getBonusOutputChance } from '../config/alchemy-data.js';
+import { TRANSMUTATION_CONVERSIONS, TRANSMUTATION_CONFIG, calculateConversionTime, getBonusOutputChance } from '../config/transmutation-data.js';
 
-class AlchemyManager {
+class TransmutationManager {
     constructor(game) {
         this.game = game;
         this.level = 1;
         this.xp = 0;
         this.conversionQueue = []; // Max 5 conversions simultanées
-        this.unlocked = false; // Débloqué au niveau joueur 10
+        this.unlocked = false; // Débloqué au niveau joueur configuré
         
         if (GameConfig.DEBUG.enabled) {
-            console.log('🧪 AlchemyManager initialisé');
+            console.log('🔄 TransmutationManager initialisé');
         }
     }
 
@@ -22,11 +25,11 @@ class AlchemyManager {
      * Vérifie si la Transmutation est débloquée
      */
     checkUnlock(playerLevel) {
-        if (!this.unlocked && playerLevel >= ALCHEMY_CONFIG.unlockLevel) {
+        if (!this.unlocked && playerLevel >= TRANSMUTATION_CONFIG.unlockLevel) {
             this.unlocked = true;
             // La notification est gérée par unlockTab() dans UI
             if (GameConfig.DEBUG.enabled) {
-                console.log('🧪 Transmutation débloquée au niveau', playerLevel);
+                console.log('🔄 Transmutation débloquée au niveau', playerLevel);
             }
             return true;
         }
@@ -48,14 +51,14 @@ class AlchemyManager {
             return false;
         }
 
-        if (this.conversionQueue.length >= ALCHEMY_CONFIG.maxQueueSize) {
+        if (this.conversionQueue.length >= TRANSMUTATION_CONFIG.maxQueueSize) {
             if (this.game.ui) {
                 this.game.ui.showNotification('❌ File d\'attente pleine (max 5)', 'error');
             }
             return false;
         }
 
-        const conversion = ALCHEMY_CONVERSIONS[conversionId];
+        const conversion = TRANSMUTATION_CONVERSIONS[conversionId];
         if (!conversion) {
             console.error('❌ Conversion inconnue:', conversionId);
             return false;
@@ -89,8 +92,17 @@ class AlchemyManager {
         // Consommer ressources
         this.game.professionManager.removeFromInventory(conversion.input.resourceId, inputAmount);
 
-        // Calculer temps avec bonus
-        const baseTime = calculateConversionTime(conversion, this.level);
+        // Calculer temps avec bonus (incluant bonus recherches)
+        let baseTime = calculateConversionTime(conversion, this.level);
+        
+        // ⚗️ Appliquer bonus recherche "Alchimie Accélérée" (-50% temps)
+        if (this.game.researchManager) {
+            const researchBonuses = this.game.researchManager.getActiveBonuses();
+            if (researchBonuses.transmutationSpeed) {
+                baseTime = baseTime * (1 - researchBonuses.transmutationSpeed);
+            }
+        }
+        
         const totalTime = baseTime * 1000; // Convertir en millisecondes
 
         // Ajouter à la queue
@@ -108,14 +120,14 @@ class AlchemyManager {
 
         if (this.game.ui) {
             this.game.ui.showNotification(
-                `🧪 Conversion démarrée: ${conversion.name} ×${quantity}`,
+                `🔄 Conversion démarrée: ${conversion.name} ×${quantity}`,
                 'info'
             );
             this.game.ui.updateAlchemy();
         }
 
         if (GameConfig.DEBUG.enabled) {
-            console.log('🧪 Conversion démarrée:', conversionItem);
+            console.log('🔄 Conversion démarrée:', conversionItem);
         }
 
         return true;
@@ -236,14 +248,14 @@ class AlchemyManager {
         this.xp += amount;
 
         // Level up ?
-        const xpRequired = ALCHEMY_CONFIG.xpFormula(this.level);
+        const xpRequired = TRANSMUTATION_CONFIG.xpFormula(this.level);
         
         while (this.xp >= xpRequired) {
             this.xp -= xpRequired;
             this.level++;
 
             // Vérifier déblocage bonus
-            const bonus = ALCHEMY_CONFIG.bonuses[this.level];
+            const bonus = TRANSMUTATION_CONFIG.bonuses[this.level];
             if (bonus) {
                 if (this.game.ui) {
                     this.game.ui.showNotification(
@@ -261,7 +273,7 @@ class AlchemyManager {
             }
 
             if (GameConfig.DEBUG.enabled) {
-                console.log(`🧪 Transmutation niveau ${this.level} !`);
+                console.log(`🔄 Transmutation niveau ${this.level} !`);
             }
         }
 
@@ -283,7 +295,7 @@ class AlchemyManager {
      * @returns {Array} Liste des conversions débloquées
      */
     getAvailableConversions() {
-        return Object.values(ALCHEMY_CONVERSIONS).filter(
+        return Object.values(TRANSMUTATION_CONVERSIONS).filter(
             conv => conv.levelRequired <= this.level
         );
     }
@@ -305,7 +317,7 @@ class AlchemyManager {
      * @returns {number} Temps en secondes
      */
     getConversionTime(conversionId) {
-        const conversion = ALCHEMY_CONVERSIONS[conversionId];
+        const conversion = TRANSMUTATION_CONVERSIONS[conversionId];
         if (!conversion) return 0;
         return calculateConversionTime(conversion, this.level);
     }
@@ -355,7 +367,7 @@ class AlchemyManager {
             this.conversionQueue = data.conversionQueue
                 .filter(item => item.timeRemaining > 0) // Ignorer les conversions expirées
                 .map(item => {
-                    const conversion = ALCHEMY_CONVERSIONS[item.conversionId];
+                    const conversion = TRANSMUTATION_CONVERSIONS[item.conversionId];
                     if (!conversion) return null;
 
                     const duration = item.timeRemaining;
@@ -380,14 +392,15 @@ class AlchemyManager {
         }
 
         if (GameConfig.DEBUG.enabled) {
-            console.log('🧪 AlchemyManager chargé:', data);
+            console.log('🔄 TransmutationManager chargé:', data);
         }
     }
 }
 
 // Rendre disponible globalement
 if (typeof window !== 'undefined') {
-    window.AlchemyManager = AlchemyManager;
+    window.TransmutationManager = TransmutationManager;
 }
 
-export { AlchemyManager };
+export { TransmutationManager };
+

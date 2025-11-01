@@ -10,6 +10,16 @@ class BuildingManager {
         // Temps de la dernière production
         this.lastProductionTime = Date.now();
         
+        // 🆕 AUTO-SELL SYSTEM
+        this.autoSellEnabled = {
+            wood: false,
+            ore: false,
+            plants: false,
+            fish: false
+        };
+        this.autoSellInterval = null;
+        this.autoSellCheckTime = 60000; // 60 secondes
+        
         this.initBuildings();
     }
 
@@ -236,9 +246,9 @@ class BuildingManager {
      * @param {number} timePassed - Temps écoulé en secondes
      */
     processAlchemyLabProduction(lab, timePassed) {
-        if (!this.game.alchemyManager) return;
+        if (!this.game.transmutationManager) return;
         
-        const alchemy = this.game.alchemyManager;
+        const alchemy = this.game.transmutationManager;
         
         // Calculer nombre de conversions possibles
         const conversionsPerSecond = window.calculateLabProductionPerSecond(lab.level);
@@ -329,12 +339,140 @@ class BuildingManager {
     }
 
     /**
+     * 🆕 Active/désactive l'auto-sell pour une catégorie
+     */
+    toggleAutoSell(category) {
+        this.autoSellEnabled[category] = !this.autoSellEnabled[category];
+        
+        // Démarrer interval si au moins 1 activé
+        if (Object.values(this.autoSellEnabled).some(v => v)) {
+            if (!this.autoSellInterval) {
+                this.autoSellInterval = setInterval(() => this.autoSellExcess(), this.autoSellCheckTime);
+            }
+        } else {
+            // Arrêter si tous désactivés
+            if (this.autoSellInterval) {
+                clearInterval(this.autoSellInterval);
+                this.autoSellInterval = null;
+            }
+        }
+        
+        return this.autoSellEnabled[category];
+    }
+
+    /**
+     * 🆕 Vend automatiquement les ressources en excédent
+     */
+    autoSellExcess() {
+        const resourcePrices = {
+            // WOOD
+            'wood_oak': 1,
+            'wood_pine': 1,
+            'wood_cedar': 2,
+            'wood_sequoia': 3,
+            'wood_ironwood': 5,
+            'wood_moonwillow': 8,
+            'wood_crystal': 12,
+            
+            // ORE
+            'ore_copper': 1.5,
+            'ore_iron': 2,
+            'ore_silver': 3,
+            'ore_gold': 5,
+            'ore_mithril': 8,
+            'ore_adamantite': 12,
+            'ore_orichalcum': 20,
+            
+            // PLANTS
+            'plant_wild_mint': 1.5,
+            'plant_lavender': 2,
+            'plant_chamomile': 2,
+            'plant_rosemary': 3,
+            'plant_saffron': 5,
+            'plant_mandrake': 8,
+            'plant_moonflower': 12,
+            
+            // FISH
+            'fish_sardine': 2,
+            'fish_bass': 2,
+            'fish_salmon': 3,
+            'fish_tuna': 5,
+            'fish_swordfish': 8,
+            'fish_blue_marlin': 12,
+            'fish_dragon_fish': 20
+        };
+        
+        let totalGold = 0;
+        let soldItems = [];
+        
+        for (const [resourceId, price] of Object.entries(resourcePrices)) {
+            // Vérifier catégorie activée
+            const category = this.getResourceCategory(resourceId);
+            if (!this.autoSellEnabled[category]) continue;
+            
+            const current = this.game.professionManager.getInventoryAmount(resourceId);
+            const max = this.getMaxStorage(resourceId);
+            
+            // Vendre si > 80% stockage
+            if (current > max * 0.8) {
+                const toSell = Math.floor(current - (max * 0.7));
+                const goldEarned = Math.floor(toSell * price * 0.9); // 10% taxe
+                
+                this.game.professionManager.removeFromInventory(resourceId, toSell);
+                totalGold += goldEarned;
+                
+                soldItems.push({ resource: resourceId, amount: toSell, gold: goldEarned });
+            }
+        }
+        
+        // Ajouter l'or gagné
+        if (totalGold > 0) {
+            this.game.player.resources.gold += totalGold;
+            
+            if (this.game.ui) {
+                this.game.ui.showNotification(
+                    `💰 Auto-vendu ${soldItems.length} type(s) de ressources pour ${totalGold} or`,
+                    'success'
+                );
+            }
+        }
+    }
+
+    /**
+     * 🆕 Détermine la catégorie d'une ressource
+     */
+    getResourceCategory(resourceId) {
+        if (resourceId.startsWith('wood_')) return 'wood';
+        if (resourceId.startsWith('ore_')) return 'ore';
+        if (resourceId.startsWith('plant_')) return 'plants';
+        if (resourceId.startsWith('fish_')) return 'fish';
+        return 'other';
+    }
+
+    /**
+     * 🆕 Obtient le stockage max pour une ressource
+     */
+    getMaxStorage(resourceId) {
+        // Stockage de base
+        let baseStorage = 1000;
+        
+        // Bonus par bâtiment warehouse
+        const warehouse = this.buildings.get('warehouse');
+        if (warehouse && warehouse.level > 0) {
+            baseStorage += warehouse.level * 500;
+        }
+        
+        return baseStorage;
+    }
+
+    /**
      * Sérialisation pour la sauvegarde
      */
     toJSON() {
         return {
             buildings: Array.from(this.buildings.values()).map(b => b.toJSON()),
-            lastProductionTime: this.lastProductionTime
+            lastProductionTime: this.lastProductionTime,
+            autoSellEnabled: this.autoSellEnabled
         };
     }
 
@@ -357,6 +495,16 @@ class BuildingManager {
         
         // Restaurer le temps de production
         this.lastProductionTime = data.lastProductionTime || Date.now();
+        
+        // 🆕 Restaurer auto-sell
+        if (data.autoSellEnabled) {
+            this.autoSellEnabled = data.autoSellEnabled;
+            
+            // Redémarrer interval si nécessaire
+            if (Object.values(this.autoSellEnabled).some(v => v)) {
+                this.autoSellInterval = setInterval(() => this.autoSellExcess(), this.autoSellCheckTime);
+            }
+        }
     }
 }
 
@@ -364,3 +512,4 @@ class BuildingManager {
 if (typeof window !== 'undefined') {
     window.BuildingManager = BuildingManager;
 }
+

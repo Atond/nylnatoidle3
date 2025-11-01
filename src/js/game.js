@@ -14,7 +14,7 @@ class Game {
         this.equipmentManager = null;
         this.storageManager = null;
         this.characterCreation = null;
-        this.alchemyManager = null; // 🧪 Système de conversion alchimique
+        this.transmutationManager = null; // 🔄 Système de transmutation de ressources
         this.dragonManager = null; // 🐉 Système de dragons
         this.altCharacterManager = null; // 🎭 Système de personnages alternatifs
         this.dungeonManager = null; // 🏰 Système de donjons Trinity
@@ -62,6 +62,7 @@ class Game {
             storage_system: false,
             dragon_capture: false,
             dragon_breeding: false,
+            resource_specialization: false, // 🎯 Spécialisation ressources (M20b)
             
             // Alt Characters & Donjons
             alt_characters: false,
@@ -69,6 +70,15 @@ class Game {
             characters_tab: false,
             dungeons_tab: false,
             raid_system: false
+        };
+        
+        // 🎯 Spécialisations de ressources (M20b)
+        // Bonus de +25% drop rate sur une ressource spécifique par profession
+        this.specializations = {
+            woodcutter: null,   // 'wood_oak', 'wood_ash', etc.
+            miner: null,        // 'ore_iron', 'ore_copper', etc.
+            herbalist: null,    // 'plant_dandelion', 'plant_herb', etc.
+            fisher: null        // 'fish_stream', 'fish_bass', etc.
         };
         
         // Boucle de jeu
@@ -131,8 +141,15 @@ class Game {
         this.craftingManager = new CraftingManager(this);
         this.buildingManager = new BuildingManager(this);
         this.cityManager = new CityManager(this); // 🏘️ Gestion de la ville
-        this.alchemyManager = new AlchemyManager(this); // 🧪 Alchimie
+        this.transmutationManager = new TransmutationManager(this); // 🔄 Transmutation de ressources
+        this.researchManager = new ResearchManager(this); // 🔬 Système de recherches
         this.storageManager = new StorageManager(this);
+        
+        // ✅ FIX: Initialiser les limites de ressources maintenant que ResourcesData est chargé
+        if (this.storageManager && window.ResourcesData) {
+            this.storageManager.initializeResourceLimits();
+        }
+        
         this.ui = new UI(this);
         this.characterCreation = new CharacterCreationManager(this);
         
@@ -249,10 +266,10 @@ class Game {
         }
         
         // 🧪 Met à jour l'alchimie (conversions en cours)
-        if (this.alchemyManager) {
-            this.alchemyManager.update(deltaTime);
+        if (this.transmutationManager) {
+            this.transmutationManager.update(deltaTime);
             // Vérifier déblocage alchimie
-            this.alchemyManager.checkUnlock(this.player.level);
+            this.transmutationManager.checkUnlock(this.player.level);
         }
         
         // � Met à jour les buffs actifs (consommables)
@@ -334,6 +351,7 @@ class Game {
                 version: GameConfig.GAME_VERSION,
                 timestamp: Date.now(),
                 unlocks: this.unlocks, // 🔓 Déblocages progressifs
+                specializations: this.specializations, // 🎯 Spécialisations ressources
                 player: this.player.toJSON(),
                 combat: this.combat.toJSON(),
                 quests: this.questManager.toJSON(),
@@ -342,7 +360,8 @@ class Game {
                 crafting: this.craftingManager.toJSON(),
                 buildings: this.buildingManager.toJSON(),
                 city: this.cityManager.toJSON(), // 🏘️ Ville
-                alchemy: this.alchemyManager.save(), // 🧪 Alchimie
+                transmutation: this.transmutationManager.save(), // 🧪 Alchimie
+                research: this.researchManager.toJSON(), // 🔬 Recherches
                 dragons: this.dragonManager.toJSON(), // 🐉 Dragons
                 storage: this.storageManager.getSaveData(),
                 altCharacters: this.altCharacterManager.save(), // 🎭 Alt Characters
@@ -394,6 +413,11 @@ class Game {
                 this.unlocks = { ...this.unlocks, ...saveData.unlocks };
             }
             
+            // 🎯 Restaurer les spécialisations
+            if (saveData.specializations) {
+                this.specializations = { ...this.specializations, ...saveData.specializations };
+            }
+            
             this.player.fromJSON(saveData.player);
             this.combat.fromJSON(saveData.combat);
             if (saveData.quests) {
@@ -415,7 +439,10 @@ class Game {
                 this.cityManager.fromJSON(saveData.city);
             }
             if (saveData.alchemy) { // 🧪 Charger alchimie
-                this.alchemyManager.load(saveData.alchemy);
+                this.transmutationManager.load(saveData.alchemy);
+            }
+            if (saveData.research) { // 🔬 Charger recherches
+                this.researchManager.fromJSON(saveData.research);
             }
             if (saveData.dragons) { // 🐉 Charger dragons
                 this.dragonManager.fromJSON(saveData.dragons);
@@ -449,6 +476,11 @@ class Game {
                 this.ui.updateEquipment(); // 🛡️ FIX: Restaurer affichage équipement
                 this.ui.updateEquipmentInventory(); // 🛡️ FIX: Restaurer inventaire équipement
                 this.ui.updateQuests(); // 🎯 FIX: Restaurer affichage des quêtes avec progression correcte
+            }
+            
+            // 🔧 FIX: Vérifier et activer les quêtes dont les prérequis sont remplis après chargement
+            if (this.questManager) {
+                this.questManager.checkAndActivateMissingQuests();
             }
             
             if (GameConfig.DEBUG.logSaves) {
@@ -632,6 +664,77 @@ class Game {
             clearInterval(this.autoSaveIntervalId);
             this.autoSaveIntervalId = null;
         }
+    }
+    
+    /**
+     * 🎯 Choisir une spécialisation pour un métier de récolte
+     * @param {string} professionId - ID de la profession (woodcutter, miner, herbalist, fisher)
+     * @param {string} resourceId - ID de la ressource à spécialiser (wood_oak, ore_iron, etc.)
+     * @returns {boolean} Succès de l'opération
+     */
+    chooseSpecialization(professionId, resourceId) {
+        // Vérifier que le système est débloqué
+        if (!this.unlocks.resource_specialization) {
+            this.ui.showNotification('❌ Système de spécialisation non débloqué', 'error');
+            return false;
+        }
+        
+        // Vérifier que la profession existe
+        if (!['woodcutter', 'miner', 'herbalist', 'fisher'].includes(professionId)) {
+            console.error(`❌ Profession invalide: ${professionId}`);
+            return false;
+        }
+        
+        // Vérifier que la ressource existe
+        const professionTypeMap = {
+            woodcutter: 'wood',
+            miner: 'ore',
+            herbalist: 'plants',
+            fisher: 'fish'
+        };
+        
+        const resourceType = professionTypeMap[professionId];
+        const resource = window.ResourcesData[resourceType]?.find(r => r.id === resourceId);
+        
+        if (!resource) {
+            console.error(`❌ Ressource invalide: ${resourceId}`);
+            return false;
+        }
+        
+        // Enregistrer la spécialisation
+        this.specializations[professionId] = resourceId;
+        
+        // Notification de succès
+        const professionNames = {
+            woodcutter: 'Bûcheron',
+            miner: 'Mineur',
+            herbalist: 'Herboriste',
+            fisher: 'Pêcheur'
+        };
+        
+        this.ui.showNotification(
+            `🎯 Spécialisation ${professionNames[professionId]} : ${resource.name} (+25% drop rate)`,
+            'success'
+        );
+        
+        // Sauvegarder
+        this.save();
+        
+        return true;
+    }
+    
+    /**
+     * 🎯 Obtenir le bonus de drop rate pour une ressource
+     * @param {string} professionId - ID de la profession
+     * @param {string} resourceId - ID de la ressource
+     * @returns {number} Bonus de drop rate (0.25 si spécialisé, 0 sinon)
+     */
+    getSpecializationBonus(professionId, resourceId) {
+        if (!this.unlocks.resource_specialization) return 0;
+        if (this.specializations[professionId] === resourceId) {
+            return 0.25; // +25% drop rate
+        }
+        return 0;
     }
 
     /**
@@ -1014,3 +1117,4 @@ window.addEventListener('beforeunload', () => {
 if (typeof window !== 'undefined') {
     window.Game = Game;
 }
+

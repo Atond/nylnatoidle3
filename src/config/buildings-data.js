@@ -136,6 +136,7 @@ const BuildingsData = {
         description: 'Élève des animaux et cultive des plantes pour produire des tissus',
         baseProduction: {
             'fabric_linen': 2,           // 2 Fibre de Lin/min
+            'fabric_hemp': 1.5,          // 1.5 Fibre de Chanvre/min
             'fabric_raw_wool': 2,        // 2 Laine brute/min
             'fabric_cotton': 1,          // 1 Coton/min
             'fabric_coarse_silk': 0.5    // 0.5 Soie grossière/min

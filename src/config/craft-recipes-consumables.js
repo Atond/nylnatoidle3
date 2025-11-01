@@ -12,37 +12,12 @@
 
 window.CraftRecipesConsumables = [
   // ============================================
-  // HEALTH POTIONS (5 recipes)
+  // HEALTH POTIONS (4 recipes - health_potion_minor dans craft-recipes-data.js)
   // ============================================
 
   {
-    id: 'health_potion_minor',
-    name: 'Minor Health Potion',
-    category: 'consumable',
-    profession: 'alchemist',
-    tier: 1,
-    type: 'consumable',
-    slot: 'consumable',
-    icon: '🧪',
-    rarity: 'common',
-    requiredLevel: 2,
-
-    professionLevel: 2,
-    materials: [
-      { resourceId: 'plant_sage', amount: 3 },
-      { resourceId: 'plant_thyme', amount: 2 }
-    ],
-    produces: { resourceId: 'health_potion_minor', amount: 3 },
-    craftTime: 15,
-    effects: {
-      healAmount: 50,
-      duration: 0,
-      description: 'Restores 50 health instantly'
-    }
-  },
-  {
     id: 'health_potion_lesser',
-    name: 'Lesser Health Potion',
+    name: 'Potion de Vie Mineure',
     category: 'consumable',
     profession: 'alchemist',
     tier: 2,
@@ -68,7 +43,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'health_potion',
-    name: 'Health Potion',
+    name: 'Potion de Vie',
     category: 'consumable',
     profession: 'alchemist',
     tier: 3,
@@ -94,7 +69,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'health_potion_greater',
-    name: 'Greater Health Potion',
+    name: 'Grande Potion de Vie',
     category: 'consumable',
     profession: 'alchemist',
     tier: 4,
@@ -121,7 +96,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'health_potion_supreme',
-    name: 'Supreme Health Potion',
+    name: 'Potion de Vie Suprême',
     category: 'consumable',
     profession: 'alchemist',
     tier: 5,
@@ -154,7 +129,7 @@ window.CraftRecipesConsumables = [
 
   {
     id: 'mana_potion_minor',
-    name: 'Minor Mana Potion',
+    name: 'Petite Potion de Mana',
     category: 'consumable',
     profession: 'alchemist',
     tier: 1,
@@ -179,7 +154,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'mana_potion_lesser',
-    name: 'Lesser Mana Potion',
+    name: 'Potion de Mana Mineure',
     category: 'consumable',
     profession: 'alchemist',
     tier: 2,
@@ -205,7 +180,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'mana_potion',
-    name: 'Mana Potion',
+    name: 'Potion de Mana',
     category: 'consumable',
     profession: 'alchemist',
     tier: 3,
@@ -231,7 +206,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'mana_potion_greater',
-    name: 'Greater Mana Potion',
+    name: 'Grande Potion de Mana',
     category: 'consumable',
     profession: 'alchemist',
     tier: 4,
@@ -258,7 +233,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'mana_potion_supreme',
-    name: 'Supreme Mana Potion',
+    name: 'Potion de Mana Suprême',
     category: 'consumable',
     profession: 'alchemist',
     tier: 5,
@@ -290,7 +265,7 @@ window.CraftRecipesConsumables = [
 
   {
     id: 'potion_strength',
-    name: 'Potion of Strength',
+    name: 'Potion de Force',
     archetype: 'tank',
     category: 'consumable',
     profession: 'alchemist',
@@ -317,7 +292,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'potion_fortitude',
-    name: 'Potion of Fortitude',
+    name: 'Potion de Robustesse',
     archetype: 'tank',
     category: 'consumable',
     profession: 'alchemist',
@@ -345,7 +320,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'potion_iron_skin',
-    name: 'Potion of Iron Skin',
+    name: 'Potion de Peau de Fer',
     archetype: 'tank',
     category: 'consumable',
     profession: 'alchemist',
@@ -375,7 +350,7 @@ window.CraftRecipesConsumables = [
 
   {
     id: 'potion_agility',
-    name: 'Potion of Agility',
+    name: 'Potion d\'Agilité',
     archetype: 'archer',
     category: 'consumable',
     profession: 'alchemist',
@@ -402,7 +377,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'potion_swiftness',
-    name: 'Potion of Swiftness',
+    name: 'Potion de Rapidité',
     archetype: 'archer',
     category: 'consumable',
     profession: 'alchemist',
@@ -429,7 +404,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'potion_deadly_precision',
-    name: 'Potion of Deadly Precision',
+    name: 'Potion de Précision Mortelle',
     archetype: 'archer',
     category: 'consumable',
     profession: 'alchemist',
@@ -460,7 +435,7 @@ window.CraftRecipesConsumables = [
 
   {
     id: 'potion_intelligence',
-    name: 'Potion of Intelligence',
+    name: 'Potion d\'Intelligence',
     archetype: 'mage',
     category: 'consumable',
     profession: 'alchemist',
@@ -490,7 +465,7 @@ window.CraftRecipesConsumables = [
 
   {
     id: 'potion_wisdom',
-    name: 'Potion of Wisdom',
+    name: 'Potion de Sagesse',
     archetype: 'healer',
     category: 'consumable',
     profession: 'alchemist',
@@ -557,7 +532,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'elixir_shadow_assassin',
-    name: 'Elixir of the Shadow Assassin',
+    name: 'Élixir de l\'Assassin de l\'Ombre',
     archetype: 'archer',
     category: 'consumable',
     profession: 'alchemist',
@@ -590,7 +565,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'elixir_arcane_supremacy',
-    name: 'Elixir of Arcane Supremacy',
+    name: 'Élixir de Suprématie Arcanique',
     archetype: 'mage',
     category: 'consumable',
     profession: 'alchemist',
@@ -622,7 +597,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'elixir_divine_grace',
-    name: 'Elixir of Divine Grace',
+    name: 'Élixir de Grâce Divine',
     archetype: 'healer',
     category: 'consumable',
     profession: 'alchemist',
@@ -655,7 +630,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'elixir_omnipotence',
-    name: 'Elixir of Omnipotence',
+    name: 'Élixir d\'Omnipotence',
     category: 'consumable',
     profession: 'alchemist',
     tier: 5,
@@ -693,7 +668,7 @@ window.CraftRecipesConsumables = [
 
   {
     id: 'grilled_fish',
-    name: 'Grilled Fish',
+    name: 'Poisson Grillé',
     category: 'consumable',
     profession: 'fishmonger',
     tier: 1,
@@ -701,9 +676,9 @@ window.CraftRecipesConsumables = [
     slot: 'consumable',
     icon: '📦',
     rarity: 'common',
-    requiredLevel: 4,
+    requiredLevel: 1,
 
-    professionLevel: 4,
+    professionLevel: 1,
     materials: [
       { resourceId: 'fish_bass', amount: 3 },
       { resourceId: 'plant_thyme', amount: 2 }
@@ -718,7 +693,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'fish_stew',
-    name: 'Hearty Fish Stew',
+    name: 'Ragoût de Poisson Copieux',
     category: 'consumable',
     profession: 'fishmonger',
     tier: 2,
@@ -745,7 +720,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'seafood_feast',
-    name: 'Seafood Feast',
+    name: 'Festin de Fruits de Mer',
     category: 'consumable',
     profession: 'fishmonger',
     tier: 3,
@@ -774,7 +749,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'legendary_banquet',
-    name: 'Legendary Banquet',
+    name: 'Banquet Légendaire',
     category: 'consumable',
     profession: 'fishmonger',
     tier: 4,
@@ -806,7 +781,7 @@ window.CraftRecipesConsumables = [
 
   {
     id: 'combat_ration',
-    name: 'Combat Ration',
+    name: 'Ration de Combat',
     category: 'consumable',
     profession: 'fishmonger',
     tier: 2,
@@ -832,7 +807,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'mana_infused_meal',
-    name: 'Mana-Infused Meal',
+    name: 'Repas Infusé de Mana',
     category: 'consumable',
     profession: 'fishmonger',
     tier: 3,
@@ -944,7 +919,7 @@ window.CraftRecipesConsumables = [
   },
   {
     id: 'boss_slayer_steak',
-    name: 'Boss Slayer Steak',
+    name: 'Steak du Tueur de Boss',
     category: 'consumable',
     profession: 'fishmonger',
     tier: 4,

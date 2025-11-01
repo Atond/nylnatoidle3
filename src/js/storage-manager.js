@@ -18,13 +18,19 @@ class StorageManager {
      * Initialise les limites pour toutes les ressources
      */
     initializeResourceLimits() {
+        // ✅ Protection : Vérifier que ResourcesData est chargé
+        if (!window.ResourcesData) {
+            console.warn('⚠️ ResourcesData pas encore chargé, initialisation différée');
+            return;
+        }
+        
         // Initialiser les ressources de récolte (1000 de base)
         const gatheringResources = [
-            ...window.ResourcesData.wood,
-            ...window.ResourcesData.ore,
+            ...(window.ResourcesData.wood || []),
+            ...(window.ResourcesData.ore || []),
             ...(window.ResourcesData.plants || []),  // ✅ NOUVEAU
             ...(window.ResourcesData.fish || []),    // ✅ NOUVEAU
-            ...window.ResourcesData.gems
+            ...(window.ResourcesData.gems || [])
         ];
         
         for (const resource of gatheringResources) {

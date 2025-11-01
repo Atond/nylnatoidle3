@@ -175,8 +175,17 @@ class Player {
         this.xp -= this.xpRequired;
         this.xpRequired = this.calculateXpRequired(this.level);
         
+        // 🎯 Récupérer les gains selon la classe du joueur
+        let gains;
+        if (this.class && GameConfig.PROGRESSION.STATS_PER_LEVEL_BY_CLASS[this.class]) {
+            // Gains spécifiques à la classe
+            gains = GameConfig.PROGRESSION.STATS_PER_LEVEL_BY_CLASS[this.class];
+        } else {
+            // Gains par défaut si pas de classe définie
+            gains = GameConfig.PROGRESSION.STATS_PER_LEVEL;
+        }
+        
         // Augmentation des stats
-        const gains = GameConfig.PROGRESSION.STATS_PER_LEVEL;
         this.stats.maxHp += gains.hp;
         this.stats.hp = this.stats.maxHp; // Heal complet au level up
         this.stats.force += gains.force;
@@ -303,12 +312,32 @@ class Player {
 
     /**
      * Calcule la vitesse d'attaque du joueur (en millisecondes)
+     * ⚡ Formule progressive : Base - (Niveau × 10ms) - (Agilité × 2ms) - Bonus Recherche
      */
     calculateAttackSpeed() {
-        // Vitesse de base fixe (pas de bonus d'agilité)
-        const baseSpeed = GameConfig.COMBAT.BASE_ATTACK_SPEED;
+        let speed = GameConfig.COMBAT.BASE_ATTACK_SPEED; // 1500ms de base
         
-        return Math.max(500, baseSpeed); // Minimum 500ms
+        // 📈 Bonus de niveau (-10ms par niveau, max -500ms)
+        const levelBonus = Math.min(
+            this.level * GameConfig.COMBAT.ATTACK_SPEED_PER_LEVEL,
+            GameConfig.COMBAT.MAX_LEVEL_BONUS
+        );
+        speed -= levelBonus;
+        
+        // 💨 Bonus d'agilité (-2ms par point d'agilité)
+        const agilityBonus = this.stats.agility * GameConfig.COMBAT.ATTACK_SPEED_PER_AGILITY;
+        speed -= agilityBonus;
+        
+        // 🔬 Bonus de recherche "Combat Éclair" (-20% vitesse)
+        if (this.game && this.game.researchManager) {
+            const researchBonuses = this.game.researchManager.getActiveBonuses();
+            if (researchBonuses.attackSpeed) {
+                speed = speed * (1 - researchBonuses.attackSpeed);
+            }
+        }
+        
+        // Minimum 500ms pour éviter le spam trop rapide
+        return Math.max(GameConfig.COMBAT.MIN_ATTACK_SPEED, Math.floor(speed));
     }
 
     /**
